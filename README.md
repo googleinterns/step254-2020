@@ -2,3 +2,4 @@
 
 ## Authors:
 - [Aidan Molloy](https://github.com/AidanMolloy)
+- [Klaudia Obieglo](https://github.com/obieglok)
