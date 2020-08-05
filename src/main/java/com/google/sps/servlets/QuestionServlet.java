@@ -34,6 +34,7 @@ import javax.servlet.http.HttpSession;
 import java.util.*;
 import java.util.Date;
 import javax.servlet.ServletException;
+import com.google.appengine.api.datastore.FetchOptions;
 
 /** Servlet that stores questions*/
 @WebServlet("/question")
@@ -41,19 +42,25 @@ public class QuestionServlet extends HttpServlet{
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     /* Servlet Receives information from the client about the question they want to save */
+    Long date = (new Date()).getTime();
     String question = getParameter(request, "question", "");
     String marks = getParameter(request, "marks", "");
 
-    HttpSession session = request.getSession();
-    Long testID = (Long) session.getAttribute("testid");
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query query = new Query("Test").addSort("date", SortDirection.DESCENDING);
+    
+    PreparedQuery pq = datastore.prepare(query);
+    List<Entity> tests = pq.asList(FetchOptions.Builder.withLimit(1));
+
+    Entity latestTest = tests.get(0);
+    long testid = (long) latestTest.getKey().getId();
 
     // Create a Question Entity with the parameters provided
-    Entity questionEntity = new Entity((String.valueOf(testID)));
+    Entity questionEntity = new Entity((String.valueOf(testid)));
     questionEntity.setProperty("question",question);
     questionEntity.setProperty("marks",marks);
     questionEntity.setProperty("questionID",questionEntity.getKey().getId());
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    questionEntity.setProperty("date",date);
     datastore.put(questionEntity);
 
     response.sendRedirect("/createTest.html");
