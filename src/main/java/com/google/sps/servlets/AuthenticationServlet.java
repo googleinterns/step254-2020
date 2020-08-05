@@ -24,6 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 
 /**
  * The authentication servlet is responsible for authenticating users.
@@ -39,7 +44,6 @@ public class AuthenticationServlet extends HttpServlet {
     // Reference to UserService
     UserService userService = UserServiceFactory.getUserService();
 
-    // Create map to store the response
     Map<String, String> authResponse = new HashMap<String, String>();
 
     // Check if user is logged
@@ -51,6 +55,9 @@ public class AuthenticationServlet extends HttpServlet {
       // Enter information for response
       authResponse.put("email", userEmail);
       authResponse.put("logoutUrl", logoutUrl);
+
+      // Get User Info and add it to the response
+      authResponse.putAll(getUserInfo(userService.getCurrentUser().getEmail()));
     } else {
       // If logged out get login link
       String loginUrl = userService.createLoginURL("/");
@@ -59,11 +66,37 @@ public class AuthenticationServlet extends HttpServlet {
       authResponse.put("loginUrl", loginUrl);
     }
 
-    // Convert into JSON
     String json = convertToJson(authResponse);
 
     // Write response to /auth
     response.getWriter().println(json);
+  }
+
+  /** 
+   * Returns the preferences of the user with email, or null if the user has not set their preferences. 
+   */
+  private Map<String, String> getUserInfo(String email) {
+    try{
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Query query =
+          new Query("UserInfo")
+              .setFilter(new Query.FilterPredicate("email", Query.FilterOperator.EQUAL, email));
+      PreparedQuery results = datastore.prepare(query);
+      Entity entity = results.asSingleEntity();
+      if (entity == null) {
+        return null;
+      }
+      Map<String, String> userInfoResponse = new HashMap<String, String>();
+      userInfoResponse.put("name", (String) entity.getProperty("name"));
+      userInfoResponse.put("font", (String) entity.getProperty("font"));
+      userInfoResponse.put("font_size", (String) entity.getProperty("font_size"));
+      userInfoResponse.put("bg_color", (String) entity.getProperty("bg_color"));
+      userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
+      return userInfoResponse;
+    } catch(Exception e) {
+      System.out.println("Something went wrong with Datastore. Please try again later.");
+      return null;
+    }
   }
 
   // Convert into a JSON string using the Gson library.
