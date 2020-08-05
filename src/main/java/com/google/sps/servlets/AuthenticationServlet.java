@@ -47,23 +47,27 @@ public class AuthenticationServlet extends HttpServlet {
     Map<String, String> authResponse = new HashMap<String, String>();
 
     // Check if user is logged
-    if (userService.isUserLoggedIn()) {
-      // If logged in get email and create link to logout
-      String userEmail = userService.getCurrentUser().getEmail();
-      String logoutUrl = userService.createLogoutURL("/");
+    try{
+      if (userService.isUserLoggedIn()) {
+        // If logged in get email and create link to logout
+        String userEmail = userService.getCurrentUser().getEmail();
+        String logoutUrl = userService.createLogoutURL("/");
 
-      // Enter information for response
-      authResponse.put("email", userEmail);
-      authResponse.put("logoutUrl", logoutUrl);
+        // Enter information for response
+        authResponse.put("email", userEmail);
+        authResponse.put("logoutUrl", logoutUrl);
 
-      // Get User Info and add it to the response
-      authResponse.putAll(getUserInfo(userService.getCurrentUser().getEmail()));
-    } else {
-      // If logged out get login link
-      String loginUrl = userService.createLoginURL("/");
+        // Get User Info and add it to the response
+        authResponse.putAll(getUserInfo(userService.getCurrentUser().getEmail()));
+      } else {
+        // If logged out get login link
+        String loginUrl = userService.createLoginURL("/");
 
-      // Enter information for response
-      authResponse.put("loginUrl", loginUrl);
+        // Enter information for response
+        authResponse.put("loginUrl", loginUrl);
+      }
+    }catch(Exception e) {
+      authResponse.put("errorMsg", "Something went wrong with userService. Please try again later.");
     }
 
     String json = convertToJson(authResponse);
@@ -93,8 +97,8 @@ public class AuthenticationServlet extends HttpServlet {
       userInfoResponse.put("bg_color", (String) entity.getProperty("bg_color"));
       userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
       return userInfoResponse;
-    } catch(Exception e) {
-      System.out.println("Something went wrong with Datastore. Please try again later.");
+    }catch(Exception e) {
+      userInfoResponse.put("errorMsg", "Something went wrong with Datastore. Please try again later.");
       return null;
     }
   }
