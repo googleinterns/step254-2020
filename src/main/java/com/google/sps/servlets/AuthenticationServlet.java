@@ -80,6 +80,7 @@ public class AuthenticationServlet extends HttpServlet {
    * Returns the preferences of the user with email, or null if the user has not set their preferences. 
    */
   private Map<String, String> getUserInfo(String email) {
+    Map<String, String> userInfoResponse = new HashMap<String, String>();
     try{
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query query =
@@ -90,7 +91,6 @@ public class AuthenticationServlet extends HttpServlet {
       if (entity == null) {
         return null;
       }
-      Map<String, String> userInfoResponse = new HashMap<String, String>();
       userInfoResponse.put("name", (String) entity.getProperty("name"));
       userInfoResponse.put("font", (String) entity.getProperty("font"));
       userInfoResponse.put("font_size", (String) entity.getProperty("font_size"));
