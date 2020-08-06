@@ -20,6 +20,7 @@ import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -27,7 +28,6 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.FetchOptions;
 import com.google.gson.Gson;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
@@ -61,51 +61,53 @@ public class TestServlet extends HttpServlet{
     testEntity.setProperty("testDuration",testDuration);
     testEntity.setProperty("ownerID",ownerID);
     testEntity.setProperty("date", date);
+    testEntity.setProperty("testid",testEntity.getKey());
     datastore.put(testEntity);    
+
+    HttpSession session = request.getSession();
+    session.setAttribute("testid",String.valueOf(testEntity.getKey().getId()));
 
     response.sendRedirect("/createTest.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(testEntity));
   }
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    /* Gets the latest test including the questions for that test and returns everything in a json
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    /*Gets the last test that is saved in the users session
     *
     * Arguments: 
     *   request: provides request information from the HTTP servlet
     *   response: response object where servlet will write information on
     */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    //Grab the latest test
-    Query query = new Query("Test").addSort("date", SortDirection.DESCENDING);
-    PreparedQuery pq = datastore.prepare(query);
-    List<Entity> tests = pq.asList(FetchOptions.Builder.withLimit(1));
+    HttpSession session = request.getSession();
+    String testid = (String)session.getAttribute("testid");
 
-    Entity latestTest = tests.get(0);
-    long testid = (long) latestTest.getKey().getId();
-    TestClass test = new TestClass(String.valueOf(latestTest.getProperty("testName")),
-      testid,Double.valueOf(String.valueOf(latestTest.getProperty("testDuration"))),
-        String.valueOf(latestTest.getProperty("ownerID")));
-
-    // Look for all the questions that have that test ID 
-    Query queryQuestions = new Query(String.valueOf(testid)).addSort("date", SortDirection.ASCENDING);
-    PreparedQuery results = datastore.prepare(queryQuestions);
-
-    List<QuestionClass> questionList = new ArrayList<>();
-    for (Entity entity : results.asIterable()) {
-      long questionID = entity.getKey().getId();
-      String question = (String) entity.getProperty("question");
-      String marks = (String) entity.getProperty("marks");
-      QuestionClass question1 = new QuestionClass(question, questionID, Double.parseDouble(marks), Long.valueOf(testid));
-      questionList.add(question1);
+    Entity latestTest= new Entity("Test");
+    try{
+      latestTest = getEntity("Test",testid);
+    } catch( EntityNotFoundException e)
+    {
+      System.out.println("Entity was not found");
     }
+    String testName = (String) latestTest.getProperty("testName");
+    String testDuration = (String) latestTest.getProperty("testDuration");
+    String ownerId = (String) latestTest.getProperty("ownerID");
+    TestClass test = new TestClass(testName,Long.valueOf(String.valueOf(testid)),
+      Double.parseDouble(testDuration),ownerId);
 
     response.setContentType("application/json;");
-    response.sendRedirect("/createTest.html");
-    response.getWriter().println(convertToJsonUsingGson(test) + convertToJsonUsingGson(questionList));
-    
+    // response.sendRedirect("/createTest.html");
+    response.getWriter().println(convertToJsonUsingGson(test));
     }
-
+    
+    private Entity getEntity(String kind, String idName) throws EntityNotFoundException{
+      //Function that will return an entity that is of specified kind and id
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Key key = KeyFactory.createKey(kind, Long.parseLong(idName));
+      Entity test = datastore.get(key);
+      return test;
+    }
     private String getParameter(HttpServletRequest request, String name, String defaultValue){
     /* Gets Parameters from the Users Page
      *

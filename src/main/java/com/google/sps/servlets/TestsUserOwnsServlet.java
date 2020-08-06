@@ -69,6 +69,7 @@ public class TestsUserOwnsServlet extends HttpServlet{
     response.setContentType("application/json;");
     response.sendRedirect("/createTest.html");
     response.getWriter().println(convertToJsonUsingGson(testList));
+    System.out.println(convertToJsonUsingGson(testList));
   }
   private String convertToJsonUsingGson(List<TestClass> questions) {
     /* Converts the test List to a json string using Gson

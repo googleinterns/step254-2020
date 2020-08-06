@@ -47,16 +47,11 @@ public class QuestionServlet extends HttpServlet{
     String marks = getParameter(request, "marks", "");
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Test").addSort("date", SortDirection.DESCENDING);
-    
-    PreparedQuery pq = datastore.prepare(query);
-    List<Entity> tests = pq.asList(FetchOptions.Builder.withLimit(1));
-
-    Entity latestTest = tests.get(0);
-    long testid = (long) latestTest.getKey().getId();
+    HttpSession session = request.getSession();
+    String testid = (String)session.getAttribute("testid");
 
     // Create a Question Entity with the parameters provided
-    Entity questionEntity = new Entity((String.valueOf(testid)));
+    Entity questionEntity = new Entity(testid);
     questionEntity.setProperty("question",question);
     questionEntity.setProperty("marks",marks);
     questionEntity.setProperty("questionID",questionEntity.getKey().getId());
@@ -66,6 +61,37 @@ public class QuestionServlet extends HttpServlet{
     response.sendRedirect("/createTest.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(questionEntity));
+  }
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    /*Gets the questions for the last test saved in a HTTP session
+    *
+    * Arguments: 
+    *   request: provides request information from the HTTP servlet
+    *   response: response object where servlet will write information on
+    */
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    HttpSession session = request.getSession();
+    String testid = (String)session.getAttribute("testid");
+
+    /* Look for all the questions that have the required test ID 
+    * sort them in ascending order so that questions will appear in the order
+    * that they were inserted in
+    */
+    Query queryQs = new Query(String.valueOf(testid)).addSort("date", SortDirection.ASCENDING);
+    PreparedQuery results = datastore.prepare(queryQs);
+    List<QuestionClass> questionList = new ArrayList<>();
+    for (Entity entity : results.asIterable()) {
+      long questionID = entity.getKey().getId();
+      String question = (String) entity.getProperty("question");
+      String marks = (String) entity.getProperty("marks");
+      QuestionClass question1 = new QuestionClass(question, questionID,
+        Double.parseDouble(marks), Long.valueOf(testid));
+      questionList.add(question1);
+    }
+
+    response.setContentType("application/json;");
+    // response.sendRedirect("/createTest.html");
+    response.getWriter().println(convertToJsonUsingGson(questionList));
   }
 
   private String getParameter(HttpServletRequest request, String name, String defaultValue){
@@ -90,6 +116,18 @@ public class QuestionServlet extends HttpServlet{
     */
     Gson gson = new Gson();
     String json = gson.toJson(question);
+    return json;
+  }
+    private String convertToJsonUsingGson(List<QuestionClass> questions) {
+    /* Converts the question List to a json string using Gson
+    *
+    *Arguments: List of questions
+    *
+    *Returns: json string of the questions
+    *
+    */
+    Gson gson = new Gson();
+    String json = gson.toJson(questions);
     return json;
   }
 }
