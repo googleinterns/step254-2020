@@ -11,7 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
+let userAuth = false;
 // Authenticate user
 function authenticate() {
   logInOut = document.getElementById("logInOut");
@@ -19,21 +21,23 @@ function authenticate() {
   fetch(`/auth`).then(response => response.json()).then((authenticated) => {
     // Check if user has already been logged in.
     if (authenticated.email) {  
-      window.location.href = "dashboard.html";
-      logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">Logout</a>`;    
+      userAuth = true;
+      logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">Logout</a>`;   
+      setPreference(); 
     } else {
+      userAuth = false;
       logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
     }
   });
 }
 
 // Set user UI preferneces
-function setPrefernce(){
-  fetch('/authentication').then(response =>response.json()).then((authenticated) =>{
+function setPreference(){
+  fetch('/auth').then(response =>response.json()).then((authenticated) =>{
     userFont = authenticated.font;
     userFontSize = authenticated.font_size;
     userFontColor = authenticated.text_color;
-    userBackgroundColor = authenticated.bg_color;
+    userBackgroundColor = authenticated.bg_color; 
 
     document.body.style.fontFamily = userFont;
     document.body.style.fontSize = userFontSize + "px";
@@ -41,4 +45,14 @@ function setPrefernce(){
     document.body.style.backgroundColor = userBackgroundColor;
   });
 
+}
+
+//Check if user has access to page
+function pageAccess(){
+    if(userAuth == true){
+      window.location.href = "dashboard.html";
+    }
+    else{
+      document.getElementById("accessDenied").innerHTML = `<p> Cannot access until you login</p>`
+    }
 }

@@ -95,6 +95,6 @@ public class UpdateInfoServlet extends HttpServlet {
       System.out.println("Something went wrong with Datastore. Please try again later.");
     }
 
-    response.sendRedirect("/");
+    response.sendRedirect("/dashboard.html");
   }
 }
