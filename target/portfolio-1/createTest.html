@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body  onload="authenticate()">
+  <body>
     <header>
       <div class="navtop">
         <a  href="dashboard.html">Navigation, will have login, click here to test rest of page</a>
@@ -24,7 +24,7 @@
         <input type="submit" value="Submit">
       </form>
       <h3> Create New Question</h3>
-      <form id="createQuestion">
+      <form id="createQuestion" action="/test" method="POST">
         <label for="question">Enter Question:</label><br>
         <textarea name="question" rows="4" cols="50" required></textarea><br>
         <label for="marks">Marks given for Question:</label><br>
