@@ -44,7 +44,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 /** Servlet that stores questions*/
-@WebServlet("/question")
+@WebServlet("/createQuestion")
 public class CreateQuestionServlet extends HttpServlet{
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
