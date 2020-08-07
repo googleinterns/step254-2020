@@ -45,7 +45,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 /** Servlet that stores and returns tests*/
 @WebServlet("/test")
-public class TestServlet extends HttpServlet{
+public class CreateTestServlet extends HttpServlet{
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     //Servlet Recevies information from the client about a test they want to create and saves it in
