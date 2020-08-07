@@ -24,7 +24,8 @@ public final class TestClass{
   private final String ownersID;
   private final List<Long> questionList;
 
-  public TestClass(String testName, long testID, double testDuration, String ownersID, List<Long> questionList)
+  public TestClass(String testName, long testID, double testDuration, String ownersID,
+    List<Long> questionList)
   {
     /* Constructor for the test Class
     * Arguments:
@@ -32,6 +33,7 @@ public final class TestClass{
     *  testID: Unique ID of this Test
     *  testDuration: How long the students have for this exam
     *  ownersID: email of the user who created the test
+    *  List<long> questionsList : list of questions id's that belong to this test
     *
     */
     this.testName = testName;

@@ -28,14 +28,13 @@ public final class QuestionClass{
     *  question: the question being asked
     *  questionID: Unique ID of this question
     *  marks: How many marks this question is worth
-    *  testID: ID of the test this question is part of
+    *  ownerID : Who owns the question
     *
     */
     this.question = question;
     this.questionID = questionID;
     this.marks = marks;
     this.ownerID = ownerID;
-    // this.testID = testID;
   }
   public String getQuestion(){
     /*Getter method to get questions */
@@ -49,10 +48,6 @@ public final class QuestionClass{
     /*Getter method to get marks for the question */
     return marks;
   }
-//   public long getTestID(){
-//     /* Getter method to get the test id to which the question belongs to*/
-//     return testID;
-//   }
   public String getOwnerID(){
     /*Getter method for ownerID */
     return ownerID;
