@@ -13,7 +13,7 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
-
+// 
 import com.google.sps.data.TestClass;
 import com.google.sps.data.QuestionClass;
 import java.io.IOException;
@@ -62,7 +62,8 @@ public class TestsUserOwnsServlet extends HttpServlet{
       String testName = (String) entity.getProperty("testName");
       String testDuration = (String) entity.getProperty("testDuration");
       String ownerId = (String) entity.getProperty("ownerID");
-      TestClass test = new TestClass(testName,testId,Double.valueOf(testDuration),ownerID);
+      List<Long> list = (List<Long>) entity.getProperty("questionsList");
+      TestClass test = new TestClass(testName,testId,Double.valueOf(testDuration),ownerID,list);
       testList.add(test);
     }
 

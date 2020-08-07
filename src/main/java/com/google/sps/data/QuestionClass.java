@@ -19,9 +19,9 @@ public final class QuestionClass{
   private final String question;
   private final long questionID;
   private final double marks;
-  private final long testID;
+  private final String ownerID;
 
-  public QuestionClass(String question, long questionID, double marks, long testID)
+  public QuestionClass(String question, long questionID, double marks, String ownerID)
   {
     /* Constructor for the Question Class
     * Arguments:
@@ -34,7 +34,8 @@ public final class QuestionClass{
     this.question = question;
     this.questionID = questionID;
     this.marks = marks;
-    this.testID = testID;
+    this.ownerID = ownerID;
+    // this.testID = testID;
   }
   public String getQuestion(){
     /*Getter method to get questions */
@@ -48,8 +49,12 @@ public final class QuestionClass{
     /*Getter method to get marks for the question */
     return marks;
   }
-  public long getTestID(){
-    /* Getter method to get the test id to which the question belongs to*/
-    return testID;
+//   public long getTestID(){
+//     /* Getter method to get the test id to which the question belongs to*/
+//     return testID;
+//   }
+  public String getOwnerID(){
+    /*Getter method for ownerID */
+    return ownerID;
   }
 }

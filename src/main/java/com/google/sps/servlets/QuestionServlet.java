@@ -24,6 +24,11 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.gson.Gson;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
@@ -35,6 +40,8 @@ import java.util.*;
 import java.util.Date;
 import javax.servlet.ServletException;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 /** Servlet that stores questions*/
 @WebServlet("/question")
@@ -45,55 +52,56 @@ public class QuestionServlet extends HttpServlet{
     Long date = (new Date()).getTime();
     String question = getParameter(request, "question", "");
     String marks = getParameter(request, "marks", "");
+    
+    UserService userService = UserServiceFactory.getUserService();
+    String ownerID = userService.getCurrentUser().getEmail(); 
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    HttpSession session = request.getSession();
-    String testid = (String)session.getAttribute("testid");
 
     // Create a Question Entity with the parameters provided
-    Entity questionEntity = new Entity(testid);
+    Entity questionEntity = new Entity("Question");
     questionEntity.setProperty("question",question);
     questionEntity.setProperty("marks",marks);
-    questionEntity.setProperty("questionID",questionEntity.getKey().getId());
     questionEntity.setProperty("date",date);
-    datastore.put(questionEntity);
+    questionEntity.setProperty("ownerID",ownerID);
+    try{
+      datastore.put(questionEntity);    
+    }catch (DatastoreFailureException e){
+      System.out.println("Datastore is not responding right now. Try Again Later");
+    }
+    addQuestionToTestList(questionEntity.getKey().getId(),ownerID);
 
     response.sendRedirect("/createTest.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(questionEntity));
   }
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    /*Gets the questions for the last test saved in a HTTP session
-    *
-    * Arguments: 
-    *   request: provides request information from the HTTP servlet
-    *   response: response object where servlet will write information on
-    */
+  private void addQuestionToTestList(long questionEntityKey,String ownerID)
+  {
+    //Function that adds the question id to the list of questions in the test entity
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    HttpSession session = request.getSession();
-    String testid = (String)session.getAttribute("testid");
-
-    /* Look for all the questions that have the required test ID 
-    * sort them in ascending order so that questions will appear in the order
-    * that they were inserted in
-    */
-    Query queryQs = new Query(String.valueOf(testid)).addSort("date", SortDirection.ASCENDING);
-    PreparedQuery results = datastore.prepare(queryQs);
-    List<QuestionClass> questionList = new ArrayList<>();
-    for (Entity entity : results.asIterable()) {
-      long questionID = entity.getKey().getId();
-      String question = (String) entity.getProperty("question");
-      String marks = (String) entity.getProperty("marks");
-      QuestionClass question1 = new QuestionClass(question, questionID,
-        Double.parseDouble(marks), Long.valueOf(testid));
-      questionList.add(question1);
+    
+    //grab the latest test created by the user
+    Entity latestTest = getTest(ownerID);
+    if(latestTest.getProperty("questionsList") == null){
+      List<Long> questionList = new ArrayList<>();
+      questionList.add(questionEntityKey);
+      latestTest.setProperty("questionsList",questionList);
+    }else{
+      List<Long> questionList = (List<Long>)latestTest.getProperty("questionsList");
+      questionList.add(questionEntityKey);
+      latestTest.setProperty("questionsList",questionList);
     }
-
-    response.setContentType("application/json;");
-    // response.sendRedirect("/createTest.html");
-    response.getWriter().println(convertToJsonUsingGson(questionList));
+    datastore.put(latestTest);
   }
-
+  private Entity getTest(String ownerID){
+    // Function that returns the latest test created by the user
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query queryTest = new Query("Test").setFilter(new FilterPredicate("ownerID",
+      FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.DESCENDING);
+    PreparedQuery pq = datastore.prepare(queryTest);
+    List<Entity> tests = pq.asList(FetchOptions.Builder.withLimit(1));
+    return tests.get(0);
+  }
   private String getParameter(HttpServletRequest request, String name, String defaultValue){
     /* Gets Parameters from the Users Page
      *

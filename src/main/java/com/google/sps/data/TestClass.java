@@ -13,15 +13,18 @@
 // limitations under the License.
 
 package com.google.sps.data;
-
+import com.google.sps.data.QuestionClass;
+import java.util.List;
+import com.google.appengine.api.datastore.Key;
 public final class TestClass{
   /*Class that creates tests */
   private final String testName;
   private final long testID;
   private final double testDuration;
   private final String ownersID;
+  private final List<Long> questionList;
 
-  public TestClass(String testName, long testID, double testDuration, String ownersID)
+  public TestClass(String testName, long testID, double testDuration, String ownersID, List<Long> questionList)
   {
     /* Constructor for the test Class
     * Arguments:
@@ -35,6 +38,7 @@ public final class TestClass{
     this.testID = testID;
     this.testDuration = testDuration;
     this.ownersID = ownersID;
+    this.questionList = questionList;
   }
   public String getTestName(){
     /*Getter method to get the test's Name*/
@@ -51,5 +55,9 @@ public final class TestClass{
   public String getOwnersID(){
     /* Getter method to get the owners id*/
     return ownersID;
+  }
+  public List<Long> questionList(){
+    /* Getter method to get questions list*/
+    return questionList;
   }
 }

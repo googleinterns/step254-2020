@@ -28,6 +28,9 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.gson.Gson;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
@@ -53,62 +56,27 @@ public class TestServlet extends HttpServlet{
 
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
+    List<Long> list = new ArrayList<>();
 
-    //set up the new Test and save it in the datastore
+    //Set up the new Test and save it in the datastore
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity testEntity = new Entity("Test");
     testEntity.setProperty("testName",testName);
     testEntity.setProperty("testDuration",testDuration);
     testEntity.setProperty("ownerID",ownerID);
     testEntity.setProperty("date", date);
-    testEntity.setProperty("testid",testEntity.getKey());
-    datastore.put(testEntity);    
-
-    HttpSession session = request.getSession();
-    session.setAttribute("testid",String.valueOf(testEntity.getKey().getId()));
+    testEntity.setProperty("questionsList",list);
+    try{
+      datastore.put(testEntity);    
+    }catch (DatastoreFailureException e){
+      System.out.println("Datastore is not responding right now. Try Again Later");
+    }
 
     response.sendRedirect("/createTest.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(testEntity));
   }
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    /*Gets the last test that is saved in the users session
-    *
-    * Arguments: 
-    *   request: provides request information from the HTTP servlet
-    *   response: response object where servlet will write information on
-    */
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    HttpSession session = request.getSession();
-    String testid = (String)session.getAttribute("testid");
-
-    Entity latestTest= new Entity("Test");
-    try{
-      latestTest = getEntity("Test",testid);
-    } catch( EntityNotFoundException e)
-    {
-      System.out.println("Entity was not found");
-    }
-    String testName = (String) latestTest.getProperty("testName");
-    String testDuration = (String) latestTest.getProperty("testDuration");
-    String ownerId = (String) latestTest.getProperty("ownerID");
-    TestClass test = new TestClass(testName,Long.valueOf(String.valueOf(testid)),
-      Double.parseDouble(testDuration),ownerId);
-
-    response.setContentType("application/json;");
-    // response.sendRedirect("/createTest.html");
-    response.getWriter().println(convertToJsonUsingGson(test));
-    }
-    
-    private Entity getEntity(String kind, String idName) throws EntityNotFoundException{
-      //Function that will return an entity that is of specified kind and id
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      Key key = KeyFactory.createKey(kind, Long.parseLong(idName));
-      Entity test = datastore.get(key);
-      return test;
-    }
-    private String getParameter(HttpServletRequest request, String name, String defaultValue){
+  private String getParameter(HttpServletRequest request, String name, String defaultValue){
     /* Gets Parameters from the Users Page
      *
      * Return: Returns the requested parameter or the default value if the parameter
@@ -119,30 +87,6 @@ public class TestServlet extends HttpServlet{
         return defaultValue;
     }
     return value;
-  }
-    private String convertToJsonUsingGson(List<QuestionClass> questions) {
-    /* Converts the question List to a json string using Gson
-    *
-    *Arguments: Question ArrayList that is populated with questions
-    *
-    *Returns: json string of the questions
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(questions);
-    return json;
-  }
-  private String convertToJsonUsingGson(TestClass test) {
-    /* Converts the test to a json string using Gson
-    *
-    *Arguments: Test instance
-    *
-    *Returns: json string of the test instance
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(test);
-    return json;
   }
   private String convertToJsonUsingGson(Entity test) {
     /* Converts the test entity to a json string using Gson
