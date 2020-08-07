@@ -13,8 +13,8 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
- 
-import com.google.sps.data.TestClass;
+
+import com.google.sps.data.QuestionClass;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -35,46 +35,44 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.*;
 import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 /** Servlet that returns the tests owned by the user*/
-@WebServlet("/returnTestsUserOwns")
-public class TestsUserOwnsServlet extends HttpServlet{
+@WebServlet("/returnQuestionsUserOwns")
+public class QuestionsUserOwnsServlet extends HttpServlet{
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    /*Returns the tests that the user has created */
+    /*Returns all the questions that the user has created */
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Test").setFilter(new FilterPredicate("ownerID",
-      FilterOperator.EQUAL, ownerID));
+    Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
+      FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);;
     PreparedQuery results = datastore.prepare(query);
 
-    List<TestClass> testList = new ArrayList<>();
+    List<QuestionClass> questionList = new ArrayList<>();
     for (Entity entity : results.asIterable()) {
-      long testId = entity.getKey().getId();
-      String testName = (String) entity.getProperty("testName");
-      String testDuration = (String) entity.getProperty("testDuration");
-      String ownerId = (String) entity.getProperty("ownerID");
-      List<Long> list = (List<Long>) entity.getProperty("questionsList");
-      TestClass test = new TestClass(testName,testId,Double.valueOf(testDuration),ownerID,list);
-      testList.add(test);
+      long questionId = entity.getKey().getId();
+      String question = (String) entity.getProperty("question");
+      String marks = (String) entity.getProperty("marks");
+      QuestionClass questionInstance= new QuestionClass(question,questionId,Double.parseDouble(marks),ownerID);
+      questionList.add(questionInstance);
     }
 
     response.setContentType("application/json;");
-    response.sendRedirect("/createTest.html");
-    response.getWriter().println(convertToJsonUsingGson(testList));
+    response.getWriter().println(convertToJsonUsingGson(questionList));
   }
-  private String convertToJsonUsingGson(List<TestClass> questions) {
-    /* Converts the test List to a json string using Gson
+  private String convertToJsonUsingGson(List<QuestionClass> questions) {
+    /* Converts the Question List to a json string using Gson
     *
-    *Arguments: Question testList that is populated with tests
+    *Arguments: Question List that is populated with questions
     *
-    *Returns: json string of the tests
+    *Returns: json string of the questions the user owns
     *
     */
     Gson gson = new Gson();
