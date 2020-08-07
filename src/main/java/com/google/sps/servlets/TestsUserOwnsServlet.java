@@ -13,9 +13,8 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
-// 
+ 
 import com.google.sps.data.TestClass;
-import com.google.sps.data.QuestionClass;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -36,7 +35,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.*;
 import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
@@ -70,7 +68,6 @@ public class TestsUserOwnsServlet extends HttpServlet{
     response.setContentType("application/json;");
     response.sendRedirect("/createTest.html");
     response.getWriter().println(convertToJsonUsingGson(testList));
-    System.out.println(convertToJsonUsingGson(testList));
   }
   private String convertToJsonUsingGson(List<TestClass> questions) {
     /* Converts the test List to a json string using Gson
