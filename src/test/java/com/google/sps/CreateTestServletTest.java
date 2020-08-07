@@ -13,10 +13,8 @@
 // limitations under the License.
 
 package com.google.sps;
-import com.google.sps.data.TestClass;
 import com.google.sps.servlets.CreateTestServlet;
 import java.io.IOException;
-import com.google.gson.Gson;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,15 +27,8 @@ import org.junit.Test;
 import javax.servlet.http.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import java.util.Date;
 import java.io.*;
-import com.google.gson.Gson;
 import static org.mockito.Mockito.*;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import static org.junit.Assert.assertTrue;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -62,7 +53,6 @@ public final class CreateTestServletTest extends CreateTestServlet{
   @Test
   public void testdoPostFunction() throws IOException{
     /*Tests the doPost function to see if the test gets stored correctly */
-    Long date = (new Date()).getTime();
     CreateTestServlet servlet = new CreateTestServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
