@@ -29,41 +29,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet to set users preferences linked with specific emails
+ * Servlet to update users preferences, overwrites current preferences linked with users email
+ * on the datastore.
+ *
+ * @author  Aidan Molloy
  */
 @WebServlet("/updateInfo")
 public class UpdateInfoServlet extends HttpServlet {
-
   /**
-   * doGet prints form to page for changing username
-   */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html");
-    PrintWriter out = response.getWriter();
-    out.println("<h1>Set Preferences</h1>");
-
-    UserService userService = UserServiceFactory.getUserService();
-    if (userService.isUserLoggedIn()) {
-      out.println("<p>Set your preferences here:</p>");
-      out.println("<form method=\"POST\" action=\"/updateInfo\">");
-      out.println("<input type=\"text\" name=\"name\" />");
-      out.println("<input type=\"text\" name=\"font\" />");
-      out.println("<input type=\"text\" name=\"font_size\" />");
-      out.println("<input type=\"text\" name=\"bg_color\" />");
-      out.println("<input type=\"text\" name=\"text_color\" />");
-      out.println("<br/>");
-      out.println("<button>Submit</button>");
-      out.println("</form>");
-    } else {
-      String loginUrl = userService.createLoginURL("/");
-      out.println("<p>Login <a href=\"" + loginUrl + "\">here</a>.</p>");
-    }
-  }
-
-  /**
-   * doPost process the information from the form links the new preferences to 
-   * the associated logged in email
+   * Get passed paramaters for users new preferences and save to datastore.
+   *
+   * @param   request     provides request information from the HTTP servlet
+   * @param   response    response object where servlet will write information to
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -82,15 +59,15 @@ public class UpdateInfoServlet extends HttpServlet {
 
     try {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      Entity entity = new Entity("UserInfo", email);
-      entity.setProperty("email", email);
-      entity.setProperty("name", name);
-      entity.setProperty("font", font);
-      entity.setProperty("font_size", font_size);
-      entity.setProperty("bg_color", bg_color);
-      entity.setProperty("text_color", text_color);
+      Entity userInfoEntity = new Entity("UserInfo", email);
+      userInfoEntity.setProperty("email", email);
+      userInfoEntity.setProperty("name", name);
+      userInfoEntity.setProperty("font", font);
+      userInfoEntity.setProperty("font_size", font_size);
+      userInfoEntity.setProperty("bg_color", bg_color);
+      userInfoEntity.setProperty("text_color", text_color);
       // The put() function automatically inserts new data or updates existing data based on email
-      datastore.put(entity);
+      datastore.put(userInfoEntity);
     } catch(Exception e) {
       System.out.println("Something went wrong with Datastore. Please try again later.");
     }
