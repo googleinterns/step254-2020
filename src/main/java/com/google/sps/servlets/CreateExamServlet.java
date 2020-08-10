@@ -14,7 +14,7 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.data.TestClass;
+import com.google.sps.data.ExamClass;
 import com.google.sps.data.QuestionClass;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -32,38 +32,38 @@ import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that stores and returns tests*/
-@WebServlet("/createTest")
-public class CreateTestServlet extends HttpServlet{
+/** Servlet that stores and returns exams*/
+@WebServlet("/createExam")
+public class CreateExamServlet extends HttpServlet{
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //Servlet Recevies information from the client about a test they want to create and saves it in
+    //Servlet Recevies information from the client about a exam they want to create and saves it in
     //the datastore
     Long date = (new Date()).getTime(); 
-    String testName= getParameter(request, "testName","");
-    String testDuration = getParameter(request, "duration", "");
+    String name= getParameter(request, "name","");
+    String duration = getParameter(request, "duration", "");
 
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
     List<Long> list = new ArrayList<>();
 
-    //Set up the new Test and save it in the datastore
+    //Set up the new Exam and save it in the datastore
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Entity testEntity = new Entity("Test");
-    testEntity.setProperty("testName",testName);
-    testEntity.setProperty("testDuration",testDuration);
-    testEntity.setProperty("ownerID",ownerID);
-    testEntity.setProperty("date", date);
-    testEntity.setProperty("questionsList",list);
+    Entity examEntity = new Entity("Exam");
+    examEntity.setProperty("name",name);
+    examEntity.setProperty("duration",duration);
+    examEntity.setProperty("ownerID",ownerID);
+    examEntity.setProperty("date", date);
+    examEntity.setProperty("questionsList",list);
     try{
-      datastore.put(testEntity);    
+      datastore.put(examEntity);    
     }catch (DatastoreFailureException e){
       System.out.println("Datastore is not responding right now. Try Again Later");
     }
 
-    response.sendRedirect("/createTest.html");
+    response.sendRedirect("/createExam.html");
     response.setContentType("application/json");
-    response.getWriter().println(convertToJsonUsingGson(testEntity));
+    response.getWriter().println(convertToJsonUsingGson(examEntity));
   }
   private String getParameter(HttpServletRequest request, String name, String defaultValue){
     /* Gets Parameters from the Users Page
@@ -77,16 +77,16 @@ public class CreateTestServlet extends HttpServlet{
     }
     return value;
   }
-  private String convertToJsonUsingGson(Entity test) {
-    /* Converts the test entity to a json string using Gson
+  private String convertToJsonUsingGson(Entity exam) {
+    /* Converts the exam entity to a json string using Gson
     *
-    *Arguments: Test entity
+    *Arguments: Exam entity
     *
-    *Returns: json string of the test entity
+    *Returns: json string of the exam entity
     *
     */
     Gson gson = new Gson();
-    String json = gson.toJson(test);
+    String json = gson.toJson(exam);
     return json;
   }
 }

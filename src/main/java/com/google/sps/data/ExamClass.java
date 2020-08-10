@@ -24,7 +24,7 @@ public final class ExamClass{
   private final String ownerID;
   private final List<Long> questionList;
 
-  public TestClass(String name, long examID, double duration, String ownerID,
+  public ExamClass(String name, long examID, double duration, String ownerID,
     List<Long> questionList)
   {
     /* Constructor for the Exam Class
@@ -42,9 +42,9 @@ public final class ExamClass{
     this.ownerID = ownerID;
     this.questionList = questionList;
   }
-  public String getExamName(){
+  public String getName(){
     /*Getter method to get the exam's Name*/
-    return examName;
+    return name;
   }
   public long getExamID(){
     /*Getter method to get the test ID */
