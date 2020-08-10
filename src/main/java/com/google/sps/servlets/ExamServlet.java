@@ -66,7 +66,6 @@ public class ExamServlet extends HttpServlet{
     response.setContentType("application/json;");
     response.getWriter().println(convertToJsonUsingGson(exam));
     response.getWriter().println(convertToJsonUsingGson(listofQuestions));
-    System.out.println(convertToJsonUsingGson(exam));
   }
   private List<QuestionClass> getQuestionsFromExam(List<Long> list){
     /*Grab all the question id's from the list and creates instances of 
