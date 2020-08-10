@@ -30,6 +30,13 @@ h3{
     font-size: 105%;
 }
 
+.content-wrap{
+    max-width: 800px;
+    width: 85%;
+    margin: 0 auto;
+    padding: 60px 0;
+}
+
 /* Header
 -------------------*/
 .navtop{
@@ -55,5 +62,15 @@ h3{
 .navtop a.active{
     background-color: #EBEBEB;
     color: #4D5061;
+}
+
+/* Dashboard
+-------------------*/
+.dashBtn{
+  padding: 14px 25px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 5px;
 }
 
