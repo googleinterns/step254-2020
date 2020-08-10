@@ -15,7 +15,7 @@
 
 let userAuth = false;
 // Authenticate user
-function authenticate() {
+window.onload=function authenticate() {
   logInOut = document.getElementById("logInOut");
 
   fetch(`/auth`).then(response => response.json()).then((authenticated) => {
@@ -45,6 +45,28 @@ function setPreference(){
     document.body.style.backgroundColor = userBackgroundColor;
   });
 
+}
+
+//Get current user prefernces to set as default value in preference form
+function setPreferenceForm(){
+  setPreference();
+  fetch('/auth').then(response =>response.json()).then((authenticated) =>{
+    userFont = authenticated.font;
+    userFontSize = authenticated.font_size;
+    userFontColor = authenticated.text_color;
+    userBackgroundColor = authenticated.bg_color; 
+
+    setValue("font", userFont);
+    setValue("font_size", userFontSize);
+    setValue("text_color", userFontColor);
+    setValue("bg_color", userBackgroundColor);
+  });
+
+}
+
+//Set current user prefernces as default value in preference form
+function setValue(id, val){
+    document.getElementById(id).value = val;
 }
 
 //Check if user has access to page
