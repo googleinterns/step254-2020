@@ -16,7 +16,7 @@
     </header>
     <main>
       <h2>Create Test</h2>
-      <form action="/createTest" method="POST" id="makeTest">
+      <form action="/createExam" method="POST" id="makeTest">
         <label for="testName">Enter Test Name:</label><br>
         <input type="text" id="testName" name="testName" required><br>
         <label for="duration">Enter Duration:</label><br>
@@ -32,10 +32,11 @@
         <input type="submit" value="Submit Question"> 
       </form>
       <h3> Add Previously Used Questions</h3>
-      <form id="addQuestions">
+      <form id="addQuestions" action="/returnQuestionsUserOwns" method="GET">
         <input type="submit" value="Submit Selected Questions"> 
       </form>
     </main>
+    
     <footer>
     </footer>
   </body>

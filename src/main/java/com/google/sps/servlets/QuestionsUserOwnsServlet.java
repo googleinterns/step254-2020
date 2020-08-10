@@ -14,7 +14,6 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.data.QuestionClass;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -29,23 +28,21 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.gson.Gson;
-import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.*;
 import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import java.io.PrintWriter;
 
 /** Servlet that returns the tests owned by the user*/
 @WebServlet("/returnQuestionsUserOwns")
 public class QuestionsUserOwnsServlet extends HttpServlet{
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
     /*Returns all the questions that the user has created */
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
@@ -55,28 +52,19 @@ public class QuestionsUserOwnsServlet extends HttpServlet{
       FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);;
     PreparedQuery results = datastore.prepare(query);
 
-    List<QuestionClass> questionList = new ArrayList<>();
+    response.setContentType("text/html");
+    PrintWriter out = response.getWriter();
+    out.println("<h1>Check the boxes of questions you would like to reuse</h1>");
+    out.println("<form action=\"/saveQuestionsFromBank\" method=\"POST\">");
     for (Entity entity : results.asIterable()) {
       long questionId = entity.getKey().getId();
       String question = (String) entity.getProperty("question");
       String marks = (String) entity.getProperty("marks");
-      QuestionClass questionInstance= new QuestionClass(question,questionId,Double.parseDouble(marks),ownerID);
-      questionList.add(questionInstance);
+      out.println("<input type=\"checkbox\" name=\"question\" value=\""+String.valueOf(questionId)+
+        "\">"+question+" ("+marks+")<br>");
     }
-
-    response.setContentType("application/json;");
-    response.getWriter().println(convertToJsonUsingGson(questionList));
-  }
-  private String convertToJsonUsingGson(List<QuestionClass> questions) {
-    /* Converts the Question List to a json string using Gson
-    *
-    *Arguments: Question List that is populated with questions
-    *
-    *Returns: json string of the questions the user owns
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(questions);
-    return json;
+    out.println("<br/>");
+    out.println("<button>Submit</button>");
+    out.println("</form>");
   }
 }
