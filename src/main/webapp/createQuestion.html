@@ -2,12 +2,12 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Create Test</title>
+    <title>Create Question</title>
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload="authenticate()">
+  <body>
     <header>
       <div class="navtop">
         <a  href="dashboard.html">Navigation, will have login, click here to test rest of page</a>
@@ -15,16 +15,8 @@
       </div>
     </header>
     <main>
-      <h2>Create Test</h2>
-      <form action="/createTest" method="POST" id="makeTest">
-        <label for="testName">Enter Test Name:</label><br>
-        <input type="text" id="testName" name="testName" required><br>
-        <label for="duration">Enter Duration:</label><br>
-        <input type="text" id="duration" name="duration" required>
-        <input type="submit" value="Submit">
-      </form>
       <h3> Create New Question</h3>
-      <form id="createQuestion" action="/createQuestion" method="POST">
+      <form id="createQuestion" action="/question" method="POST">
         <label for="question">Enter Question:</label><br>
         <textarea name="question" rows="4" cols="50" required></textarea><br>
         <label for="marks">Marks given for Question:</label><br>
