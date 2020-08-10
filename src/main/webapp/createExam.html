@@ -7,36 +7,23 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload="authenticate()">
+  <body>
     <header>
       <div class="navtop">
-        <a  href="dashboard.html">Navigation, will have login, click here to test rest of page</a>
+        <a  href="dashboard.html">Dashboard</a>
         <p id=logInOut></p>
       </div>
     </header>
     <main>
-      <h2>Create Test</h2>
-      <form action="/createExam" method="POST" id="makeTest">
-        <label for="testName">Enter Test Name:</label><br>
-        <input type="text" id="testName" name="testName" required><br>
+      <h2>Create Exam</h2>
+      <form id="makeExam" action="/createExam" method="POST" onsubmit="window.location.href = 'createQuestion.html'; return false;">
+        <label for="name">Enter Exam Name:</label><br>
+        <input type="text" id="name" name="name" required><br>  
         <label for="duration">Enter Duration:</label><br>
         <input type="text" id="duration" name="duration" required>
         <input type="submit" value="Submit">
       </form>
-      <h3> Create New Question</h3>
-      <form id="createQuestion" action="/createQuestion" method="POST">
-        <label for="question">Enter Question:</label><br>
-        <textarea name="question" rows="4" cols="50" required></textarea><br>
-        <label for="marks">Marks given for Question:</label><br>
-        <input type="text" id="marks" name="marks" required>
-        <input type="submit" value="Submit Question"> 
-      </form>
-      <h3> Add Previously Used Questions</h3>
-      <form id="addQuestions" action="/returnQuestionsUserOwns" method="GET">
-        <input type="submit" value="Submit Selected Questions"> 
-      </form>
     </main>
-    
     <footer>
     </footer>
   </body>

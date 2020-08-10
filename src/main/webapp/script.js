@@ -15,7 +15,7 @@
 
 let userAuth = false;
 // Authenticate user
-function authenticate() {
+window.onload=function authenticate() {
   logInOut = document.getElementById("logInOut");
 
   fetch(`/auth`).then(response => response.json()).then((authenticated) => {

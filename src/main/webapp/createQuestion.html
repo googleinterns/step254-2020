@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Create Question</title>
+    <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="navtop">
+        <a  href="dashboard.html">Navigation, will have login, click here to test rest of page</a>
+        <p id=logInOut></p>
+      </div>
+    </header>
+    <main>
+      <h3> Create New Question</h3>
+      <form id="createQuestion" action="/question" method="POST">
+        <label for="question">Enter Question:</label><br>
+        <textarea name="question" rows="4" cols="50" required></textarea><br>
+        <label for="marks">Marks given for Question:</label><br>
+        <input type="text" id="marks" name="marks" required>
+        <input type="submit" value="Submit Question"> 
+      </form>
+      <h3> Add Previously Used Questions</h3>
+      <form id="addQuestions">
+        <input type="submit" value="Submit Selected Questions"> 
+      </form>
+    </main>
+    <footer>
+    </footer>
+  </body>
+</html>

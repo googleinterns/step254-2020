@@ -20,6 +20,8 @@ import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -47,25 +49,57 @@ public class ExamServlet extends HttpServlet{
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    String examID = getParameter(request,"examID","");
-    Entity examEntity = new Entity("Exam");
+    response.setContentType("text/html;");
+    String examID = getParameter(request, "examID", "1");
+
+    Entity examEntity = null;
+
     try{
       examEntity = getEntity(examID);
     }catch (EntityNotFoundException e){
-      System.out.println("Entity was not found");
     }
-    String name = (String) examEntity.getProperty("name");
-    String duration = (String) examEntity.getProperty("duration");
-    String ownerID = (String) examEntity.getProperty("ownerID");
-    List<Long> list = (List<Long>) examEntity.getProperty("questionsList");
-    ExamClass exam = new ExamClass(name,examEntity.getKey().getId(),
-      Double.parseDouble(duration),ownerID,list);
-    
-    List<QuestionClass> listofQuestions=getQuestionsFromExam(list);
 
-    response.setContentType("application/json;");
-    response.getWriter().println(convertToJsonUsingGson(exam));
-    response.getWriter().println(convertToJsonUsingGson(listofQuestions));
+    if(examEntity != null) {
+      String name = (String) examEntity.getProperty("name");
+      String duration = (String) examEntity.getProperty("duration");
+      String ownerID = (String) examEntity.getProperty("ownerID");
+      List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
+      ExamClass exam = new ExamClass(name,examEntity.getKey().getId(),
+        Double.parseDouble(duration),ownerID,questionsList);
+        
+      
+      response.getWriter().println("<h1>Exam Name: " + exam.getName() + "</h1>");
+      response.getWriter().println("<h2>Length: " + exam.getDuration() + "</h2>");
+      response.getWriter().println("<h2>Created By: " + exam.getOwnerID() + "</h2>");
+      if(questionsList != null){
+        List<QuestionClass> listofQuestions=getQuestionsFromExam(questionsList);
+        response.getWriter().println(convertToJsonUsingGson(listofQuestions));
+      }else{
+        response.getWriter().println("<p>There are no questions associated with this exam.</p>");
+      }
+    } else {
+      response.getWriter().println("<h1>Choose an exam to take.</h1>");
+      response.getWriter().println("<table><tr><th>ID</th><th>Name</th><th>Duration</th></tr>");
+
+      Query query = new Query("Exam");
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      PreparedQuery results = datastore.prepare(query);
+      for (Entity entity : results.asIterable()) {
+        // Send back amount of results requested
+        long id = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        String duration = (String) entity.getProperty("duration");
+
+      response.getWriter().println("<tr>");
+      response.getWriter().println("<td>" + id + "</td>");
+      response.getWriter().println("<td>" + name + "</td>");
+      response.getWriter().println("<td>" + duration + "</td>");
+      response.getWriter().println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
+      response.getWriter().println("</tr>");
+      }
+      response.getWriter().println("</table>");
+    }
+
   }
   private List<QuestionClass> getQuestionsFromExam(List<Long> list){
     /*Grab all the question id's from the list and creates instances of 
@@ -73,6 +107,9 @@ public class ExamServlet extends HttpServlet{
     */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     List<QuestionClass> questionList = new ArrayList<>();
+    if (list == null){
+      return null;
+    }
     for(int i=0 ; i<list.size(); i++)
     {
       try{
@@ -83,10 +120,10 @@ public class ExamServlet extends HttpServlet{
         String question = (String) qs.getProperty("question");
         String marks = (String) qs.getProperty("marks");
         String ownerID = (String) qs.getProperty("ownerID");
-        QuestionClass question1 = new QuestionClass(question, questionID,
+        QuestionClass questionToBeEntered = new QuestionClass(question, questionID,
           Double.parseDouble(marks), ownerID);
-        questionList.add(question1);
-      } catch( EntityNotFoundException e)
+        questionList.add(questionToBeEntered);
+      } catch( Exception e)
       {  
         System.out.println("Entity was not found");
       }
@@ -98,8 +135,12 @@ public class ExamServlet extends HttpServlet{
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Key key = KeyFactory.createKey("Exam", Long.parseLong(entityID));
     Entity entity = datastore.get(key);
+    if(entity == null) {
+      return null;
+    }
     return entity;
   }
+
   private String getParameter(HttpServletRequest request, String name, String defaultValue){
     /* Gets Parameters from the Users Page
     *
