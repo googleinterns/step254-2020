@@ -13,16 +13,13 @@
 // limitations under the License.
 
 package com.google.sps;
-import com.google.sps.servlets.QuestionsUserOwnsServlet;
+import com.google.sps.servlets.SaveQuestionsFromBankServlet;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.After;
@@ -32,13 +29,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.io.*;
 import static org.mockito.Mockito.*;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import static org.junit.Assert.assertTrue;
+import java.util.Date;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.util.Date;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 @RunWith(JUnit4.class)
-public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet{
+public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBankServlet{
   private final LocalServiceTestHelper helper = 
     new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
       .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
@@ -52,20 +54,27 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
   public void tearDown() {
     helper.tearDown();
   }
-
   @Test
-  public void testdoGetFunction() throws IOException{
-    /*Tests the doGet function to see if the questions that the
-    * user owns get retrieved correctly */
-    QuestionsUserOwnsServlet servlet= new QuestionsUserOwnsServlet();
+  public void testdoPostFunction() throws IOException{
+    /*Test if questions that are chosen from the bank are saved properly */ 
+    Long date = (new Date()).getTime();
+    SaveQuestionsFromBankServlet servlet = new SaveQuestionsFromBankServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    Long date = (new Date()).getTime(); 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-   
-    /*Set up two fake question entities */
+    
+    //create Fake Test
+    Entity testEntity = new Entity("Test");
+    testEntity.setProperty("testName", "Trial");
+    testEntity.setProperty("testDuration", "30");
+    testEntity.setProperty("ownerID","test@example.com");
+    testEntity.setProperty("date", date);
+    datastore.put(testEntity); 
+
+    //Create Fake Questions
     Entity questionEntity = new Entity("Question");
     questionEntity.setProperty("question","What day is it?");
     questionEntity.setProperty("marks","5");
@@ -80,13 +89,18 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     anotherQuestionEntity.setProperty("ownerID","test@example.com");
     datastore.put(anotherQuestionEntity);
 
+    String[] questionsList ={String.valueOf(questionEntity.getKey().getId()), String.valueOf(anotherQuestionEntity.getKey().getId())};
+    when(request.getParameterValues("question")).thenReturn(questionsList);
+    
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
 
-    servlet.doGet(request, response);
+    servlet.doPost(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("What day is it? (5)"));
-    Assert.assertTrue(result.contains("What year is it? (10)"));
+    Assert.assertTrue(result.contains("Successfully added Question 2"));
+    Assert.assertTrue(result.contains("Successfully added Question 3"));
+
   }
+  
 }
