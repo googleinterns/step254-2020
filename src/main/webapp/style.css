@@ -18,12 +18,16 @@ main{
 }
 
 h1{
-    font-size: 3.2em;
+    font-size: 115%;
 }
 
 h2{
 
-    font-size: 1.8em;
+    font-size: 110%;
+}
+
+h3{
+    font-size: 105%;
 }
 
 /* Header
@@ -31,7 +35,7 @@ h2{
 .navtop{
     background-color: #4D5061;
     overflow: hidden;
-    height: 72px;
+    height: auto;
 }
 
 .navtop a{
@@ -40,7 +44,7 @@ h2{
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 120%;
 }
 
 .navtop a:hover{
