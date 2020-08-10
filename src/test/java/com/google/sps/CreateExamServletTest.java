@@ -13,16 +13,13 @@
 // limitations under the License.
 
 package com.google.sps;
-import com.google.sps.servlets.TestsUserOwnsServlet;
+import com.google.sps.servlets.CreateExamServlet;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.After;
@@ -38,7 +35,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 @RunWith(JUnit4.class)
-public final class TestsUserOwnsServletTest extends TestsUserOwnsServlet{
+public final class CreateExamServletTest extends CreateExamServlet{
   private final LocalServiceTestHelper helper = 
     new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
       .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
@@ -54,46 +51,27 @@ public final class TestsUserOwnsServletTest extends TestsUserOwnsServlet{
   }
 
   @Test
-  public void testdoGetFunction() throws IOException{
-    /*Tests the doGet function to see if all tests a user owns get
-    * retrieved correctly.
-    */
-    TestsUserOwnsServlet servlet= new TestsUserOwnsServlet();
+  public void testdoPostFunction() throws IOException{
+    /*Tests the doPost function to see if the test gets stored correctly */
+    CreateExamServlet servlet = new CreateExamServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    Long date = (new Date()).getTime(); 
+
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-
-    List<Long> list = new ArrayList<>();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    /*Create two fake TestEntities */
-    Entity testEntity = new Entity("Test");
-    testEntity.setProperty("testName","Trial");
-    testEntity.setProperty("testDuration","30");
-    testEntity.setProperty("ownerID","test@example.com");
-    testEntity.setProperty("date", date);
-    testEntity.setProperty("questionsList",list);
-    datastore.put(testEntity);
-
-    Entity anotherEntity= new Entity("Test");
-    anotherEntity.setProperty("testName","AnotherTest");
-    anotherEntity.setProperty("testDuration","45");
-    anotherEntity.setProperty("ownerID","test@example.com");
-    anotherEntity.setProperty("date", date);
-    anotherEntity.setProperty("questionsList",list);
-    datastore.put(anotherEntity);
+    //set the parameters that will be requested to test values
+    when(request.getParameter("name")).thenReturn("Testing Exam");
+    when(request.getParameter("duration")).thenReturn("30");
 
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
 
-    servlet.doGet(request, response);
+    servlet.doPost(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"testName\":\"Trial\",\"testID\":1,"+
-      "\"testDuration\":30.0,\"ownersID\":\"test@example.com\""));
-    Assert.assertTrue(result.contains("\"testName\":\"AnotherTest\",\"testID\":2,"+
-      "\"testDuration\":45.0,\"ownersID\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"ownerID\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"duration\":\"30\""));
+    Assert.assertTrue(result.contains("\"name\":\"Testing Exam\""));
   }
 }

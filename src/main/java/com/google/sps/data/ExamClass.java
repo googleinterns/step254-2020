@@ -16,47 +16,47 @@ package com.google.sps.data;
 import com.google.sps.data.QuestionClass;
 import java.util.List;
 import com.google.appengine.api.datastore.Key;
-public final class TestClass{
-  /*Class that creates tests */
-  private final String testName;
-  private final long testID;
-  private final double testDuration;
-  private final String ownersID;
+public final class ExamClass{
+  /*Class that creates exams */
+  private final String name;
+  private final long examID;
+  private final double duration;
+  private final String ownerID;
   private final List<Long> questionList;
 
-  public TestClass(String testName, long testID, double testDuration, String ownersID,
+  public ExamClass(String name, long examID, double duration, String ownerID,
     List<Long> questionList)
   {
-    /* Constructor for the test Class
+    /* Constructor for the Exam Class
     * Arguments:
-    *  testName: Name of the Test
-    *  testID: Unique ID of this Test
-    *  testDuration: How long the students have for this exam
-    *  ownersID: email of the user who created the test
+    *  name: Name of the Exam
+    *  examID: Unique ID of this Exam
+    *  duration: How long the students have for this exam
+    *  ownerID: email of the user who created the test
     *  List<long> questionsList : list of questions id's that belong to this test
     *
     */
-    this.testName = testName;
-    this.testID = testID;
-    this.testDuration = testDuration;
-    this.ownersID = ownersID;
+    this.name = name;
+    this.examID = examID;
+    this.duration = duration;
+    this.ownerID = ownerID;
     this.questionList = questionList;
   }
-  public String getTestName(){
-    /*Getter method to get the test's Name*/
-    return testName;
+  public String getName(){
+    /*Getter method to get the exam's Name*/
+    return name;
   }
-  public long getTestID(){
+  public long getExamID(){
     /*Getter method to get the test ID */
-    return testID;
+    return examID;
   }
-  public double getTestDuration(){
+  public double getDuration(){
     /*Getter method to get test duration */
-    return testDuration;
+    return duration;
   }
-  public String getOwnersID(){
-    /* Getter method to get the owners id*/
-    return ownersID;
+  public String getOwnerID(){
+    /* Getter method to get the owner id*/
+    return ownerID;
   }
   public List<Long> questionList(){
     /* Getter method to get questions list*/

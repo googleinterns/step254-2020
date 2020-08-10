@@ -31,29 +31,31 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 
 /**
- * The authentication servlet is responsible for authenticating users.
+ * The authentication servlet is responsible for authenticating users and retreiving user
+ * preferences from datastore.
+ *
+ * @author  Aidan Molloy
  */
 @WebServlet("/auth")
 public class AuthenticationServlet extends HttpServlet {
-
+  /**
+   * Checks if the user is logged in with UserService and prints response in json.
+   *
+   * @param   request     provides request information from the HTTP servlet
+   * @param   response    response object where servlet will write information to
+   */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Set response header
     response.setContentType("application/json;");
-
-    // Reference to UserService
     UserService userService = UserServiceFactory.getUserService();
-
     Map<String, String> authResponse = new HashMap<String, String>();
 
-    // Check if user is logged
     try{
       if (userService.isUserLoggedIn()) {
         // If logged in get email and create link to logout
         String userEmail = userService.getCurrentUser().getEmail();
         String logoutUrl = userService.createLogoutURL("/");
 
-        // Enter information for response
         authResponse.put("email", userEmail);
         authResponse.put("logoutUrl", logoutUrl);
 
@@ -62,12 +64,10 @@ public class AuthenticationServlet extends HttpServlet {
       } else {
         // If logged out get login link
         String loginUrl = userService.createLoginURL("/");
-
-        // Enter information for response
         authResponse.put("loginUrl", loginUrl);
       }
     }catch(Exception e) {
-      authResponse.put("errorMsg", "Something went wrong with userService. Please try again later.");
+      authResponse.put("errorMsg", "Something went wrong. Please try again later.");
     }
 
     String json = convertToJson(authResponse);
@@ -76,8 +76,12 @@ public class AuthenticationServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
-  /** 
-   * Returns the preferences of the user with email, or null if the user has not set their preferences. 
+  /**
+   * Returns the preferences of the user with email, or null if the user has not set their 
+   * preferences.
+   *
+   * @param   email   the email of logged in user to retreive linked userInfo from datastore
+   * @return          a map of userInfo linked to the user email
    */
   private Map<String, String> getUserInfo(String email) {
     Map<String, String> userInfoResponse = new HashMap<String, String>();
@@ -89,7 +93,8 @@ public class AuthenticationServlet extends HttpServlet {
       PreparedQuery results = datastore.prepare(query);
       Entity entity = results.asSingleEntity();
       if (entity == null) {
-        return null;
+        userInfoResponse.put("updateInfoRequired", "true");
+        return userInfoResponse;
       }
       userInfoResponse.put("name", (String) entity.getProperty("name"));
       userInfoResponse.put("font", (String) entity.getProperty("font"));
@@ -98,12 +103,17 @@ public class AuthenticationServlet extends HttpServlet {
       userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
       return userInfoResponse;
     }catch(Exception e) {
-      userInfoResponse.put("errorMsg", "Something went wrong with Datastore. Please try again later.");
+      userInfoResponse.put("errorMsg", "Something went wrong. Please try again later.");
       return null;
     }
   }
 
-  // Convert into a JSON string using the Gson library.
+  /**
+   * Converts data into a JSON string using the Gson library.
+   *
+   * @param     authResponse    map to be converted into a json string
+   * @return                    a json string converted from authResponse map
+   */
   private String convertToJson(Map<String, String> authResponse) {
     Gson gson = new Gson();
     String json = gson.toJson(authResponse);

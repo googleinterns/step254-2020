@@ -14,7 +14,7 @@
 
 package com.google.sps.servlets;
  
-import com.google.sps.data.TestClass;
+import com.google.sps.data.ExamClass;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -40,41 +40,41 @@ import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that returns the tests owned by the user*/
-@WebServlet("/returnTestsUserOwns")
-public class TestsUserOwnsServlet extends HttpServlet{
+/** Servlet that returns the exams owned by the user*/
+@WebServlet("/returnExamsUserOwns")
+public class ExamsUserOwnsServlet extends HttpServlet{
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    /*Returns the tests that the user has created */
+    /*Returns the exams that the user has created */
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Test").setFilter(new FilterPredicate("ownerID",
+    Query query = new Query("Exam").setFilter(new FilterPredicate("ownerID",
       FilterOperator.EQUAL, ownerID));
     PreparedQuery results = datastore.prepare(query);
 
-    List<TestClass> testList = new ArrayList<>();
+    List<ExamClass> examList = new ArrayList<>();
     for (Entity entity : results.asIterable()) {
-      long testId = entity.getKey().getId();
-      String testName = (String) entity.getProperty("testName");
-      String testDuration = (String) entity.getProperty("testDuration");
+      long examID = entity.getKey().getId();
+      String name = (String) entity.getProperty("name");
+      String duration = (String) entity.getProperty("duration");
       String ownerId = (String) entity.getProperty("ownerID");
       List<Long> list = (List<Long>) entity.getProperty("questionsList");
-      TestClass test = new TestClass(testName,testId,Double.valueOf(testDuration),ownerID,list);
-      testList.add(test);
+      ExamClass exam = new ExamClass(name,examID,Double.valueOf(duration),ownerID,list);
+      examList.add(exam);
     }
 
     response.setContentType("application/json;");
-    response.sendRedirect("/createTest.html");
-    response.getWriter().println(convertToJsonUsingGson(testList));
+    response.sendRedirect("/createExam.html");
+    response.getWriter().println(convertToJsonUsingGson(examList));
   }
-  private String convertToJsonUsingGson(List<TestClass> questions) {
-    /* Converts the test List to a json string using Gson
+  private String convertToJsonUsingGson(List<ExamClass> questions) {
+    /* Converts the exam List to a json string using Gson
     *
-    *Arguments: Question testList that is populated with tests
+    *Arguments: Question examList that is populated with exams
     *
-    *Returns: json string of the tests
+    *Returns: json string of the exams
     *
     */
     Gson gson = new Gson();
