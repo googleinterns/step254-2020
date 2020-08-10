@@ -55,7 +55,7 @@ public class SaveQuestionsFromBankServlet extends HttpServlet{
       addQuestionToExamList(Long.valueOf(questionsList[i]),ownerID);
       response.getWriter().println("Successfully added Question " + questionsList[i]);
     }
-    response.sendRedirect("/createTest.html");
+    response.sendRedirect("/createExam.html");
   }
   private void addQuestionToExamList(long questionEntityKey,String ownerID)
   {
