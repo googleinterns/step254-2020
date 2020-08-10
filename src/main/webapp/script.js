@@ -56,8 +56,3 @@ function pageAccess(){
       document.getElementById("accessDenied").innerHTML = `<p> Cannot access until you login</p>`
     }
 }
-
-//Send to question form
-function questionForm(){
-  window.location.href = "createQuestion.html";
-}
