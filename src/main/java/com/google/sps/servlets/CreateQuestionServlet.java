@@ -71,13 +71,13 @@ public class CreateQuestionServlet extends HttpServlet{
     }catch (DatastoreFailureException e){
       System.out.println("Datastore is not responding right now. Try Again Later");
     }
-    addQuestionToTestList(questionEntity.getKey().getId(),ownerID);
+    addQuestionToExamList(questionEntity.getKey().getId(),ownerID);
 
     response.sendRedirect("/createQuestion.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(questionEntity));
   }
-  private void addQuestionToTestList(long questionEntityKey,String ownerID)
+  private void addQuestionToExamList(long questionEntityKey,String ownerID)
   {
     /*Function that adds the question id to the list of questions in the exam entity
     * Arguments : QuestionEntityKey - id of the question Entity we are adding to the list
