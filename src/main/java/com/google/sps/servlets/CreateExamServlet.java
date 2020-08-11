@@ -14,14 +14,12 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.data.ExamClass;
-import com.google.sps.data.QuestionClass;
+import com.google.sps.data.*;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.DatastoreFailureException;
-import com.google.gson.Gson;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -42,8 +40,8 @@ public class CreateExamServlet extends HttpServlet{
     //Servlet Recevies information from the client about a exam they want to create and saves it in
     //the datastore
     Long date = (new Date()).getTime(); 
-    String name= getParameter(request, "name","");
-    String duration = getParameter(request, "duration", "");
+    String name= UtilityClass.getParameter(request, "name","");
+    String duration = UtilityClass.getParameter(request, "duration", "");
 
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
@@ -64,30 +62,6 @@ public class CreateExamServlet extends HttpServlet{
 
     response.sendRedirect("/createQuestion.html");
     response.setContentType("application/json");
-    response.getWriter().println(convertToJsonUsingGson(examEntity));
-  }
-  private String getParameter(HttpServletRequest request, String name, String defaultValue){
-    /* Gets Parameters from the Users Page
-     *
-     * Return: Returns the requested parameter or the default value if the parameter
-     *  wasn't specified by the User.   
-     */
-    String value = request.getParameter(name);
-    if(value == null){
-        return defaultValue;
-    }
-    return value;
-  }
-  private String convertToJsonUsingGson(Entity exam) {
-    /* Converts the exam entity to a json string using Gson
-    *
-    *Arguments: Exam entity
-    *
-    *Returns: json string of the exam entity
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(exam);
-    return json;
+    response.getWriter().println(UtilityClass.convertToJson(examEntity));
   }
 }
