@@ -88,28 +88,6 @@ public class ExamServlet extends HttpServlet{
         examEntity = getEntity(examID);
       }catch (EntityNotFoundException e){
         out.println("<h3>Selected exam is not available.</h3>");
-    try{
-      examEntity = getEntity(examID);
-    }catch (EntityNotFoundException e){
-    }
-
-    if(examEntity != null) {
-      String name = (String) examEntity.getProperty("name");
-      String duration = (String) examEntity.getProperty("duration");
-      String ownerID = (String) examEntity.getProperty("ownerID");
-      List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
-      ExamClass exam = new ExamClass(name,examEntity.getKey().getId(),
-        Double.parseDouble(duration),ownerID,questionsList);
-        
-      
-      response.getWriter().println("<h1>Exam Name: " + exam.getName() + "</h1>");
-      response.getWriter().println("<h2>Length: " + exam.getDuration() + "</h2>");
-      response.getWriter().println("<h2>Created By: " + exam.getOwnerID() + "</h2>");
-      if(questionsList != null){
-        List<QuestionClass> listofQuestions=getQuestionsFromExam(questionsList);
-        response.getWriter().println(UtilityClass.convertToJson(listofQuestions));
-      }else{
-        response.getWriter().println("<p>There are no questions associated with this exam.</p>");
       }
       if(examEntity != null){
         // If exam exists, then display the exam and questions
