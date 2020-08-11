@@ -7,30 +7,13 @@ on:
     branches: [ master, dev ]
 
 jobs:
-  run-linters:
-    name: Run linters
+  lint:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
-
-      # ESLint and Prettier must be in `package.json`
-      - name: Install Node.js dependencies
-        run: npm install -g eslint
-      
-      - name: Setup config file 
-        run: npx eslint --init
-
-      - name: Run linters
-        uses: wearerequired/lint-action@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          # Enable linters
-          eslint: true
-          eslint_args: "--no-error-on-unmatched-pattern"
+      - uses: actions/checkout@v1
+      - name: Install npm packages
+        run: npm install
+      - name: Lint
+        # Run ESLint on diffed JS files. Do not run if there are no diffs.
+        run: git diff --diff-filter=ACM --name-only origin/master HEAD -- . ':!node_modules' | grep -E "(.*)\.(jsx|js)$" | xargs --no-run-if-empty npx eslint
