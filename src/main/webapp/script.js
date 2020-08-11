@@ -15,44 +15,49 @@
 
 let userAuth = false;
 // Authenticate user
-window.onload=function authenticate() {
+window.onload = function authenticate() {
   logInOut = document.getElementById("logInOut");
 
-  fetch(`/auth`).then(response => response.json()).then((authenticated) => {
-    // Check if user has already been logged in.
-    if (authenticated.email) {  
-      userAuth = true;
-      logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">Logout</a>`;   
-      setPreference(); 
-    } else {
-      userAuth = false;
-      logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
-    }
-  });
-}
+  fetch(`/auth`)
+    .then((response) => response.json())
+    .then((authenticated) => {
+      // Check if user has already been logged in.
+      if (authenticated.email) {
+        userAuth = true;
+        logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">
+          Logout</a>`;
+        setPreference();
+      } else {
+        userAuth = false;
+        logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
+      }
+    });
+};
 
 // Set user UI preferneces
-function setPreference(){
-  fetch('/auth').then(response =>response.json()).then((authenticated) =>{
-    userFont = authenticated.font;
-    userFontSize = authenticated.font_size;
-    userFontColor = authenticated.text_color;
-    userBackgroundColor = authenticated.bg_color; 
+function setPreference() {
+  fetch("/auth")
+    .then((response) => response.json())
+    .then((authenticated) => {
+      userFont = authenticated.font;
+      userFontSize = authenticated.font_size;
+      userFontColor = authenticated.text_color;
+      userBackgroundColor = authenticated.bg_color;
 
-    document.body.style.fontFamily = userFont;
-    document.body.style.fontSize = userFontSize + "px";
-    document.body.style.color = userFontColor;
-    document.body.style.backgroundColor = userBackgroundColor;
-  });
-
+      document.body.style.fontFamily = userFont;
+      document.body.style.fontSize = userFontSize + "px";
+      document.body.style.color = userFontColor;
+      document.body.style.backgroundColor = userBackgroundColor;
+    });
 }
 
 //Check if user has access to page
-function pageAccess(){
-    if(userAuth == true){
-      window.location.href = "dashboard.html";
-    }
-    else{
-      document.getElementById("accessDenied").innerHTML = `<p> Cannot access until you login</p>`
-    }
+function pageAccess() {
+  if (userAuth == true) {
+    window.location.href = "dashboard.html";
+  } else {
+    document.getElementById(
+      "accessDenied"
+    ).innerHTML = `<p> Cannot access until you login</p>`;
+  }
 }

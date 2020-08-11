@@ -14,26 +14,26 @@
 //
 
 //Get current user prefernces to set as default value in preference form
-function setPreferenceForm(){
-  fetch('/auth').then(response =>response.json()).then((authenticated) =>{
-    userFont = authenticated.font;
-    userFontSize = authenticated.font_size;
-    userFontColor = authenticated.text_color;
-    userBackgroundColor = authenticated.bg_color; 
+function setPreferenceForm() {
+  fetch("/auth")
+    .then((response) => response.json())
+    .then((authenticated) => {
+      userFont = authenticated.font;
+      userFontSize = authenticated.font_size;
+      userFontColor = authenticated.text_color;
+      userBackgroundColor = authenticated.bg_color;
 
-    setValue("font", userFont);
-    setValue("font_size", userFontSize);
-    setValue("text_color", userFontColor);
-    setValue("bg_color", userBackgroundColor);
-  });
-
+      setValue("font", userFont);
+      setValue("font_size", userFontSize);
+      setValue("text_color", userFontColor);
+      setValue("bg_color", userBackgroundColor);
+    });
 }
 
 //Set current user prefernces as default value in preference form
-function setValue(id, val){
-    document.getElementById(id).value = val;
+function setValue(id, val) {
+  document.getElementById(id).value = val;
 }
 
 //Call Functions
 setPreferenceForm();
-
