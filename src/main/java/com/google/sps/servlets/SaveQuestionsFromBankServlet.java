@@ -39,7 +39,9 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 
-/** Servlet that saves questions from the bank to a test*/
+/** Servlet that saves selected questions to the test
+* @author Klaudia Obieglo
+*/
 @WebServlet("/saveQuestionsFromBank")
 public class SaveQuestionsFromBankServlet extends HttpServlet{
   @Override
@@ -55,7 +57,7 @@ public class SaveQuestionsFromBankServlet extends HttpServlet{
       addQuestionToExamList(Long.valueOf(questionsList[i]),ownerID);
       response.getWriter().println("Successfully added Question " + questionsList[i]);
     }
-    response.sendRedirect("/createExam.html");
+    response.sendRedirect("/createQuestion.html");
   }
   private void addQuestionToExamList(long questionEntityKey,String ownerID)
   {
