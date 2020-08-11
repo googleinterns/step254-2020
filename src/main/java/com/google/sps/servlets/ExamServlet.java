@@ -15,9 +15,7 @@
 package com.google.sps.servlets;
 
 
-import com.google.sps.data.*;
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.google.sps.data.ExamClass;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -28,6 +26,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.ArrayList;
 import javax.servlet.annotation.WebServlet;
@@ -63,9 +63,9 @@ public class ExamServlet extends HttpServlet{
     out.println("<!DOCTYPE html>");
     out.println("<html>");
     out.println("<head>");
-    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:wght@400;"+
-      "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""+
-      " rel=\"stylesheet\">");
+    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:wght@400;"
+      + "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""
+      + " rel=\"stylesheet\">");
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
     out.println("<title>Take Exam</title>");
@@ -73,8 +73,8 @@ public class ExamServlet extends HttpServlet{
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
-    out.println("<a href=\"dashboard.html\">Navigation, will have login, click here to test rest"+
-      " of page</a>");
+    out.println("<a href=\"dashboard.html\">Navigation, will have login, click here to test rest"
+      + " of page</a>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -82,30 +82,30 @@ public class ExamServlet extends HttpServlet{
     String examID = UtilityClass.getParameter(request, "examID", null);
     Entity examEntity = null;
 
-    if(examID != null){
+    if (examID != null) {
       // If an exam has been selected
-      try{
+      try {
         examEntity = getEntity(examID);
-      }catch (EntityNotFoundException e){
+      } catch (EntityNotFoundException e) {
         out.println("<h3>Selected exam is not available.</h3>");
       }
-      if(examEntity != null){
+      if (examEntity != null) {
         // If exam exists, then display the exam and questions
         String name = (String) examEntity.getProperty("name");
         String duration = (String) examEntity.getProperty("duration");
         String ownerID = (String) examEntity.getProperty("ownerID");
         List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
-        ExamClass exam = new ExamClass(name,examEntity.getKey().getId(),
-          Double.parseDouble(duration),ownerID,questionsList);
+        ExamClass exam = new ExamClass(name,examEntity.getKey().getId()
+          , Double.parseDouble(duration),ownerID,questionsList);
       
         out.println("<h1>Exam Name: " + exam.getName() + "</h1>");
         out.println("<h3>Length: " + exam.getDuration() + "</h3>");
         out.println("<h3>Created By: " + exam.getOwnerID() + "</h3>");
-        if(questionsList != null){
+        if (questionsList != null) {
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<form action=\"/examResponse\" method=\"POST\">");
-          for(int i=0; i < questionsList.size(); i++){
-            try{
+          for (int i=0; i < questionsList.size(); i++) {
+            try {
               Key key = KeyFactory.createKey("Question", questionsList.get(i));
               Entity qs = datastore.get(key);
 
@@ -116,7 +116,7 @@ public class ExamServlet extends HttpServlet{
               out.println("<input type=\"text\" id=\"" + questionID + "\" name=\"" +
                             questionID + "\"><br><br>");
 
-            }catch( Exception e){
+            } catch( Exception e) {
               out.println("<p>Question was not found</p><br>");
             }
           }
