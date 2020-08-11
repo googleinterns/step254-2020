@@ -88,8 +88,9 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     anotherQuestionEntity.setProperty("date",date);
     anotherQuestionEntity.setProperty("ownerID","test@example.com");
     datastore.put(anotherQuestionEntity);
-
-    String[] questionsList ={String.valueOf(questionEntity.getKey().getId()),String.valueOf(anotherQuestionEntity.getKey().getId())};
+    String questionEntityId = String.valueOf(questionEntity.getKey().getId());
+    String anotherQuestionEntityId =String.valueOf(anotherQuestionEntity.getKey().getId());
+    String[] questionsList ={questionEntityId,anotherQuestionEntityId};
     when(request.getParameterValues("question")).thenReturn(questionsList);
     
     StringWriter stringWriter = new StringWriter();
