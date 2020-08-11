@@ -47,7 +47,6 @@ public class CreateExamServlet extends HttpServlet{
 
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
-    List<Long> list = new ArrayList<>();
 
     //Set up the new Exam and save it in the datastore
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -56,7 +55,7 @@ public class CreateExamServlet extends HttpServlet{
     examEntity.setProperty("duration",duration);
     examEntity.setProperty("ownerID",ownerID);
     examEntity.setProperty("date", date);
-    examEntity.setProperty("questionsList",list);
+    examEntity.setProperty("questionsList",new ArrayList<>());
     try{
       datastore.put(examEntity);    
     }catch (DatastoreFailureException e){
