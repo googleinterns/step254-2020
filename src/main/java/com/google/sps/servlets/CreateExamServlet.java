@@ -32,7 +32,9 @@ import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that stores and returns exams*/
+/** Servlet that stores and returns exams
+* @author Klaudia Obieglo
+*/
 @WebServlet("/createExam")
 public class CreateExamServlet extends HttpServlet{
   @Override

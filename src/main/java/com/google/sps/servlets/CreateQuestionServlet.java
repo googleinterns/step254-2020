@@ -43,7 +43,9 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that stores questions*/
+/** Servlet that creates and stores questions
+* @author Klaudia Obieglo 
+*/
 @WebServlet("/createQuestion")
 public class CreateQuestionServlet extends HttpServlet{
   @Override
@@ -71,36 +73,42 @@ public class CreateQuestionServlet extends HttpServlet{
     }
     addQuestionToTestList(questionEntity.getKey().getId(),ownerID);
 
-    response.sendRedirect("/createTest.html");
+    response.sendRedirect("/createQuestion.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(questionEntity));
   }
   private void addQuestionToTestList(long questionEntityKey,String ownerID)
   {
-    //Function that adds the question id to the list of questions in the test entity
+    /*Function that adds the question id to the list of questions in the exam entity
+    * Arguments : QuestionEntityKey - id of the question Entity we are adding to the list
+    *           : ownerID - email of the person who is adding this question to their exam
+    */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     
-    //grab the latest test created by the user
-    Entity latestTest = getTest(ownerID);
-    if(latestTest.getProperty("questionsList") == null){
+    //grab the latest exam created by the user
+    Entity latestExam = getExam(ownerID);
+    if(latestExam.getProperty("questionsList") == null){
       List<Long> questionList = new ArrayList<>();
       questionList.add(questionEntityKey);
-      latestTest.setProperty("questionsList",questionList);
+      latestExam.setProperty("questionsList",questionList);
     }else{
-      List<Long> questionList = (List<Long>)latestTest.getProperty("questionsList");
+      List<Long> questionList = (List<Long>)latestExam.getProperty("questionsList");
       questionList.add(questionEntityKey);
-      latestTest.setProperty("questionsList",questionList);
+      latestExam.setProperty("questionsList",questionList);
     }
-    datastore.put(latestTest);
+    datastore.put(latestExam);
   }
-  private Entity getTest(String ownerID){
-    // Function that returns the latest test created by the user
+  private Entity getExam(String ownerID){
+    /* Function that returns the latest exam created by the user
+    *  Arguments: ownerID - email of the user who's last test we want to find
+    *  Return : Returns the entity of the last test created by that user.
+    */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query queryTest = new Query("Test").setFilter(new FilterPredicate("ownerID",
+    Query queryExam = new Query("Exam").setFilter(new FilterPredicate("ownerID",
       FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.DESCENDING);
-    PreparedQuery pq = datastore.prepare(queryTest);
-    List<Entity> tests = pq.asList(FetchOptions.Builder.withLimit(1));
-    return tests.get(0);
+    PreparedQuery pq = datastore.prepare(queryExam);
+    List<Entity> exams = pq.asList(FetchOptions.Builder.withLimit(1));
+    return exams.get(0);
   }
   private String getParameter(HttpServletRequest request, String name, String defaultValue){
     /* Gets Parameters from the Users Page

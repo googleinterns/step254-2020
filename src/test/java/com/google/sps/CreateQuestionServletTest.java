@@ -70,7 +70,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet{
     when(request.getParameter("marks")).thenReturn("5");
 
     //create Fake Test
-    Entity testEntity = new Entity("Test");
+    Entity testEntity = new Entity("Exam");
     testEntity.setProperty("testName", "Trial");
     testEntity.setProperty("testDuration", "30");
     testEntity.setProperty("ownerID","test@example.com");

@@ -40,7 +40,9 @@ import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that returns the exams owned by the user*/
+/** Servlet that returns the exams owned by the user
+* @author Klaudia Obieglo
+*/
 @WebServlet("/returnExamsUserOwns")
 public class ExamsUserOwnsServlet extends HttpServlet{
   @Override
