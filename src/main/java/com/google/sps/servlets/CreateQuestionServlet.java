@@ -68,10 +68,10 @@ public class CreateQuestionServlet extends HttpServlet{
     questionEntity.setProperty("ownerID",ownerID);
     try{
       datastore.put(questionEntity);    
+      addQuestionToExamList(questionEntity.getKey().getId(),ownerID);
     }catch (DatastoreFailureException e){
       System.out.println("Datastore is not responding right now. Try Again Later");
     }
-    addQuestionToExamList(questionEntity.getKey().getId(),ownerID);
 
     response.sendRedirect("/createQuestion.html");
     response.setContentType("application/json");
