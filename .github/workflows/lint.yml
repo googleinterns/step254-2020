@@ -31,3 +31,4 @@ jobs:
           # Enable linters
           eslint: true
           prettier: true
+          eslint_args: "--no-error-on-unmatched-pattern"
