@@ -13,27 +13,46 @@
 // limitations under the License.
 //
 
-//Get current user prefernces to set as default value in preference form
-function setPreferenceForm(){
-  fetch('/auth').then(response =>response.json()).then((authenticated) =>{
-    userFont = authenticated.font;
-    userFontSize = authenticated.font_size;
-    userFontColor = authenticated.text_color;
-    userBackgroundColor = authenticated.bg_color; 
+/**
+ * Get current user prefernces to set as default value in preference form.
+ */
+function setPreferenceForm() {
+  fetch("/auth")
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error("Servlet response error");
+      }
+    })
+    .then((authenticated) => {
+      userFont = authenticated.font;
+      userFontSize = authenticated.font_size;
+      userFontColor = authenticated.text_color;
+      userBackgroundColor = authenticated.bg_color;
 
-    setValue("font", userFont);
-    setValue("font_size", userFontSize);
-    setValue("text_color", userFontColor);
-    setValue("bg_color", userBackgroundColor);
-  });
-
+      setValue("font", userFont);
+      setValue("font_size", userFontSize);
+      setValue("text_color", userFontColor);
+      setValue("bg_color", userBackgroundColor);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
-//Set current user prefernces as default value in preference form
-function setValue(id, val){
+/**
+ * Set current user prefernces as default value in preference form
+ * @param {string} id The id of the element being changed.
+ * @param {string} val The value the element is being changed to.
+ */
+function setValue(id, val) {
+  if (val == undefined) {
+    document.getElementById(id).value = document.getElementById(id).value;
+  } else {
     document.getElementById(id).value = val;
+  }
 }
 
-//Call Functions
+// Call Functions
 setPreferenceForm();
-
