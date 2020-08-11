@@ -71,8 +71,8 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet{
 
     //create Fake Test
     Entity testEntity = new Entity("Exam");
-    testEntity.setProperty("testName", "Trial");
-    testEntity.setProperty("testDuration", "30");
+    testEntity.setProperty("name", "Trial");
+    testEntity.setProperty("duration", "30");
     testEntity.setProperty("ownerID","test@example.com");
     testEntity.setProperty("date", date);
     datastore.put(testEntity); 
