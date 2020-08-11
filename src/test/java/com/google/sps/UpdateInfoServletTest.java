@@ -14,19 +14,18 @@
 
 package com.google.sps;
 
+import static org.mockito.Mockito.*;
+
 import com.google.sps.servlets.UpdateInfoServlet;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import static org.mockito.Mockito.*;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -37,6 +36,8 @@ import com.google.appengine.api.datastore.Query;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for Update Info Servlet to see if user preferences are stored correctly.
@@ -44,9 +45,9 @@ import java.util.Map;
  * @author  Aidan Molloy
  */
 @RunWith(JUnit4.class)
-public final class UpdateInfoServletTest extends UpdateInfoServlet{
+public final class UpdateInfoServletTest extends UpdateInfoServlet {
   private final LocalServiceTestHelper helper = 
-    new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
       .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
     
   @Before
@@ -60,11 +61,9 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet{
   }
 
   @Test
-  public void doPostTest() throws IOException{
+  public void doPostTest() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    UpdateInfoServlet servlet = new UpdateInfoServlet();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     when(request.getParameter("name")).thenReturn("Test User");
     when(request.getParameter("font")).thenReturn("Arial");
@@ -75,7 +74,7 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet{
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
-
+    UpdateInfoServlet servlet = new UpdateInfoServlet();
     servlet.doPost(request, response);
 
     // Make query to datastore to make sure it was stored correctly
@@ -83,6 +82,7 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet{
         new Query("UserInfo")
             .setFilter(new Query
             .FilterPredicate("email", Query.FilterOperator.EQUAL, "test@example.com"));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     Entity entity = results.asSingleEntity();
 

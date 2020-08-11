@@ -79,7 +79,7 @@ public class ExamServlet extends HttpServlet{
     out.println("</div>");
     out.println("</header>");
     out.println("<main>");
-    String examID = UtilityClass.getParameter(request, "examID", "1")
+    String examID = UtilityClass.getParameter(request, "examID", null);
     Entity examEntity = null;
 
     if(examID != null){
