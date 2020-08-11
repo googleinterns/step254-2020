@@ -14,7 +14,7 @@
 
 package com.google.sps.servlets;
  
-import com.google.sps.data.ExamClass;
+import com.google.sps.data.*;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -29,7 +29,6 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.gson.Gson;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -69,18 +68,6 @@ public class ExamsUserOwnsServlet extends HttpServlet{
 
     response.setContentType("application/json;");
     response.sendRedirect("/createExam.html");
-    response.getWriter().println(convertToJsonUsingGson(examList));
-  }
-  private String convertToJsonUsingGson(List<ExamClass> questions) {
-    /* Converts the exam List to a json string using Gson
-    *
-    *Arguments: Question examList that is populated with exams
-    *
-    *Returns: json string of the exams
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(questions);
-    return json;
+    response.getWriter().println(UtilityClass.convertToJson(examList));
   }
 }

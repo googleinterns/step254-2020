@@ -14,8 +14,8 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.data.ExamClass;
-import com.google.sps.data.QuestionClass;
+
+import com.google.sps.data.*;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -50,7 +50,7 @@ public class ExamServlet extends HttpServlet{
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
     response.setContentType("text/html;");
-    String examID = getParameter(request, "examID", "1");
+    String examID = UtilityClass.getParameter(request, "examID", "1");
 
     Entity examEntity = null;
 
@@ -73,7 +73,7 @@ public class ExamServlet extends HttpServlet{
       response.getWriter().println("<h2>Created By: " + exam.getOwnerID() + "</h2>");
       if(questionsList != null){
         List<QuestionClass> listofQuestions=getQuestionsFromExam(questionsList);
-        response.getWriter().println(convertToJsonUsingGson(listofQuestions));
+        response.getWriter().println(UtilityClass.convertToJson(listofQuestions));
       }else{
         response.getWriter().println("<p>There are no questions associated with this exam.</p>");
       }
@@ -139,42 +139,5 @@ public class ExamServlet extends HttpServlet{
       return null;
     }
     return entity;
-  }
-
-  private String getParameter(HttpServletRequest request, String name, String defaultValue){
-    /* Gets Parameters from the Users Page
-    *
-    * Return: Returns the requested parameter or the default value if the parameter
-    *  wasn't specified by the User.   
-    */
-    String value = request.getParameter(name);
-    if(value == null){
-        return defaultValue;
-    }
-    return value;
-  }
-   private String convertToJsonUsingGson(ExamClass exam) {
-    /* Converts the exam to a json string using Gson
-    *
-    *Arguments: Exam instance
-    *
-    *Returns: json string of the exam instance
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(exam);
-    return json;
-  }
-    private String convertToJsonUsingGson(List<QuestionClass> questions) {
-    /* Converts the question List to a json string using Gson
-    *
-    *Arguments: List of questions
-    *
-    *Returns: json string of the questions
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(questions);
-    return json;
   }
 }

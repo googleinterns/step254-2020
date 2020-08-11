@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 import com.google.sps.data.QuestionClass;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -29,7 +30,6 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.gson.Gson;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -52,8 +52,8 @@ public class CreateQuestionServlet extends HttpServlet{
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     /* Servlet Receives information from the client about the question they want to save */
     Long date = (new Date()).getTime();
-    String question = getParameter(request, "question", "");
-    String marks = getParameter(request, "marks", "");
+    String question = UtilityClass.getParameter(request, "question", "");
+    String marks = UtilityClass.getParameter(request, "marks", "");
     
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail(); 
@@ -75,7 +75,7 @@ public class CreateQuestionServlet extends HttpServlet{
 
     response.sendRedirect("/createQuestion.html");
     response.setContentType("application/json");
-    response.getWriter().println(convertToJsonUsingGson(questionEntity));
+    response.getWriter().println(UtilityClass.convertToJson(questionEntity));
   }
   private void addQuestionToExamList(long questionEntityKey,String ownerID)
   {
@@ -109,41 +109,5 @@ public class CreateQuestionServlet extends HttpServlet{
     PreparedQuery pq = datastore.prepare(queryExam);
     List<Entity> exams = pq.asList(FetchOptions.Builder.withLimit(1));
     return exams.get(0);
-  }
-  private String getParameter(HttpServletRequest request, String name, String defaultValue){
-    /* Gets Parameters from the Users Page
-     *
-     * Return: Returns the requested parameter or the default value if the parameter
-     *  wasn't specified by the User.   
-     */
-    String value = request.getParameter(name);
-    if(value == null){
-        return defaultValue;
-    }
-    return value;
-  }
-  private String convertToJsonUsingGson(Entity question) {
-    /* Converts the question to a json string using Gson
-    *
-    *Arguments: question Entity 
-    *
-    *Returns: json string of the question
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(question);
-    return json;
-  }
-    private String convertToJsonUsingGson(List<QuestionClass> questions) {
-    /* Converts the question List to a json string using Gson
-    *
-    *Arguments: List of questions
-    *
-    *Returns: json string of the questions
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(questions);
-    return json;
   }
 }
