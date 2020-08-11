@@ -42,13 +42,18 @@ public class ExamResponseServlet extends HttpServlet {
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      response.sendRedirect("/");
+      return;
+    }
     PrintWriter out = response.getWriter();
     response.setContentType("text/html");
 
     Enumeration<String> parameterNames = request.getParameterNames();
-    String email = userService.getCurrentUser().getEmail();    
     try {
+      String email = userService.getCurrentUser().getEmail();  
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       while (parameterNames.hasMoreElements()) {
         String questionID = parameterNames.nextElement();
@@ -61,7 +66,7 @@ public class ExamResponseServlet extends HttpServlet {
         datastore.put(examResponseEntity);
       }
     } catch(Exception e) {
-      System.out.println("Something went wrong with Datastore. Please try again later.");
+      System.out.println("Something went wrong. Please try again later.");
     }
     out.println("<h2>Responses Saved.</h2>");
     out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
