@@ -1,0 +1,23 @@
+{
+  "name": "step254-2020",
+  "version": "1.0.0",
+  "description": "## Authors: - [Aidan Molloy](https://github.com/AidanMolloy) - [Klaudia Obieglo](https://github.com/obieglok) - [Róisín O'Farrell](https://github.com/ofarrero)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/googleinterns/step254-2020.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/googleinterns/step254-2020/issues"
+  },
+  "homepage": "https://github.com/googleinterns/step254-2020#readme",
+  "devDependencies": {
+    "eslint": "^7.6.0",
+    "eslint-config-google": "^0.14.0"
+  }
+}
