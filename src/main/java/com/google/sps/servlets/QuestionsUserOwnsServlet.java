@@ -38,7 +38,11 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.PrintWriter;
 
-/** Servlet that returns the tests owned by the user*/
+/** Servlet that returns a checkbox form of all the questions owned by the user
+* A user can then select the questions they want to reuse by clicking on the 
+* checkboxes.
+* @author Klaudia Obieglo
+*/
 @WebServlet("/returnQuestionsUserOwns")
 public class QuestionsUserOwnsServlet extends HttpServlet{
   @Override
@@ -54,6 +58,25 @@ public class QuestionsUserOwnsServlet extends HttpServlet{
 
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
+    out.println("<!DOCTYPE html>");
+    out.println("<html>");
+    out.println("<head>");
+    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:wght@400;"+
+      "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""+
+      " rel=\"stylesheet\">");
+    out.println("<link rel=\"stylesheet\" href=\"style.css\">");
+    out.println("<script src=\"script.js\"></script>");
+    out.println("</head>");
+    out.println("<body>");
+    out.println("<header>");
+    out.println("<div class=\"navtop\">");
+    out.println("<a href=\"dashboard.html\">Navigation, will have login, click here to test rest"+
+      " of page</a>");
+    out.println("<p id=logInOut></p>");
+    out.println("</div>");
+    out.println("</header>");
+    out.println("<main>");
+    out.println("<body>");
     out.println("<h1>Check the boxes of questions you would like to reuse</h1>");
     out.println("<form action=\"/saveQuestionsFromBank\" method=\"POST\">");
     for (Entity entity : results.asIterable()) {
@@ -66,5 +89,6 @@ public class QuestionsUserOwnsServlet extends HttpServlet{
     out.println("<br/>");
     out.println("<button>Submit</button>");
     out.println("</form>");
+    out.println("</body>");
   }
 }

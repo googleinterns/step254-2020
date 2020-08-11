@@ -32,7 +32,9 @@ import javax.servlet.ServletException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that stores and returns exams*/
+/** Servlet that stores and returns exams
+* @author Klaudia Obieglo
+*/
 @WebServlet("/createExam")
 public class CreateExamServlet extends HttpServlet{
   @Override
@@ -61,7 +63,7 @@ public class CreateExamServlet extends HttpServlet{
       System.out.println("Datastore is not responding right now. Try Again Later");
     }
 
-    response.sendRedirect("/createExam.html");
+    response.sendRedirect("/createQuestion.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(examEntity));
   }

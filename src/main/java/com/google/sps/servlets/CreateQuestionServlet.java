@@ -43,7 +43,9 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that stores questions*/
+/** Servlet that creates and stores questions
+* @author Klaudia Obieglo 
+*/
 @WebServlet("/createQuestion")
 public class CreateQuestionServlet extends HttpServlet{
   @Override
@@ -71,13 +73,16 @@ public class CreateQuestionServlet extends HttpServlet{
     }
     addQuestionToExamList(questionEntity.getKey().getId(),ownerID);
 
-    response.sendRedirect("/createExam.html");
+    response.sendRedirect("/createQuestion.html");
     response.setContentType("application/json");
     response.getWriter().println(convertToJsonUsingGson(questionEntity));
   }
   private void addQuestionToExamList(long questionEntityKey,String ownerID)
   {
-    //Function that adds the question id to the list of questions in the exam entity
+    /*Function that adds the question id to the list of questions in the exam entity
+    * Arguments : QuestionEntityKey - id of the question Entity we are adding to the list
+    *           : ownerID - email of the person who is adding this question to their exam
+    */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     
     //grab the latest exam created by the user
@@ -94,7 +99,10 @@ public class CreateQuestionServlet extends HttpServlet{
     datastore.put(latestExam);
   }
   private Entity getExam(String ownerID){
-    // Function that returns the latest exam created by the user
+    /* Function that returns the latest exam created by the user
+    *  Arguments: ownerID - email of the user who's last test we want to find
+    *  Return : Returns the entity of the last test created by that user.
+    */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query queryExam = new Query("Exam").setFilter(new FilterPredicate("ownerID",
       FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.DESCENDING);

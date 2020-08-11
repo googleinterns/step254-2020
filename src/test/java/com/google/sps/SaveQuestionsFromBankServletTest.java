@@ -67,9 +67,9 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     when(userService.isUserLoggedIn()).thenReturn(true);
     
     //create Fake Test
-    Entity testEntity = new Entity("Test");
-    testEntity.setProperty("testName", "Trial");
-    testEntity.setProperty("testDuration", "30");
+    Entity testEntity = new Entity("Exam");
+    testEntity.setProperty("name", "Trial");
+    testEntity.setProperty("duration", "30");
     testEntity.setProperty("ownerID","test@example.com");
     testEntity.setProperty("date", date);
     datastore.put(testEntity); 
@@ -88,8 +88,9 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     anotherQuestionEntity.setProperty("date",date);
     anotherQuestionEntity.setProperty("ownerID","test@example.com");
     datastore.put(anotherQuestionEntity);
-
-    String[] questionsList ={String.valueOf(questionEntity.getKey().getId()), String.valueOf(anotherQuestionEntity.getKey().getId())};
+    String questionEntityId = String.valueOf(questionEntity.getKey().getId());
+    String anotherQuestionEntityId =String.valueOf(anotherQuestionEntity.getKey().getId());
+    String[] questionsList ={questionEntityId,anotherQuestionEntityId};
     when(request.getParameterValues("question")).thenReturn(questionsList);
     
     StringWriter stringWriter = new StringWriter();
