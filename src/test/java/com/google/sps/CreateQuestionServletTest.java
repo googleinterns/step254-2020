@@ -70,9 +70,9 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet{
     when(request.getParameter("marks")).thenReturn("5");
 
     //create Fake Test
-    Entity testEntity = new Entity("Test");
-    testEntity.setProperty("testName", "Trial");
-    testEntity.setProperty("testDuration", "30");
+    Entity testEntity = new Entity("Exam");
+    testEntity.setProperty("name", "Trial");
+    testEntity.setProperty("duration", "30");
     testEntity.setProperty("ownerID","test@example.com");
     testEntity.setProperty("date", date);
     datastore.put(testEntity); 
