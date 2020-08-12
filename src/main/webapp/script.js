@@ -32,8 +32,8 @@ window.onload = function authenticate() {
         // Check if user has already been logged in.
         if (authenticated.email) {
           userAuth = true;
-          logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">
-          Logout</a>`;
+          logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}"
+          >Logout</a>`;
           setPreference();
         } else {
           userAuth = false;
@@ -75,11 +75,11 @@ function setPreference() {
  * Check if user has access to page
  */
 function pageAccess() {
-  if (userAuth == true) {
+  if (userAuth === true) {
     window.location.href = 'dashboard.html';
   } else {
     document.getElementById(
-      'accessDenied'
+        'accessDenied',
     ).innerHTML = `<p> Cannot access until you login</p>`;
-    };
+  };
 }
