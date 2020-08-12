@@ -71,10 +71,10 @@ function setPreference() {
         console.log(error);
       });
 }
+/* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
  */
-/* eslint-disable no-unused-vars */
 function pageAccess() {
   if (userAuth === true) {
     window.location.href = 'dashboard.html';
