@@ -12,33 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
 /**
  * Get current user prefernces to set as default value in preference form.
  */
 function setPreferenceForm() {
-  fetch("/auth")
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error("Servlet response error");
-      }
-    })
-    .then((authenticated) => {
-      userFont = authenticated.font;
-      userFontSize = authenticated.font_size;
-      userFontColor = authenticated.text_color;
-      userBackgroundColor = authenticated.bg_color;
+  fetch('/auth')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Servlet response error');
+        }
+      })
+      .then((authenticated) => {
+        userFont = authenticated.font;
+        userFontSize = authenticated.font_size;
+        userFontColor = authenticated.text_color;
+        userBackgroundColor = authenticated.bg_color;
 
-      setValue("font", userFont);
-      setValue("font_size", userFontSize);
-      setValue("text_color", userFontColor);
-      setValue("bg_color", userBackgroundColor);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+        setValue('font', userFont);
+        setValue('font_size', userFontSize);
+        setValue('text_color', userFontColor);
+        setValue('bg_color', userBackgroundColor);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 }
 
 /**
