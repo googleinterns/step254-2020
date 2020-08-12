@@ -18,13 +18,9 @@ import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -33,64 +29,70 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-import javax.servlet.ServletException;
+import java.util.ArrayList;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 
-/** Servlet that saves selected questions to the test
+/** Servlet that saves selected questions to the test.
 * @author Klaudia Obieglo
 */
 @WebServlet("/saveQuestionsFromBank")
-public class SaveQuestionsFromBankServlet extends HttpServlet{
+public class SaveQuestionsFromBankServlet extends HttpServlet {
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    /*Saves the selected questions from the question bank to the latest test 
+  public void doPost(final HttpServletRequest request,
+      final HttpServletResponse response) throws IOException {
+    /*Saves the selected questions from the question bank to the latest test
     * that the user has created
     */
     UserService userService = UserServiceFactory.getUserService();
-    String ownerID = userService.getCurrentUser().getEmail(); 
+    String ownerID = userService.getCurrentUser().getEmail();
+    String testName = request.getParameter("test");
     String[] questionsList = request.getParameterValues("question");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    for(int i=0; i<questionsList.length; i++){
-      addQuestionToExamList(Long.valueOf(questionsList[i]),ownerID);
-      response.getWriter().println("Successfully added Question " + questionsList[i]);
+    for (int i = 0; i < questionsList.length; i++) {
+      addQuestionToExamList(Long.valueOf(questionsList[i]), ownerID, testName);
+      response.getWriter().println("Successfully added Question "
+          + questionsList[i]);
     }
-    response.sendRedirect("/createQuestion.html");
+    response.sendRedirect("/questionForm");
   }
-  private void addQuestionToExamList(long questionEntityKey,String ownerID)
-  {
+  private void addQuestionToExamList(final long questionEntityKey,
+      final String ownerID, final String testName) {
     /*Function that adds the question id to the list of questions to the latest
     *  test created by the user
-    * Arguments : QuestionEntityKey - id of the question Entity we are adding to the list
-    *           : ownerID - email of the person who is adding this question to their test
+    * Arguments
+    * -QuestionEntityKey - id of the question Entity we are adding to the list
+    * -ownerID - email of the person who is adding this question to their test
     */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    
+
     //grab the latest exam created by the user
-    Entity latestExam = getExam(ownerID);
-    if(latestExam.getProperty("questionsList") == null){
+    Entity latestExam = getExam(ownerID, testName);
+    if (latestExam.getProperty("questionsList") == null) {
       List<Long> questionList = new ArrayList<>();
       questionList.add(questionEntityKey);
-      latestExam.setProperty("questionsList",questionList);
-    }else{
-      List<Long> questionList = (List<Long>)latestExam.getProperty("questionsList");
+      latestExam.setProperty("questionsList", questionList);
+    } else {
+      List<Long> questionList =
+          (List<Long>) latestExam.getProperty("questionsList");
       questionList.add(questionEntityKey);
-      latestExam.setProperty("questionsList",questionList);
+      latestExam.setProperty("questionsList", questionList);
     }
     datastore.put(latestExam);
   }
-  private Entity getExam(String ownerID){
-    /* Function that returns the latest exam created by the user
+  private Entity getExam(final String ownerID, final String testName) {
+    /* Function that returns the exam created by the user
     *  Arguments: ownerID - email of the user who's last exam we want to find
-    *  Return : Returns the entity of the last exam created by that user.
+    *  Return : Returns the entity of the exam created by that user.
     */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query queryTest = new Query("Exam").setFilter(new FilterPredicate("ownerID",
-      FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.DESCENDING);
+        FilterOperator.EQUAL, ownerID)).setFilter(new FilterPredicate(
+        "name", FilterOperator.EQUAL, testName)).addSort("date",
+        SortDirection.DESCENDING);
     PreparedQuery pq = datastore.prepare(queryTest);
-    List<Entity> exams = pq.asList(FetchOptions.Builder.withLimit(1));
-    return exams.get(0);
+    Entity result = pq.asSingleEntity();
+    return result;
   }
 }
