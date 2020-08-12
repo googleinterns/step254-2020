@@ -13,31 +13,32 @@
 // limitations under the License.
 
 package com.google.sps;
+
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertTrue;
+
 import com.google.sps.servlets.CreateExamServlet;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.Before;
 import javax.servlet.http.*;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import java.io.*;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertTrue;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
-public final class CreateExamServletTest extends CreateExamServlet{
+public final class CreateExamServletTest extends CreateExamServlet {
   private final LocalServiceTestHelper helper = 
-    new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
       .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
     
   @Before
@@ -51,9 +52,8 @@ public final class CreateExamServletTest extends CreateExamServlet{
   }
 
   @Test
-  public void testdoPostFunction() throws IOException{
+  public void testdoPostFunction() throws IOException {
     /*Tests the doPost function to see if the test gets stored correctly */
-    CreateExamServlet servlet = new CreateExamServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -68,6 +68,7 @@ public final class CreateExamServletTest extends CreateExamServlet{
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
 
+    CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("\"ownerID\":\"test@example.com\""));
