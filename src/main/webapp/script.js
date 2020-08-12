@@ -20,59 +20,57 @@ let userAuth = false;
 window.onload = function authenticate() {
   logInOut = document.getElementById('logInOut');
 
-  fetch("/auth")
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error('Servlet response error');
-      }
-    })
-    .then((authenticated) => {
-      // Check if user has already been logged in.
-      if (authenticated.email) {
-        userAuth = true;
-        logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">
+  fetch('/auth')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Servlet response error');
+        }
+      })
+      .then((authenticated) => {
+        // Check if user has already been logged in.
+        if (authenticated.email) {
+          userAuth = true;
+          logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">
           Logout</a>`;
-        setPreference();
-      } else {
-        userAuth = false;
-        logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+          setPreference();
+        } else {
+          userAuth = false;
+          logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 };
- 
 /**
  * Set user UI preferneces
  */
 function setPreference() {
-  fetch("/auth")
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error('Servlet response error');
-      }
-    })
-    .then((authenticated) => {
-      userFont = authenticated.font;
-      userFontSize = authenticated.font_size;
-      userFontColor = authenticated.text_color;
-      userBackgroundColor = authenticated.bg_color;
+  fetch('/auth')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Servlet response error');
+        }
+      })
+      .then((authenticated) => {
+        userFont = authenticated.font;
+        userFontSize = authenticated.font_size;
+        userFontColor = authenticated.text_color;
+        userBackgroundColor = authenticated.bg_color;
 
-      document.body.style.fontFamily = userFont;
-      document.body.style.fontSize = userFontSize + 'px';
-      document.body.style.color = userFontColor;
-      document.body.style.backgroundColor = userBackgroundColor;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+        document.body.style.fontFamily = userFont;
+        document.body.style.fontSize = userFontSize + 'px';
+        document.body.style.color = userFontColor;
+        document.body.style.backgroundColor = userBackgroundColor;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 }
-
 /**
  * Check if user has access to page
  */
@@ -83,5 +81,5 @@ function pageAccess() {
     document.getElementById(
       'accessDenied'
     ).innerHTML = `<p> Cannot access until you login</p>`;
-  }
+    };
 }
