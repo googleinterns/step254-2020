@@ -74,6 +74,7 @@ function setPreference() {
 /**
  * Check if user has access to page
  */
+/* eslint-disable no-unused-vars */
 function pageAccess() {
   if (userAuth === true) {
     window.location.href = 'dashboard.html';
@@ -83,3 +84,4 @@ function pageAccess() {
     ).innerHTML = `<p> Cannot access until you login</p>`;
   };
 }
+/* eslint-enable no-unused-vars */
