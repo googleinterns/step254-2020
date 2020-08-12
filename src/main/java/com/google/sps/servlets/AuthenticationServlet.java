@@ -13,7 +13,7 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
-
+import com.google.sps.data.UtilityClass;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
@@ -21,7 +21,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -70,7 +69,7 @@ public class AuthenticationServlet extends HttpServlet {
       authResponse.put("errorMsg", "Something went wrong. Please try again later.");
     }
 
-    String json = convertToJson(authResponse);
+    String json = UtilityClass.convertToJson(authResponse);
 
     // Write response to /auth
     response.getWriter().println(json);
@@ -106,17 +105,5 @@ public class AuthenticationServlet extends HttpServlet {
       userInfoResponse.put("errorMsg", "Something went wrong. Please try again later.");
       return null;
     }
-  }
-
-  /**
-   * Converts data into a JSON string using the Gson library.
-   *
-   * @param     authResponse    map to be converted into a json string
-   * @return                    a json string converted from authResponse map
-   */
-  private String convertToJson(Map<String, String> authResponse) {
-    Gson gson = new Gson();
-    String json = gson.toJson(authResponse);
-    return json;
   }
 }

@@ -15,8 +15,7 @@
 package com.google.sps.servlets;
 
 import com.google.sps.data.ExamClass;
-import com.google.sps.data.QuestionClass;
-import java.io.IOException;
+import com.google.sps.data.UtilityClass;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -25,7 +24,10 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.gson.Gson;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.ArrayList;
 import javax.servlet.annotation.WebServlet;
@@ -34,7 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet to display the requested exam questions and send responses to ExamResponseServlet.
+ * Servlet to display the requested exam  and send responses to ExamResponseServlet or if no exam
+ * is selected it will display a list of available exams.
  *
  * @author  Aidan Molloy
  */
@@ -49,87 +52,107 @@ public class ExamServlet extends HttpServlet{
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    // Only logged in users should access this page.
+    UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      response.sendRedirect("/");
+      return;
+    }
     response.setContentType("text/html;");
-    String examID = getParameter(request, "examID", "1");
-
+    PrintWriter out = response.getWriter();
+    out.println("<!DOCTYPE html>");
+    out.println("<html>");
+    out.println("<head>");
+    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:wght@400;"
+      + "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""
+      + " rel=\"stylesheet\">");
+    out.println("<link rel=\"stylesheet\" href=\"style.css\">");
+    out.println("<script src=\"script.js\"></script>");
+    out.println("<title>Take Exam</title>");
+    out.println("</head>");
+    out.println("<body>");
+    out.println("<header>");
+    out.println("<div class=\"navtop\">");
+    out.println("<a href=\"dashboard.html\">Navigation, will have login, click here to test rest"
+      + " of page</a>");
+    out.println("<p id=logInOut></p>");
+    out.println("</div>");
+    out.println("</header>");
+    out.println("<main>");
+    String examID = UtilityClass.getParameter(request, "examID", null);
     Entity examEntity = null;
 
-    try{
-      examEntity = getEntity(examID);
-    }catch (EntityNotFoundException e){
-    }
-
-    if(examEntity != null) {
-      String name = (String) examEntity.getProperty("name");
-      String duration = (String) examEntity.getProperty("duration");
-      String ownerID = (String) examEntity.getProperty("ownerID");
-      List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
-      ExamClass exam = new ExamClass(name,examEntity.getKey().getId(),
-        Double.parseDouble(duration),ownerID,questionsList);
-        
+    if (examID != null) {
+      // If an exam has been selected
+      try {
+        examEntity = getEntity(examID);
+      } catch (EntityNotFoundException e) {
+        out.println("<h3>Selected exam is not available.</h3>");
+      }
+      if (examEntity != null) {
+        // If exam exists, then display the exam and questions
+        String name = (String) examEntity.getProperty("name");
+        String duration = (String) examEntity.getProperty("duration");
+        String ownerID = (String) examEntity.getProperty("ownerID");
+        List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
+        ExamClass exam = new ExamClass(name,examEntity.getKey().getId()
+          , Double.parseDouble(duration),ownerID,questionsList);
       
-      response.getWriter().println("<h1>Exam Name: " + exam.getName() + "</h1>");
-      response.getWriter().println("<h2>Length: " + exam.getDuration() + "</h2>");
-      response.getWriter().println("<h2>Created By: " + exam.getOwnerID() + "</h2>");
-      if(questionsList != null){
-        List<QuestionClass> listofQuestions=getQuestionsFromExam(questionsList);
-        response.getWriter().println(convertToJsonUsingGson(listofQuestions));
-      }else{
-        response.getWriter().println("<p>There are no questions associated with this exam.</p>");
-      }
-    } else {
-      response.getWriter().println("<h1>Choose an exam to take.</h1>");
-      response.getWriter().println("<table><tr><th>ID</th><th>Name</th><th>Duration</th></tr>");
+        out.println("<h1>Exam Name: " + exam.getName() + "</h1>");
+        out.println("<h3>Length: " + exam.getDuration() + "</h3>");
+        out.println("<h3>Created By: " + exam.getOwnerID() + "</h3>");
+        if (questionsList != null) {
+          DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+          out.println("<form action=\"/examResponse\" method=\"POST\">");
+          for (int i=0; i < questionsList.size(); i++) {
+            try {
+              Key key = KeyFactory.createKey("Question", questionsList.get(i));
+              Entity qs = datastore.get(key);
 
-      Query query = new Query("Exam");
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      PreparedQuery results = datastore.prepare(query);
-      for (Entity entity : results.asIterable()) {
-        // Send back amount of results requested
-        long id = entity.getKey().getId();
-        String name = (String) entity.getProperty("name");
-        String duration = (String) entity.getProperty("duration");
+              long questionID = qs.getKey().getId();
+              String question = (String) qs.getProperty("question");
+              out.println("<label for=\"" + questionID + "\">" + (i+1) + ") " + 
+                            question + ": </label>");
+              out.println("<input type=\"text\" id=\"" + questionID + "\" name=\"" +
+                            questionID + "\"><br><br>");
 
-      response.getWriter().println("<tr>");
-      response.getWriter().println("<td>" + id + "</td>");
-      response.getWriter().println("<td>" + name + "</td>");
-      response.getWriter().println("<td>" + duration + "</td>");
-      response.getWriter().println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
-      response.getWriter().println("</tr>");
+            } catch( Exception e) {
+              out.println("<p>Question was not found</p><br>");
+            }
+          }
+          out.println("<br><input type=\"submit\" value=\"Submit\">");
+          out.println("</form>");
+        }else{
+          out.println("<p>There are no questions associated with this exam.</p>");
+        }
+        out.println("</main></body>");
+        return;
       }
-      response.getWriter().println("</table>");
     }
 
-  }
-  private List<QuestionClass> getQuestionsFromExam(List<Long> list){
-    /*Grab all the question id's from the list and creates instances of 
-    *questions from them.
-    */
+    // If exam is not selected or unavailable display list of available exams
+    out.println("<h1>Choose an exam to take.</h1>");
+    out.println("<table><tr><th>ID</th><th>Name</th><th>Duration</th></tr>");
+
+    Query query = new Query("Exam");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    List<QuestionClass> questionList = new ArrayList<>();
-    if (list == null){
-      return null;
-    }
-    for(int i=0 ; i<list.size(); i++)
-    {
-      try{
-        Key key = KeyFactory.createKey("Question", list.get(i));
-        Entity qs = datastore.get(key);
+    PreparedQuery results = datastore.prepare(query);
+    for (Entity entity : results.asIterable()) {
+      long id = entity.getKey().getId();
+      String name = (String) entity.getProperty("name");
+      String duration = (String) entity.getProperty("duration");
 
-        long questionID = qs.getKey().getId();
-        String question = (String) qs.getProperty("question");
-        String marks = (String) qs.getProperty("marks");
-        String ownerID = (String) qs.getProperty("ownerID");
-        QuestionClass questionToBeEntered = new QuestionClass(question, questionID,
-          Double.parseDouble(marks), ownerID);
-        questionList.add(questionToBeEntered);
-      } catch( Exception e)
-      {  
-        System.out.println("Entity was not found");
-      }
+      out.println("<tr>");
+      out.println("<td>" + id + "</td>");
+      out.println("<td>" + name + "</td>");
+      out.println("<td>" + duration + "</td>");
+      out.println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
+      out.println("</tr>");
     }
-    return questionList;
+    out.println("</table>");
+    out.println("</body>");
   }
+
   private Entity getEntity(String entityID) throws EntityNotFoundException{
     /*Function that will return a exam entity based on the entity ID */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -139,42 +162,5 @@ public class ExamServlet extends HttpServlet{
       return null;
     }
     return entity;
-  }
-
-  private String getParameter(HttpServletRequest request, String name, String defaultValue){
-    /* Gets Parameters from the Users Page
-    *
-    * Return: Returns the requested parameter or the default value if the parameter
-    *  wasn't specified by the User.   
-    */
-    String value = request.getParameter(name);
-    if(value == null){
-        return defaultValue;
-    }
-    return value;
-  }
-   private String convertToJsonUsingGson(ExamClass exam) {
-    /* Converts the exam to a json string using Gson
-    *
-    *Arguments: Exam instance
-    *
-    *Returns: json string of the exam instance
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(exam);
-    return json;
-  }
-    private String convertToJsonUsingGson(List<QuestionClass> questions) {
-    /* Converts the question List to a json string using Gson
-    *
-    *Arguments: List of questions
-    *
-    *Returns: json string of the questions
-    *
-    */
-    Gson gson = new Gson();
-    String json = gson.toJson(questions);
-    return json;
   }
 }

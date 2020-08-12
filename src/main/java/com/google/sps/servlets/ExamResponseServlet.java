@@ -23,6 +23,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Enumeration;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet that processes users responses to exam questions and stores them in datastore.
- * NOT SETUP CORRECTLY YET
  *
  * @author  Aidan Molloy
  */
@@ -42,26 +42,33 @@ public class ExamResponseServlet extends HttpServlet {
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       response.sendRedirect("/");
       return;
     }
+    PrintWriter out = response.getWriter();
+    response.setContentType("text/html");
 
-    String question = request.getParameter("question");
-    String email = userService.getCurrentUser().getEmail();
-
+    Enumeration<String> parameterNames = request.getParameterNames();
     try {
+      String email = userService.getCurrentUser().getEmail();  
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      Entity entity = new Entity("exam1", email);
-      entity.setProperty("email", email);
-      entity.setProperty("question", question);
-      // The put() function automatically inserts new data or updates existing data based on email
-      datastore.put(entity);
+      while (parameterNames.hasMoreElements()) {
+        String questionID = parameterNames.nextElement();
+        String[] questionAnswer = request.getParameterValues(questionID);
+        Entity examResponseEntity = new Entity(questionID, email);
+        examResponseEntity.setProperty("email", email);
+        examResponseEntity.setProperty("answer", questionAnswer[0]);
+        // This is where I can correct questions with pre-defined answers
+        examResponseEntity.setProperty("marks", null);
+        datastore.put(examResponseEntity);
+      }
     } catch(Exception e) {
-      System.out.println("Something went wrong with Datastore. Please try again later.");
+      System.out.println("Something went wrong. Please try again later.");
     }
-
-    response.sendRedirect("/");
+    out.println("<h2>Responses Saved.</h2>");
+    out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
   }
 }
