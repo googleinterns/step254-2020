@@ -31,32 +31,26 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.PrintWriter;
 
-/** Servlet that returns a checkbox form of all the questions owned by the user
-* A user can then select the questions they want to reuse by clicking on the
-* checkboxes.
+/** Servlet that creates a question form for the user to fill out.
+* A user can add a question to whichever test they want.
 * @author Klaudia Obieglo
 */
-@WebServlet("/returnQuestionsUserOwns")
-public class QuestionsUserOwnsServlet extends HttpServlet {
+@WebServlet("/questionForm")
+public class QuestionFormServlet extends HttpServlet {
   @Override
   public void doGet(final HttpServletRequest request,
-       final HttpServletResponse response) throws IOException {
+        final HttpServletResponse response) throws IOException {
     /*Returns all the questions that the user has created */
     UserService userService = UserServiceFactory.getUserService();
     String ownerID = userService.getCurrentUser().getEmail();
-
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
-      FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
-    PreparedQuery results = datastore.prepare(query);
-
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
     out.println("<!DOCTYPE html>");
     out.println("<html>");
     out.println("<head>");
-    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine"
-        + ":wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,"
+    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:"
+        + "wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,"
         + "600;1,700&display=swap\" rel=\"stylesheet\">");
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
@@ -65,28 +59,27 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<a href=\"dashboard.html\">Navigation, will have login,"
-        + " click here to test rest" + " of page</a>");
+        + " click here to test rest of page</a>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
     out.println("<main>");
     out.println("<body>");
-    out.println("<h1>Check the questions you would like to reuse</h1>");
-    out.println("<form action=\"/saveQuestionsFromBank\" method=\"POST\">");
-    for (Entity entity : results.asIterable()) {
-      long questionId = entity.getKey().getId();
-      String question = (String) entity.getProperty("question");
-      String marks = (String) entity.getProperty("marks");
-      out.println("<input type=\"checkbox\" name=\"question\" value=\""
-          + String.valueOf(questionId) + "\">" + question
-        + " (" + marks + ")<br>");
-    }
-    out.println("<h3> Select which test you want the questions added to </h1>");
-    out.println("<select name=\"test\">");
+    out.println("<h3>Create a New Question</h3>");
+    out.println("<form id=\"createQuestion\" action=\"/createQuestion\""
+        + " method=\"POST\">");
+    out.println("<label for=\"question\">Enter Question:</label><br>");
+    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" required>"
+        + "</textarea><br>");
+    out.println("<label for=\"marks\">Marks given for Question:</label><br>");
+    out.println("<input type=\"text\" id=\"marks\" name=\"marks\" required>");
+    out.println("<form action=\"/createQuestion\" method=\"POST\">");
+    out.println("<h3> Select which test you want the questions added to</h1>");
+    out.println("<select name=\"testName\">");
     // Find all tests created by this user and display them as a dropdown menu.
-    Query queryExams = new Query("Exam")
-        .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
-        ownerID)).addSort("date", SortDirection.DESCENDING);
+    Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
+        "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
+        SortDirection.DESCENDING);
     PreparedQuery listExams = datastore.prepare(queryExams);
     for (Entity entity : listExams.asIterable()) {
       long examID = entity.getKey().getId();
@@ -97,6 +90,11 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<br/>");
     out.println("<br/>");
     out.println("<button>Submit</button>");
+    out.println("</form>");
+    out.println("<h3> Add Previously Used Questions</h3>");
+    out.println("<form id=\"addQuestions\" action=\"/returnQuestionsUserOwns\""
+        + " method=\"GET\">");
+    out.println("<input type=\"submit\" value=\"Submit Selected Questions\">");
     out.println("</form>");
     out.println("</body>");
   }

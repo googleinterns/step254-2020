@@ -92,6 +92,7 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     String anotherQuestionEntityId =String.valueOf(anotherQuestionEntity.getKey().getId());
     String[] questionsList ={questionEntityId,anotherQuestionEntityId};
     when(request.getParameterValues("question")).thenReturn(questionsList);
+    when(request.getParameter("test")).thenReturn("Trial");
     
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);

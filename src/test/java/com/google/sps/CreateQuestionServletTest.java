@@ -68,7 +68,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet{
     //set the parameters that will be requested to test values
     when(request.getParameter("question")).thenReturn("What does the fox say?");
     when(request.getParameter("marks")).thenReturn("5");
-
+    when(request.getParameter("testName")).thenReturn("Trial");
     //create Fake Test
     Entity testEntity = new Entity("Exam");
     testEntity.setProperty("name", "Trial");
