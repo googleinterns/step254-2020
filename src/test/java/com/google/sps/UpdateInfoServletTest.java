@@ -17,6 +17,7 @@ package com.google.sps;
 import static org.mockito.Mockito.*;
 
 import com.google.sps.servlets.UpdateInfoServlet;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -93,24 +94,11 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet {
     userInfoResponse.put("font_size", (String) entity.getProperty("font_size"));
     userInfoResponse.put("bg_color", (String) entity.getProperty("bg_color"));
     userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
-    String result = convertToJson(userInfoResponse);
+    String result = UtilityClass.convertToJson(userInfoResponse);
     Assert.assertTrue(result.contains("\"bg_color\":\"white\""));
     Assert.assertTrue(result.contains("\"font_size\":\"16\""));
     Assert.assertTrue(result.contains("\"name\":\"Test User\""));
     Assert.assertTrue(result.contains("\"text_color\":\"black\""));
     Assert.assertTrue(result.contains("\"font\":\"Arial\""));
   }
-
-  /**
-   * Converts data into a JSON string using the Gson library.
-   *
-   * @param     userInfoResponse    map to be converted into a json string
-   * @return                        a json string converted from userInfoResponse map
-   */
-  private String convertToJson(Map<String, String> userInfoResponse) {
-    Gson gson = new Gson();
-    String json = gson.toJson(userInfoResponse);
-    return json;
-  }
-
 }
