@@ -50,7 +50,7 @@ public class ExamServlet extends HttpServlet {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
-      logger.atInfo().log("User is not logged in.");
+      logger.atWarning().log("User is not logged in.");
       response.sendRedirect("/");
       return;
     }
@@ -98,7 +98,7 @@ public class ExamServlet extends HttpServlet {
         try {
           questionsList = (List<Long>) examEntity.getProperty("questionsList");
         } catch (Exception e) {
-          logger.atInfo().log("There was an error: %s", e);
+          logger.atWarning().log("There was an error: %s", e);
         }
 
         out.println("<h1>Exam Name: " + name + "</h1>");
@@ -123,7 +123,7 @@ public class ExamServlet extends HttpServlet {
 
             } catch (Exception e) {
               out.println("<p>Question was not found</p><br>");
-              logger.atInfo().log("Question does not exist: %s", e);
+              logger.atWarning().log("Question does not exist: %s", e);
             }
           }
           out.println("<br><input type=\"submit\" value=\"Submit\">");
@@ -140,20 +140,24 @@ public class ExamServlet extends HttpServlet {
     out.println("<h1>Choose an exam to take.</h1>");
     out.println("<table><tr><th>ID</th><th>Name</th><th>Duration</th></tr>");
 
-    Query query = new Query("Exam");
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    PreparedQuery results = datastore.prepare(query);
-    for (Entity entity : results.asIterable()) {
-      long id = entity.getKey().getId();
-      String name = (String) entity.getProperty("name");
-      String duration = (String) entity.getProperty("duration");
+    try {
+      Query query = new Query("Exam");
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      PreparedQuery results = datastore.prepare(query);
+      for (Entity entity : results.asIterable()) {
+        long id = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        String duration = (String) entity.getProperty("duration");
 
-      out.println("<tr>");
-      out.println("<td>" + id + "</td>");
-      out.println("<td>" + name + "</td>");
-      out.println("<td>" + duration + "</td>");
-      out.println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
-      out.println("</tr>");
+        out.println("<tr>");
+        out.println("<td>" + id + "</td>");
+        out.println("<td>" + name + "</td>");
+        out.println("<td>" + duration + "</td>");
+        out.println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
+        out.println("</tr>");
+      }
+    } catch (Exception e) {
+      logger.atWarning().log("Error with Datastore: %s", e);
     }
     out.println("</table>");
     out.println("</body>");

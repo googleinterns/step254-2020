@@ -48,18 +48,33 @@ public class UpdateInfoServlet extends HttpServlet {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
-      logger.atInfo().log("User is not logged in.");
+      logger.atWarning().log("User is not logged in.");
       response.sendRedirect("/");
       return;
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
 
-    String name = request.getParameter("name");
-    String font = request.getParameter("font");
-    String font_size = request.getParameter("font_size");
-    String bg_color = request.getParameter("bg_color");
-    String text_color = request.getParameter("text_color");
-    String email = userService.getCurrentUser().getEmail();
+    String name, font, font_size, bg_color, text_color, email;
+    name = font = font_size = bg_color = text_color = email = null;
+
+    try {
+      name = request.getParameter("name");
+      font = request.getParameter("font");
+      font_size = request.getParameter("font_size");
+      bg_color = request.getParameter("bg_color");
+      text_color = request.getParameter("text_color");
+      email = userService.getCurrentUser().getEmail();
+    } catch (Exception e) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      logger.atWarning().log("One or more null parameters");
+    }
+
+    if (name == null || font == null || font_size == null || bg_color == null ||
+        text_color == null || email == null) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      logger.atWarning().log("One or more null parameters");
+      return;
+    }
 
     try {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -73,7 +88,7 @@ public class UpdateInfoServlet extends HttpServlet {
       // The put() function automatically inserts new data or updates existing data based on email
       datastore.put(userInfoEntity);
     } catch (Exception e) {
-      logger.atInfo().log("There was an error: %s", e);
+      logger.atWarning().log("There was an error: %s", e);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 

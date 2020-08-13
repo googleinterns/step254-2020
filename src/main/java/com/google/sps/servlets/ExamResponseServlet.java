@@ -49,7 +49,7 @@ public class ExamResponseServlet extends HttpServlet {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
-      logger.atInfo().log("User is not logged in.");
+      logger.atWarning().log("User is not logged in.");
       response.sendRedirect("/");
       return;
     }
@@ -73,7 +73,7 @@ public class ExamResponseServlet extends HttpServlet {
       }
     } catch (Exception e) {
       logger.atInfo().log("There was an error: %s", e);
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
     out.println("<h2>Responses Saved.</h2>");
     out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
