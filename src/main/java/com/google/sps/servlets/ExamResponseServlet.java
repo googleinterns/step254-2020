@@ -17,29 +17,32 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
+import com.google.common.flogger.FluentLogger;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 
 /**
  * Servlet that processes users responses to exam questions and stores them in datastore.
  *
- * @author  Aidan Molloy
+ * @author Aidan Molloy
  */
 @WebServlet("/examResponse")
 public class ExamResponseServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /**
    * doPost process the information from the exam form response and send it to the datastore
+   *
+   * @param request  provides request information from the HTTP servlet
+   * @param response response object where servlet will write information to
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -56,7 +59,7 @@ public class ExamResponseServlet extends HttpServlet {
 
     Enumeration<String> parameterNames = request.getParameterNames();
     try {
-      String email = userService.getCurrentUser().getEmail();  
+      String email = userService.getCurrentUser().getEmail();
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       while (parameterNames.hasMoreElements()) {
         String questionID = parameterNames.nextElement();
@@ -68,7 +71,7 @@ public class ExamResponseServlet extends HttpServlet {
         examResponseEntity.setProperty("marks", null);
         datastore.put(examResponseEntity);
       }
-    } catch(Exception e) {
+    } catch (Exception e) {
       logger.atInfo().log("There was an error: %s", e);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }

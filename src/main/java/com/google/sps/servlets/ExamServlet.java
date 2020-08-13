@@ -14,45 +14,39 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.data.ExamClass;
-import com.google.sps.data.UtilityClass;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.ArrayList;
+import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.UtilityClass;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Servlet to display the requested exam  and send responses to ExamResponseServlet or if no exam
  * is selected it will display a list of available exams.
  *
- * @author  Aidan Molloy
+ * @author Aidan Molloy
  */
 @WebServlet("/exam")
-public class ExamServlet extends HttpServlet{
+public class ExamServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /**
-   * Gets the exam ID from the httpRequest
+   * Gets the exam ID from the httpRequest, displays exam if it exists otherwise displays
+   * list of exams
    *
-   * Arguments: 
-   *  request: provides request information from the HTTP servlet.
-   *  response: response object where servlet will write information to.
+   * @param request  provides request information from the HTTP servlet
+   * @param response response object where servlet will write information to
    */
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
@@ -67,8 +61,8 @@ public class ExamServlet extends HttpServlet{
     out.println("<html>");
     out.println("<head>");
     out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:wght@400;"
-      + "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""
-      + " rel=\"stylesheet\">");
+        + "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""
+        + " rel=\"stylesheet\">");
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
     out.println("<title>Take Exam</title>");
@@ -77,7 +71,7 @@ public class ExamServlet extends HttpServlet{
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<a href=\"dashboard.html\">Navigation, will have login, click here to test rest"
-      + " of page</a>");
+        + " of page</a>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -100,8 +94,13 @@ public class ExamServlet extends HttpServlet{
         String name = (String) examEntity.getProperty("name");
         String duration = (String) examEntity.getProperty("duration");
         String ownerID = (String) examEntity.getProperty("ownerID");
-        List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
-      
+        List<Long> questionsList = null;
+        try {
+          questionsList = (List<Long>) examEntity.getProperty("questionsList");
+        } catch (Exception e) {
+          logger.atInfo().log("There was an error: %s", e);
+        }
+
         out.println("<h1>Exam Name: " + name + "</h1>");
         out.println("<h3>Length: " + duration + "</h3>");
         out.println("<h3>Created By: " + ownerID + "</h3>");
@@ -110,26 +109,26 @@ public class ExamServlet extends HttpServlet{
         if (questionsList != null) {
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<form action=\"/examResponse\" method=\"POST\">");
-          for (int i=0; i < questionsList.size(); i++) {
+          for (int i = 0; i < questionsList.size(); i++) {
             try {
               Key key = KeyFactory.createKey("Question", questionsList.get(i));
               Entity qs = datastore.get(key);
 
               long questionID = qs.getKey().getId();
               String question = (String) qs.getProperty("question");
-              out.println("<label for=\"" + questionID + "\">" + (i+1) + ") " + 
-                            question + ": </label>");
+              out.println("<label for=\"" + questionID + "\">" + (i + 1) + ") " +
+                  question + ": </label>");
               out.println("<input type=\"text\" id=\"" + questionID + "\" name=\"" +
-                            questionID + "\"><br><br>");
+                  questionID + "\"><br><br>");
 
-            } catch( Exception e) {
+            } catch (Exception e) {
               out.println("<p>Question was not found</p><br>");
               logger.atInfo().log("Question does not exist: %s", e);
             }
           }
           out.println("<br><input type=\"submit\" value=\"Submit\">");
           out.println("</form>");
-        }else{
+        } else {
           out.println("<p>There are no questions associated with this exam.</p>");
         }
         out.println("</main></body>");

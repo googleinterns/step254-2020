@@ -17,32 +17,31 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.google.common.flogger.FluentLogger;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
 
 /**
  * Servlet to update users preferences, overwrites current preferences linked with users email
  * on the datastore.
  *
- * @author  Aidan Molloy
+ * @author Aidan Molloy
  */
 @WebServlet("/updateInfo")
 public class UpdateInfoServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /**
-   * Get passed paramaters for users new preferences and save to datastore.
+   * Get passed parameters for users new preferences and save to datastore.
    *
-   * @param   request     provides request information from the HTTP servlet
-   * @param   response    response object where servlet will write information to
+   * @param request  provides request information from the HTTP servlet
+   * @param response response object where servlet will write information to
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -73,7 +72,7 @@ public class UpdateInfoServlet extends HttpServlet {
       userInfoEntity.setProperty("text_color", text_color);
       // The put() function automatically inserts new data or updates existing data based on email
       datastore.put(userInfoEntity);
-    } catch(Exception e) {
+    } catch (Exception e) {
       logger.atInfo().log("There was an error: %s", e);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
