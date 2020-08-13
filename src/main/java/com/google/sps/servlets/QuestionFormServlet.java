@@ -26,6 +26,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -37,12 +38,21 @@ import java.io.PrintWriter;
 */
 @WebServlet("/questionForm")
 public class QuestionFormServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   @Override
   public void doGet(final HttpServletRequest request,
         final HttpServletResponse response) throws IOException {
     /*Returns all the questions that the user has created */
     UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      logger.atWarning().log("User is not logged in.");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendRedirect("/");
+      return;
+    }
+    logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
+
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
@@ -72,20 +82,27 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" required>"
         + "</textarea><br>");
     out.println("<label for=\"marks\">Marks given for Question:</label><br>");
-    out.println("<input type=\"text\" id=\"marks\" name=\"marks\" required>");
+    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" required>");
     out.println("<form action=\"/createQuestion\" method=\"POST\">");
     out.println("<h3> Select which test you want the questions added to</h1>");
     out.println("<select name=\"testName\">");
     // Find all tests created by this user and display them as a dropdown menu.
-    Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
-        "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
-        SortDirection.DESCENDING);
-    PreparedQuery listExams = datastore.prepare(queryExams);
-    for (Entity entity : listExams.asIterable()) {
-      long examID = entity.getKey().getId();
-      String name = (String) entity.getProperty("name");
-      out.println("<option>" + name  + "</option>");
+    try {
+      Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
+          "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
+          SortDirection.DESCENDING);
+      PreparedQuery listExams = datastore.prepare(queryExams);
+      for (Entity entity : listExams.asIterable()) {
+        long examID = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        out.println("<option>" + name  + "</option>");
+      }
+    } catch (Exception e) {
+      logger.atWarning().log("There was a problem with retrieving the exams %s",
+          e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
+
     out.println("</select>");
     out.println("<br/>");
     out.println("<br/>");
@@ -97,5 +114,8 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<input type=\"submit\" value=\"Submit Selected Questions\">");
     out.println("</form>");
     out.println("</body>");
+    response.setStatus(HttpServletResponse.SC_OK);
+    logger.atInfo().log("Question form was displayed correctly for the User:"
+      + "%s", userService.getCurrentUser());
   }
 }

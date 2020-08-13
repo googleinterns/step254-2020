@@ -18,16 +18,17 @@ import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import com.google.appengine.api.users.UserService;
@@ -39,6 +40,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 */
 @WebServlet("/saveQuestionsFromBank")
 public class SaveQuestionsFromBankServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
@@ -46,16 +48,38 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     * that the user has created
     */
     UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      logger.atWarning().log("User is not logged in.");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendRedirect("/");
+      return;
+    }
+    logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
+
     String testName = request.getParameter("test");
     String[] questionsList = request.getParameterValues("question");
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    for (int i = 0; i < questionsList.length; i++) {
-      addQuestionToExamList(Long.valueOf(questionsList[i]), ownerID, testName);
-      response.getWriter().println("Successfully added Question "
-          + questionsList[i]);
+    if (testName == null || questionsList == null) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      logger.atWarning().log("One or more null parameters");
+      return;
     }
-    response.sendRedirect("/questionForm");
+    try {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      for (int i = 0; i < questionsList.length; i++) {
+        addQuestionToExamList(Long.valueOf(questionsList[i]), ownerID, testName);
+        response.getWriter().println("Successfully added Question "
+            + questionsList[i]);
+      }
+      response.setStatus(HttpServletResponse.SC_OK);
+      response.sendRedirect("/questionForm");
+    } catch (DatastoreFailureException e) {
+      logger.atSevere().log("Datastore Failure.Datastore is not responding"
+        + " : %s", e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
   }
   private void addQuestionToExamList(final long questionEntityKey,
       final String ownerID, final String testName) {
@@ -65,21 +89,26 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     * -QuestionEntityKey - id of the question Entity we are adding to the list
     * -ownerID - email of the person who is adding this question to their test
     */
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
     //grab the latest exam created by the user
-    Entity latestExam = getExam(ownerID, testName);
-    if (latestExam.getProperty("questionsList") == null) {
-      List<Long> questionList = new ArrayList<>();
-      questionList.add(questionEntityKey);
-      latestExam.setProperty("questionsList", questionList);
-    } else {
-      List<Long> questionList =
-          (List<Long>) latestExam.getProperty("questionsList");
-      questionList.add(questionEntityKey);
-      latestExam.setProperty("questionsList", questionList);
+    try {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Entity latestExam = getExam(ownerID, testName);
+      if (latestExam.getProperty("questionsList") == null) {
+        List<Long> questionList = new ArrayList<>();
+        questionList.add(questionEntityKey);
+        latestExam.setProperty("questionsList", questionList);
+      } else {
+        List<Long> questionList =
+            (List<Long>) latestExam.getProperty("questionsList");
+        questionList.add(questionEntityKey);
+        latestExam.setProperty("questionsList", questionList);
+      }
+      datastore.put(latestExam);
+      logger.atInfo().log("Added question: %s to test: %s", questionEntityKey,
+          latestExam.getKey().getId());
+    } catch (Exception e) {
+      logger.atWarning().log("Exam questions cannot be added: %s", e);
     }
-    datastore.put(latestExam);
   }
   private Entity getExam(final String ownerID, final String testName) {
     /* Function that returns the exam created by the user

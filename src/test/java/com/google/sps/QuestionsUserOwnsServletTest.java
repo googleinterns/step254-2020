@@ -43,8 +43,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet {
   private final LocalServiceTestHelper helper = 
-      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-      .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
   @Before
   public void setUp() {
@@ -62,12 +61,39 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     * user owns get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    Long date = (new Date()).getTime(); 
-
+    helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-   
-    /*Set up two fake question entities */
+    
+    setFakeQuestions();
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+    
+    QuestionsUserOwnsServlet servlet= new QuestionsUserOwnsServlet();
+    servlet.doGet(request, response);
+    String result = stringWriter.toString();
+    Assert.assertTrue(result.contains("What day is it? (5)"));
+    Assert.assertTrue(result.contains("What year is it? (10)"));
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+  }
+  @Test
+  public void testNotLoggedInUser() throws IOException {
+    // test to see if a not logged in user will be able to
+    // look at tests a user has created
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    
+    QuestionsUserOwnsServlet servlet= new QuestionsUserOwnsServlet();
+    servlet.doGet(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+  private void setFakeQuestions () {
+    /*Set up two fake question entities for testing purposes */
+    Long date = (new Date()).getTime(); 
     Entity questionEntity = new Entity("Question");
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
@@ -83,14 +109,11 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(questionEntity);
     datastore.put(anotherQuestionEntity);
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringWriter);
-    when(response.getWriter()).thenReturn(writer);
-    
-    QuestionsUserOwnsServlet servlet= new QuestionsUserOwnsServlet();
-    servlet.doGet(request, response);
-    String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("What day is it? (5)"));
-    Assert.assertTrue(result.contains("What year is it? (10)"));
+  }
+  private void helperLogin() {
+    /* Login user with email "test@example.com" */
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
   }
 }

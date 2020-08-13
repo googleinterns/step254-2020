@@ -26,6 +26,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -38,17 +39,20 @@ import java.io.PrintWriter;
 */
 @WebServlet("/returnQuestionsUserOwns")
 public class QuestionsUserOwnsServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   @Override
   public void doGet(final HttpServletRequest request,
        final HttpServletResponse response) throws IOException {
     /*Returns all the questions that the user has created */
     UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      logger.atWarning().log("User is not logged in.");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendRedirect("/");
+      return;
+    }
+    logger.atInfo().log("user=%s", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
-      FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
-    PreparedQuery results = datastore.prepare(query);
 
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
@@ -73,31 +77,60 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<body>");
     out.println("<h1>Check the questions you would like to reuse</h1>");
     out.println("<form action=\"/saveQuestionsFromBank\" method=\"POST\">");
-    for (Entity entity : results.asIterable()) {
-      long questionId = entity.getKey().getId();
-      String question = (String) entity.getProperty("question");
-      String marks = (String) entity.getProperty("marks");
-      out.println("<input type=\"checkbox\" name=\"question\" value=\""
+
+    // Find all questions created by the user
+    try {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
+        FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
+      PreparedQuery results = datastore.prepare(query);
+
+      for (Entity entity : results.asIterable()) {
+        long questionId = entity.getKey().getId();
+        String question = (String) entity.getProperty("question");
+        String marks = (String) entity.getProperty("marks");
+        out.println("<input type=\"checkbox\" name=\"question\" value=\""
           + String.valueOf(questionId) + "\">" + question
-        + " (" + marks + ")<br>");
+          + " (" + marks + ")<br>");
+      }
+    } catch (Exception e) {
+      logger.atWarning().log("There was an error with retrieving the questions: %s",
+          e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
     }
+
     out.println("<h3> Select which test you want the questions added to </h1>");
     out.println("<select name=\"test\">");
+
     // Find all tests created by this user and display them as a dropdown menu.
-    Query queryExams = new Query("Exam")
-        .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
-        ownerID)).addSort("date", SortDirection.DESCENDING);
-    PreparedQuery listExams = datastore.prepare(queryExams);
-    for (Entity entity : listExams.asIterable()) {
-      long examID = entity.getKey().getId();
-      String name = (String) entity.getProperty("name");
-      out.println("<option>" + name  + "</option>");
+    try {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Query queryExams = new Query("Exam")
+          .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
+          ownerID)).addSort("date", SortDirection.DESCENDING);
+      PreparedQuery listExams = datastore.prepare(queryExams);
+
+      for (Entity entity : listExams.asIterable()) {
+        long examID = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        out.println("<option>" + name  + "</option>");
+      }
+    } catch (Exception e) {
+      logger.atWarning().log("There was an error when retrieving the tests: %s",
+          e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
     }
+
     out.println("</select>");
     out.println("<br/>");
     out.println("<br/>");
     out.println("<button>Submit</button>");
     out.println("</form>");
     out.println("</body>");
+    response.setStatus(HttpServletResponse.SC_OK);
+    logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
+        + " and displayed correctly", userService.getCurrentUser());
   }
 }

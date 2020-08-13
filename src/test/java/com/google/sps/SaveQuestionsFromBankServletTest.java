@@ -33,8 +33,8 @@ import org.junit.After;
 import org.junit.Before;
 import javax.servlet.http.*;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import java.io.*;
+import org.junit.runner.RunWith;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
@@ -44,8 +44,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBankServlet {
   private final LocalServiceTestHelper helper = 
-      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-      .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
   @Before
   public void setUp() {
@@ -63,7 +62,7 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     SaveQuestionsFromBankServlet servlet = new SaveQuestionsFromBankServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-
+    helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
     
@@ -106,7 +105,26 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Successfully added Question 2"));
     Assert.assertTrue(result.contains("Successfully added Question 3"));
-
+    verify(response).setStatus(HttpServletResponse.SC_OK);
   }
-  
+  @Test
+  public void testNotLoggedInUser() throws IOException {
+    // test to see if a not logged in user will be able to
+    // look at tests a user has created
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    
+    SaveQuestionsFromBankServlet servlet = new SaveQuestionsFromBankServlet();
+    servlet.doPost(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+  private void helperLogin() {
+    /* Login user with email "test@example.com" */
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
+  }
 }
