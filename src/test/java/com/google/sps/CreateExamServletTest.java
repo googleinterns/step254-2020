@@ -105,13 +105,14 @@ public final class CreateExamServletTest extends CreateExamServlet {
 
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
+
     
     //set the parameters that will be requested to test values
-    when(request.getParameter("question")).thenReturn("How are you?");
-    when(request.getParameter("marks")).thenReturn("10");
-    when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("name")).thenReturn("trial");
+    when(request.getParameter("duration")).thenReturn("30");
+
     
-    CreateQuestionServlet servlet = new CreateQuestionServlet();
+    CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
