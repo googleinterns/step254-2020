@@ -28,6 +28,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.common.flogger.FluentLogger;
 
 /**
  * The authentication servlet is responsible for authenticating users and retreiving user
@@ -37,6 +38,7 @@ import com.google.appengine.api.datastore.Query;
  */
 @WebServlet("/auth")
 public class AuthenticationServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   /**
    * Checks if the user is logged in with UserService and prints response in json.
    *
