@@ -14,111 +14,42 @@
 //
 
 let userAuth = false;
-<<<<<<< HEAD
-// Authenticate user
-window.onload = function authenticate() {
-  logInOut = document.getElementById("logInOut");
-
-  fetch(`/auth`)
-    .then((response) => response.json())
-    .then((authenticated) => {
-      // Check if user has already been logged in.
-      if (authenticated.email) {
-        userAuth = true;
-        logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}">
-          Logout</a>`;
-        setPreference();
-      } else {
-        userAuth = false;
-        logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
-      }
-    });
-};
-
-// Set user UI preferneces
-function setPreference() {
-  fetch("/auth")
-    .then((response) => response.json())
-    .then((authenticated) => {
-      userFont = authenticated.font;
-      userFontSize = authenticated.font_size;
-      userFontColor = authenticated.text_color;
-      userBackgroundColor = authenticated.bg_color;
-
-      document.body.style.fontFamily = userFont;
-      document.body.style.fontSize = userFontSize + "px";
-      document.body.style.color = userFontColor;
-      document.body.style.backgroundColor = userBackgroundColor;
-    });
-}
-
-//Check if user has access to page
-function pageAccess() {
-  if (userAuth == true) {
-    window.location.href = "dashboard.html";
-  } else {
-    document.getElementById(
-      "accessDenied"
-    ).innerHTML = `<p> Cannot access until you login</p>`;
-  }
-}
-=======
 /**
  * Authenticate user
  */
 window.onload = function authenticate() {
   logInOut = document.getElementById('logInOut');
+  const response =  fetch('/auth');
+  const user_details =  response.json();
 
-  fetch('/auth')
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Servlet response error');
-        }
-      })
-      .then((authenticated) => {
-        // Check if user has already been logged in.
-        if (authenticated.email) {
-          userAuth = true;
-          logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}"
-          >Logout</a>`;
-          setPreference();
-        } else {
-          userAuth = false;
-          logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  if (user_details.email) {
+    userAuth = true;
+    logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}"
+    >Logout</a>`;
+    setPreference();
+  } else {
+    userAuth = false;
+    logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
+  }
 };
+
 /**
  * Set user UI preferneces
  */
 function setPreference() {
-  fetch('/auth')
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Servlet response error');
-        }
-      })
-      .then((authenticated) => {
-        userFont = authenticated.font;
-        userFontSize = authenticated.font_size;
-        userFontColor = authenticated.text_color;
-        userBackgroundColor = authenticated.bg_color;
+  const response = await fetch("/auth");
+  const user_details = await response.json();
 
-        document.body.style.fontFamily = userFont;
-        document.body.style.fontSize = userFontSize + 'px';
-        document.body.style.color = userFontColor;
-        document.body.style.backgroundColor = userBackgroundColor;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  userFont = user_details.font;
+  userFontSize = user_details.font_size;
+  userFontColor = user_details.text_color;
+  userBackgroundColor = user_details.bg_color;
+
+  document.body.style.fontFamily = userFont;
+  document.body.style.fontSize = userFontSize + 'px';
+  document.body.style.color = userFontColor;
+  document.body.style.backgroundColor = userBackgroundColor;
+      
 }
 /* eslint-disable no-unused-vars */
 /**
@@ -134,4 +65,3 @@ function pageAccess() {
   };
 }
 /* eslint-enable no-unused-vars */
->>>>>>> aab509d71e59064785720fda932830ec3dc5e041

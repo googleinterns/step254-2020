@@ -16,29 +16,19 @@
  * Get current user prefernces to set as default value in preference form.
  */
 function setPreferenceForm() {
-  fetch('/auth')
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Servlet response error');
-        }
-      })
-      .then((authenticated) => {
-        userFont = authenticated.font;
-        userFontSize = authenticated.font_size;
-        userFontColor = authenticated.text_color;
-        userBackgroundColor = authenticated.bg_color;
+  const response = await fetch("/auth");
+  const user_details = await response.json();
 
+  userFont = user_details.font;
+  userFontSize = user_details.font_size;
+  userFontColor = user_details.text_color;
+  userBackgroundColor = user_details.bg_color;
 
-        setValue('font', userFont);
-        setValue('font_size', userFontSize);
-        setValue('text_color', userFontColor);
-        setValue('bg_color', userBackgroundColor);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  setValue('font', userFont);
+  setValue('font_size', userFontSize);
+  setValue('text_color', userFontColor);
+  setValue('bg_color', userBackgroundColor);
+
 }
 
 /**
@@ -47,6 +37,7 @@ function setPreferenceForm() {
  * @param {string} val The value the element is being changed to.
  */
 function setValue(id, val) {
+    console.log(val)
   if (val == undefined) {
     document.getElementById(id).value = document.getElementById(id).value;
   } else {
