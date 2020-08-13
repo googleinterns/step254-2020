@@ -21,7 +21,6 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
@@ -34,6 +33,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.flogger.FluentLogger;
 
 /**
  * Servlet to display the requested exam  and send responses to ExamResponseServlet or if no exam
@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet("/exam")
 public class ExamServlet extends HttpServlet{
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   /**
    * Gets the exam ID from the httpRequest
    *
@@ -55,9 +56,11 @@ public class ExamServlet extends HttpServlet{
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
+      logger.atInfo().log("User is not logged in.");
       response.sendRedirect("/");
       return;
     }
+    logger.atInfo().log("user=%s", userService.getCurrentUser());
     response.setContentType("text/html;");
     PrintWriter out = response.getWriter();
     out.println("<!DOCTYPE html>");
@@ -85,9 +88,12 @@ public class ExamServlet extends HttpServlet{
     if (examID != null) {
       // If an exam has been selected
       try {
-        examEntity = getEntity(examID);
-      } catch (EntityNotFoundException e) {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Key key = KeyFactory.createKey("Exam", Long.parseLong(examID));
+        examEntity = datastore.get(key);
+      } catch (Exception e) {
         out.println("<h3>Selected exam is not available.</h3>");
+        logger.atInfo().log("Exam ID does not exist: %s", e);
       }
       if (examEntity != null) {
         // If exam exists, then display the exam and questions
@@ -95,12 +101,12 @@ public class ExamServlet extends HttpServlet{
         String duration = (String) examEntity.getProperty("duration");
         String ownerID = (String) examEntity.getProperty("ownerID");
         List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
-        ExamClass exam = new ExamClass(name,examEntity.getKey().getId()
-          , Double.parseDouble(duration),ownerID,questionsList);
       
-        out.println("<h1>Exam Name: " + exam.getName() + "</h1>");
-        out.println("<h3>Length: " + exam.getDuration() + "</h3>");
-        out.println("<h3>Created By: " + exam.getOwnerID() + "</h3>");
+        out.println("<h1>Exam Name: " + name + "</h1>");
+        out.println("<h3>Length: " + duration + "</h3>");
+        out.println("<h3>Created By: " + ownerID + "</h3>");
+
+        // If there are questions
         if (questionsList != null) {
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<form action=\"/examResponse\" method=\"POST\">");
@@ -118,6 +124,7 @@ public class ExamServlet extends HttpServlet{
 
             } catch( Exception e) {
               out.println("<p>Question was not found</p><br>");
+              logger.atInfo().log("Question does not exist: %s", e);
             }
           }
           out.println("<br><input type=\"submit\" value=\"Submit\">");
@@ -151,16 +158,5 @@ public class ExamServlet extends HttpServlet{
     }
     out.println("</table>");
     out.println("</body>");
-  }
-
-  private Entity getEntity(String entityID) throws EntityNotFoundException{
-    /*Function that will return a exam entity based on the entity ID */
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key key = KeyFactory.createKey("Exam", Long.parseLong(entityID));
-    Entity entity = datastore.get(key);
-    if(entity == null) {
-      return null;
-    }
-    return entity;
   }
 }

@@ -67,6 +67,7 @@ public class AuthenticationServlet extends HttpServlet {
       }
     }catch(Exception e) {
       authResponse.put("errorMsg", "Something went wrong. Please try again later.");
+      logger.atInfo().log("There was an error: %s", e);
     }
 
     String json = UtilityClass.convertToJson(authResponse);
@@ -103,6 +104,7 @@ public class AuthenticationServlet extends HttpServlet {
       return userInfoResponse;
     }catch(Exception e) {
       userInfoResponse.put("errorMsg", "Something went wrong. Please try again later.");
+      logger.atInfo().log("There was an error: %s", e);
       return null;
     }
   }

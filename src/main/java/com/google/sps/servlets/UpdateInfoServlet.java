@@ -27,6 +27,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.flogger.FluentLogger;
 
 /**
  * Servlet to update users preferences, overwrites current preferences linked with users email
@@ -36,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet("/updateInfo")
 public class UpdateInfoServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   /**
    * Get passed paramaters for users new preferences and save to datastore.
    *
@@ -47,9 +49,11 @@ public class UpdateInfoServlet extends HttpServlet {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
+      logger.atInfo().log("User is not logged in.");
       response.sendRedirect("/");
       return;
     }
+    logger.atInfo().log("user=%s", userService.getCurrentUser());
 
     String name = request.getParameter("name");
     String font = request.getParameter("font");
@@ -70,7 +74,8 @@ public class UpdateInfoServlet extends HttpServlet {
       // The put() function automatically inserts new data or updates existing data based on email
       datastore.put(userInfoEntity);
     } catch(Exception e) {
-      System.out.println("Something went wrong with Datastore. Please try again later.");
+      logger.atInfo().log("There was an error: %s", e);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     response.sendRedirect("/dashboard.html");
