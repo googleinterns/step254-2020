@@ -15,9 +15,9 @@
 /**
  * Get current user prefernces to set as default value in preference form.
  */
-function setPreferenceForm() {
-  const response = await fetch("/auth");
-  const user_details = await response.json();
+async function setPreferenceForm() {
+  const response =  await fetch("/auth");
+  const user_details =  await response.json();
 
   userFont = user_details.font;
   userFontSize = user_details.font_size;
@@ -37,7 +37,6 @@ function setPreferenceForm() {
  * @param {string} val The value the element is being changed to.
  */
 function setValue(id, val) {
-    console.log(val)
   if (val == undefined) {
     document.getElementById(id).value = document.getElementById(id).value;
   } else {

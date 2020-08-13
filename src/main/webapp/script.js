@@ -17,28 +17,28 @@ let userAuth = false;
 /**
  * Authenticate user
  */
-window.onload = function authenticate() {
+window.onload = async function authenticate() {
   logInOut = document.getElementById('logInOut');
-  const response =  fetch('/auth');
-  const user_details =  response.json();
+  const response =  await fetch('/auth'); 
+  const user_details =  await response.json();
 
   if (user_details.email) {
     userAuth = true;
-    logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}"
+    logInOut.innerHTML = `<a id= "login" href="${user_details.logoutUrl}"
     >Logout</a>`;
     setPreference();
   } else {
     userAuth = false;
-    logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
+    logInOut.innerHTML = `<a href="${user_details.loginUrl}">Login</a>`;
   }
 };
 
 /**
  * Set user UI preferneces
  */
-function setPreference() {
-  const response = await fetch("/auth");
-  const user_details = await response.json();
+async function setPreference() {
+  const response =  await fetch("/auth"); 
+  const user_details =  await response.json();
 
   userFont = user_details.font;
   userFontSize = user_details.font_size;
