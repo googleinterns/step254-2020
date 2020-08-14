@@ -16,21 +16,19 @@
  * Get current user prefernces to set as default value in preference form.
  */
 async function setPreferenceForm() {
-  try{
-    const response =  await fetch("/auth");
-    const user_details = await response.json();
-  
-    let userFont = user_details.font;
-    let userFontSize = user_details.font_size;
-    let userFontColor = user_details.text_color;
-    let userBackgroundColor = user_details.bg_color;
+  try {
+    const response = await fetch('/auth');
+    const userDetails = await response.json();
+    const userFont = userDetails.font;
+    const userFontSize = userDetails.font_size;
+    const userFontColor = userDetails.text_color;
+    const userBackgroundColor = userDetails.bg_color;
 
-  
     setValue('font', userFont);
     setValue('font_size', userFontSize);
     setValue('text_color', userFontColor);
     setValue('bg_color', userBackgroundColor);
-  }catch(e){
+  } catch (e) {
     console.log('Error: ', e.message);
   }
 }
@@ -53,8 +51,8 @@ setPreferenceForm();
 
 // Export modules for testing
 if (typeof exports !== 'undefined') {
-    module.exports = {
-        setPreferenceForm,
-        setValue,
-    }
+  module.exports = {
+    setPreferenceForm,
+    setValue,
+  };
 }
