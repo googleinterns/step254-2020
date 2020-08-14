@@ -55,7 +55,7 @@ async function setPreference() {
     document.body.style.backgroundColor = userBackgroundColor;
   } catch (e) {
     console.log('Error: ', e.message);
-  }  
+  }
 }
 
 /* eslint-disable no-unused-vars */
@@ -86,5 +86,5 @@ if (typeof exports !== 'undefined') {
     setPreference,
     pageAccess,
     userAuth,
-  }
+  };
 };
