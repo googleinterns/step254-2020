@@ -38,7 +38,7 @@ async function setPreferenceForm() {
  * @param {string} id The id of the element being changed.
  * @param {string} val The value the element is being changed to.
  */
-function setValue(id, val) { 
+function setValue(id, val) {
   if (val == undefined) {
     document.getElementById(id).value = document.getElementById(id).value;
   } else {
