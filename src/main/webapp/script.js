@@ -24,7 +24,7 @@ async function authenticate() {
     const user_details =  await response.json();
 
     if (user_details.email) {
-      userAuth != false;
+      userAuth = true;
       logInOut.innerHTML = `<a id= "login" href="${user_details.logoutUrl}"
       >Logout</a>`;
       setPreference();
