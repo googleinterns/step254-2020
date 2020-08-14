@@ -60,7 +60,6 @@ public class CreateQuestionServlet extends HttpServlet {
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
       return;
     }
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
@@ -77,11 +76,11 @@ public class CreateQuestionServlet extends HttpServlet {
       addQuestionToExamList(questionEntity.getKey().getId(), ownerID,
           testName);
 
-      response.sendRedirect("/questionForm");
       response.setContentType("application/json");
       response.setStatus(HttpServletResponse.SC_CREATED);
       logger.atInfo().log("question created=%s", questionEntity.getKey().getId());
       response.getWriter().println(UtilityClass.convertToJson(questionEntity));
+      response.sendRedirect("/questionForm");
     } catch (DatastoreFailureException e) {
         logger.atSevere().log("Datastore Failure.Datastore is not responding:"
           + " %s", e);
