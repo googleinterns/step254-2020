@@ -19,6 +19,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -75,16 +76,21 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("</header>");
     out.println("<main>");
     out.println("<body>");
-    out.println("<h1>Check the questions you would like to reuse</h1>");
-    out.println("<form action=\"/saveQuestionsFromBank\" method=\"POST\">");
-
+    DatastoreService datastore = null;
     // Find all questions created by the user
     try {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      datastore = DatastoreServiceFactory.getDatastoreService();
       Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
-        FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
+          FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
       PreparedQuery results = datastore.prepare(query);
 
+      if (results.countEntities() <= 0) {
+        out.println("<h1>You have not created any questions yet! </h1>");
+        logger.atInfo().log("User: %s , has not created any questions yet",ownerID);
+        return;
+      }
+      out.println("<h1>Check the questions you would like to reuse</h1>");
+      out.println("<form action=\"/saveQuestionsFromBank\" method=\"POST\">");
       for (Entity entity : results.asIterable()) {
         long questionId = entity.getKey().getId();
         String question = (String) entity.getProperty("question");
@@ -93,7 +99,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
           + String.valueOf(questionId) + "\">" + question
           + " (" + marks + ")<br>");
       }
-    } catch (Exception e) {
+    } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error with retrieving the questions: %s",
           e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -105,7 +111,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
 
     // Find all tests created by this user and display them as a dropdown menu.
     try {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      datastore = DatastoreServiceFactory.getDatastoreService();
       Query queryExams = new Query("Exam")
           .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
           ownerID)).addSort("date", SortDirection.DESCENDING);
@@ -116,7 +122,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
         String name = (String) entity.getProperty("name");
         out.println("<option>" + name  + "</option>");
       }
-    } catch (Exception e) {
+    } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error when retrieving the tests: %s",
           e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

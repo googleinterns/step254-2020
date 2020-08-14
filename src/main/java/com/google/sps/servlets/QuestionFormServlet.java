@@ -107,10 +107,10 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<br/>");
     out.println("<button>Submit</button>");
     out.println("</form>");
-    out.println("<h3> Add Previously Used Questions</h3>");
+    out.println("<h3> Click Below to Look Through Previous Questions You asked</h3>");
     out.println("<form id=\"addQuestions\" action=\"/returnQuestionsUserOwns\""
         + " method=\"GET\">");
-    out.println("<input type=\"submit\" value=\"Submit Selected Questions\">");
+    out.println("<input type=\"submit\" value=\"Click\">");
     out.println("</form>");
     out.println("</body>");
     response.setStatus(HttpServletResponse.SC_OK);
