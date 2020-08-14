@@ -17,60 +17,47 @@ let userAuth = false;
 /**
  * Authenticate user
  */
-window.onload = function authenticate() {
-  logInOut = document.getElementById('logInOut');
+async function authenticate() {
+  try {
+    logInOut = document.getElementById('logInOut');
+    const response = await fetch('/auth');
+    const userDetails = await response.json();
 
-  fetch('/auth')
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Servlet response error');
-        }
-      })
-      .then((authenticated) => {
-        // Check if user has already been logged in.
-        if (authenticated.email) {
-          userAuth = true;
-          logInOut.innerHTML = `<a id= "login" href="${authenticated.logoutUrl}"
-          >Logout</a>`;
-          setPreference();
-        } else {
-          userAuth = false;
-          logInOut.innerHTML = `<a href="${authenticated.loginUrl}">Login</a>`;
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (userDetails.email) {
+      userAuth = true;
+      logInOut.innerHTML = `<a id= "login" href="${userDetails.logoutUrl}"
+      >Logout</a>`;
+      setPreference();
+    } else {
+      userAuth = false;
+      logInOut.innerHTML = `<a href="${userDetails.loginUrl}">Login</a>`;
+    }
+  } catch (e) {
+    console.log('Error: ', e.message);
+  }
 };
+
 /**
  * Set user UI preferneces
  */
-function setPreference() {
-  fetch('/auth')
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Servlet response error');
-        }
-      })
-      .then((authenticated) => {
-        userFont = authenticated.font;
-        userFontSize = authenticated.font_size;
-        userFontColor = authenticated.text_color;
-        userBackgroundColor = authenticated.bg_color;
+async function setPreference() {
+  try {
+    const response = await fetch('/auth');
+    const userDetails = await response.json();
+    const userFont = userDetails.font;
+    const userFontSize = userDetails.font_size;
+    const userFontColor = userDetails.text_color;
+    const userBackgroundColor = userDetails.bg_color;
 
-        document.body.style.fontFamily = userFont;
-        document.body.style.fontSize = userFontSize + 'px';
-        document.body.style.color = userFontColor;
-        document.body.style.backgroundColor = userBackgroundColor;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    document.body.style.fontFamily = userFont;
+    document.body.style.fontSize = userFontSize + 'px';
+    document.body.style.color = userFontColor;
+    document.body.style.backgroundColor = userBackgroundColor;
+  } catch (e) {
+    console.log('Error: ', e.message);
+  }
 }
+
 /* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
@@ -78,6 +65,7 @@ function setPreference() {
 function pageAccess() {
   if (userAuth === true) {
     window.location.href = 'dashboard.html';
+    console.log(window.location.href );
   } else {
     document.getElementById(
         'accessDenied',
@@ -85,3 +73,18 @@ function pageAccess() {
   };
 }
 /* eslint-enable no-unused-vars */
+
+// On load
+window.onload = function() {
+  authenticate();
+};
+
+// Export modules for testing
+if (typeof exports !== 'undefined') {
+  module.exports = {
+    authenticate,
+    setPreference,
+    pageAccess,
+    userAuth,
+  };
+};

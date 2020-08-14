@@ -15,29 +15,22 @@
 /**
  * Get current user prefernces to set as default value in preference form.
  */
-function setPreferenceForm() {
-  fetch('/auth')
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Servlet response error');
-        }
-      })
-      .then((authenticated) => {
-        userFont = authenticated.font;
-        userFontSize = authenticated.font_size;
-        userFontColor = authenticated.text_color;
-        userBackgroundColor = authenticated.bg_color;
+async function setPreferenceForm() {
+  try {
+    const response = await fetch('/auth');
+    const userDetails = await response.json();
+    const userFont = userDetails.font;
+    const userFontSize = userDetails.font_size;
+    const userFontColor = userDetails.text_color;
+    const userBackgroundColor = userDetails.bg_color;
 
-        setValue('font', userFont);
-        setValue('font_size', userFontSize);
-        setValue('text_color', userFontColor);
-        setValue('bg_color', userBackgroundColor);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    setValue('font', userFont);
+    setValue('font_size', userFontSize);
+    setValue('text_color', userFontColor);
+    setValue('bg_color', userBackgroundColor);
+  } catch (e) {
+    console.log('Error: ', e.message);
+  }
 }
 
 /**
@@ -55,3 +48,11 @@ function setValue(id, val) {
 
 // Call Functions
 setPreferenceForm();
+
+// Export modules for testing
+if (typeof exports !== 'undefined') {
+  module.exports = {
+    setPreferenceForm,
+    setValue,
+  };
+}
