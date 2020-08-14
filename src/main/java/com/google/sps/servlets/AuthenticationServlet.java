@@ -48,7 +48,7 @@ public class AuthenticationServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json;");
     UserService userService = UserServiceFactory.getUserService();
-    Map<String, String> authResponse = new HashMap<String, String>();
+    Map<String, String> authResponse = new HashMap<>();
 
     try {
       if (userService.isUserLoggedIn()) {
@@ -68,7 +68,7 @@ public class AuthenticationServlet extends HttpServlet {
       }
     } catch (Exception e) {
       authResponse.put("errorMsg", "Something went wrong. Please try again later.");
-      logger.atWarning().log("There was an error: %s", e);
+      logger.atSevere().log("There was an error: %s", e);
     }
 
     String json = UtilityClass.convertToJson(authResponse);
@@ -85,7 +85,7 @@ public class AuthenticationServlet extends HttpServlet {
    * @return a map of userInfo linked to the user email
    */
   private Map<String, String> getUserInfo(String email) {
-    Map<String, String> userInfoResponse = new HashMap<String, String>();
+    Map<String, String> userInfoResponse = new HashMap<>();
     try {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query query =
@@ -105,7 +105,7 @@ public class AuthenticationServlet extends HttpServlet {
       return userInfoResponse;
     } catch (Exception e) {
       userInfoResponse.put("errorMsg", "Something went wrong. Please try again later.");
-      logger.atWarning().log("There was an error: %s", e);
+      logger.atSevere().log("There was an error: %s", e);
       return null;
     }
   }

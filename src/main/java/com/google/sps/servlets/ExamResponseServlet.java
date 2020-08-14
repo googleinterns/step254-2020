@@ -72,7 +72,7 @@ public class ExamResponseServlet extends HttpServlet {
         datastore.put(examResponseEntity);
       }
     } catch (Exception e) {
-      logger.atInfo().log("There was an error: %s", e);
+      logger.atSevere().log("There was an error: %s", e);
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
     out.println("<h2>Responses Saved.</h2>");

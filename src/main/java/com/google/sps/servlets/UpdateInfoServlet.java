@@ -66,13 +66,13 @@ public class UpdateInfoServlet extends HttpServlet {
       email = userService.getCurrentUser().getEmail();
     } catch (Exception e) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      logger.atWarning().log("One or more null parameters");
+      logger.atSevere().log("One or more null parameters");
     }
 
     if (name == null || font == null || font_size == null || bg_color == null ||
         text_color == null || email == null) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      logger.atWarning().log("One or more null parameters");
+      logger.atSevere().log("One or more null parameters");
       return;
     }
 
@@ -85,10 +85,9 @@ public class UpdateInfoServlet extends HttpServlet {
       userInfoEntity.setProperty("font_size", font_size);
       userInfoEntity.setProperty("bg_color", bg_color);
       userInfoEntity.setProperty("text_color", text_color);
-      // The put() function automatically inserts new data or updates existing data based on email
       datastore.put(userInfoEntity);
     } catch (Exception e) {
-      logger.atWarning().log("There was an error: %s", e);
+      logger.atSevere().log("There was an error with datastore: %s", e);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 

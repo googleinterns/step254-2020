@@ -98,7 +98,7 @@ public class ExamServlet extends HttpServlet {
         try {
           questionsList = (List<Long>) examEntity.getProperty("questionsList");
         } catch (Exception e) {
-          logger.atWarning().log("There was an error: %s", e);
+          logger.atWarning().log("There was an error getting the questions list: %s", e);
         }
 
         out.println("<h1>Exam Name: " + name + "</h1>");
@@ -157,7 +157,7 @@ public class ExamServlet extends HttpServlet {
         out.println("</tr>");
       }
     } catch (Exception e) {
-      logger.atWarning().log("Error with Datastore: %s", e);
+      logger.atSevere().log("Error with Datastore: %s", e);
     }
     out.println("</table>");
     out.println("</body>");
