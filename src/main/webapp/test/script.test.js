@@ -25,7 +25,7 @@ test('check page access false', () => {
   expect(userAuth).toBe(false);
   pageAccess();
   expect( document.getElementById('accessDenied').innerHTML)
-    .toBe(`<p> Cannot access until you login</p>`);
+      .toBe(`<p> Cannot access until you login</p>`);
 });
 
 test('check page access true', () => {
@@ -36,8 +36,8 @@ test('check page access true', () => {
 });
 
 test('check prefereneces can be set', async () => {
-  global.fetch = jest.fn().mockImplementation(() => 
-  Promise.resolve({json: () => mockPreference}));
+  global.fetch = jest.fn().mockImplementation(() =>
+    Promise.resolve({json: () => mockPreference}));
   script.setPreference();
   expect(global.fetch).toHaveBeenCalledWith('/auth');
   expect((await global.fetch()).json()).toEqual(mockPreference);
@@ -45,8 +45,8 @@ test('check prefereneces can be set', async () => {
 
 test('check authentication for valid user', async () => {
   document.body.innerHTML= setAuthHtml;
-  global.fetch = jest.fn().mockImplementation(() => 
-  Promise.resolve({json: () => mockValidUser}));
+  global.fetch = jest.fn().mockImplementation(() =>
+    Promise.resolve({json: () => mockValidUser}));
   authenticate();
   expect(global.fetch).toHaveBeenCalledWith('/auth');
   expect((await global.fetch()).json()).toEqual(validUser);
@@ -55,8 +55,8 @@ test('check authentication for valid user', async () => {
 
 test('check authentication for invalid user', async () => {
   document.body.innerHTML= setAuthHtml;
-  global.fetch = jest.fn().mockImplementation(() => 
-  Promise.resolve({json: () => mockInvalidUser}));
+  global.fetch = jest.fn().mockImplementation(() =>
+    Promise.resolve({json: () => mockInvalidUser}));
   authenticate();
   expect(global.fetch).toHaveBeenCalledWith('/auth');
   expect((await global.fetch()).json()).toEqual(invalidUser);
