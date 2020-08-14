@@ -16,19 +16,23 @@
  * Get current user prefernces to set as default value in preference form.
  */
 async function setPreferenceForm() {
-  const response =  await fetch("/auth");
-  const user_details =  await response.json();
+  try{
+    const response =  await fetch("/auth");
+    const user_details = await response.json();
+  
+    let userFont = user_details.font;
+    let userFontSize = user_details.font_size;
+    let userFontColor = user_details.text_color;
+    let userBackgroundColor = user_details.bg_color;
 
-  userFont = user_details.font;
-  userFontSize = user_details.font_size;
-  userFontColor = user_details.text_color;
-  userBackgroundColor = user_details.bg_color;
-
-  setValue('font', userFont);
-  setValue('font_size', userFontSize);
-  setValue('text_color', userFontColor);
-  setValue('bg_color', userBackgroundColor);
-
+  
+    setValue('font', userFont);
+    setValue('font_size', userFontSize);
+    setValue('text_color', userFontColor);
+    setValue('bg_color', userBackgroundColor);
+  }catch(e){
+    console.log('Error: ', e.message);
+  }
 }
 
 /**
@@ -36,7 +40,7 @@ async function setPreferenceForm() {
  * @param {string} id The id of the element being changed.
  * @param {string} val The value the element is being changed to.
  */
-function setValue(id, val) {
+function setValue(id, val) {  
   if (val == undefined) {
     document.getElementById(id).value = document.getElementById(id).value;
   } else {
@@ -46,3 +50,11 @@ function setValue(id, val) {
 
 // Call Functions
 setPreferenceForm();
+
+// Export modules for testing
+if (typeof exports !== 'undefined') {
+    module.exports = {
+        setPreferenceForm,
+        setValue,
+    }
+}
