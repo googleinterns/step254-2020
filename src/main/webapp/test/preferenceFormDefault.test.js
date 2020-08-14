@@ -38,9 +38,9 @@ test('check set value works with background color', () => {
 });
 
 test('check preference form servlet call works', async () => {
-  global.fetch = jest.fn().mockImplementation(() => 
-  Promise.resolve({json: () => exampleResponse}));
+  global.fetch = jest.fn().mockImplementation(() =>
+    Promise.resolve({json: () => exampleResponse}));
   preferenceFormDefault.setPreferenceForm();
-  expect(global.fetch).toHaveBeenCalledWith('/auth');    
+  expect(global.fetch).toHaveBeenCalledWith('/auth');
   expect((await global.fetch()).json()).toEqual(exampleResponse);
 });
