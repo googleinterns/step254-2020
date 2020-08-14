@@ -83,7 +83,6 @@ public class QuestionFormServlet extends HttpServlet {
         + "</textarea><br>");
     out.println("<label for=\"marks\">Marks given for Question:</label><br>");
     out.println("<input type=\"number\" id=\"marks\" name=\"marks\" required>");
-    out.println("<form action=\"/createQuestion\" method=\"POST\">");
     out.println("<h3> Select which test you want the questions added to</h1>");
     out.println("<select name=\"testName\">");
     // Find all tests created by this user and display them as a dropdown menu.
@@ -108,10 +107,10 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<br/>");
     out.println("<button>Submit</button>");
     out.println("</form>");
-    out.println("<h3> Add Previously Used Questions</h3>");
+    out.println("<h3> Click Below to Look Through Previous Questions You asked</h3>");
     out.println("<form id=\"addQuestions\" action=\"/returnQuestionsUserOwns\""
         + " method=\"GET\">");
-    out.println("<input type=\"submit\" value=\"Submit Selected Questions\">");
+    out.println("<input type=\"submit\" value=\"Click\">");
     out.println("</form>");
     out.println("</body>");
     response.setStatus(HttpServletResponse.SC_OK);
