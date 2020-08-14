@@ -86,6 +86,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
 
       if (results.countEntities() <= 0) {
         out.println("<h1>You have not created any questions yet! </h1>");
+        out.println("<button onclick=\"location.href='/questionForm'\""
+            + " type=\"button\">Go Back </button>");
         logger.atInfo().log("User: %s , has not created any questions yet",ownerID);
         return;
       }
