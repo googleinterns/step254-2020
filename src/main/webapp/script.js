@@ -18,21 +18,21 @@ let userAuth = false;
  * Authenticate user
  */
 async function authenticate() {
-  try{
+  try {
     logInOut = document.getElementById('logInOut');
-    const response =  await fetch('/auth'); 
-    const user_details =  await response.json();
+    const response = await fetch('/auth');
+    const userDetails = await response.json();
 
-    if (user_details.email) {
+    if (userDetails.email) {
       userAuth = true;
-      logInOut.innerHTML = `<a id= "login" href="${user_details.logoutUrl}"
+      logInOut.innerHTML = `<a id= "login" href="${userDetails.logoutUrl}"
       >Logout</a>`;
       setPreference();
     } else {
       userAuth = false;
-      logInOut.innerHTML = `<a href="${user_details.loginUrl}">Login</a>`;
+      logInOut.innerHTML = `<a href="${userDetails.loginUrl}">Login</a>`;
     }
-  }catch(e){
+  } catch (e) {
     console.log('Error: ', e.message);
   }
 };
@@ -41,29 +41,28 @@ async function authenticate() {
  * Set user UI preferneces
  */
 async function setPreference() {
-  try{
-    const response =  await fetch("/auth"); 
-    const user_details =  await response.json();
-    let userFont = user_details.font;
-    let userFontSize = user_details.font_size;
-    let userFontColor = user_details.text_color;
-    let userBackgroundColor = user_details.bg_color;
+  try {
+    const response = await fetch('/auth');
+    const userDetails = await response.json();
+    const userFont = userDetails.font;
+    const userFontSize = userDetails.font_size;
+    const userFontColor = userDetails.text_color;
+    const userBackgroundColor = userDetails.bg_color;
 
     document.body.style.fontFamily = userFont;
     document.body.style.fontSize = userFontSize + 'px';
     document.body.style.color = userFontColor;
     document.body.style.backgroundColor = userBackgroundColor;
-  }
-  catch(e){
+  } catch (e) {
     console.log('Error: ', e.message);
-  }     
+  }  
 }
 
 /* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
  */
-function pageAccess(){
+function pageAccess() {
   if (userAuth === true) {
     window.location.href = 'dashboard.html';
     console.log(window.location.href );
@@ -76,16 +75,16 @@ function pageAccess(){
 /* eslint-enable no-unused-vars */
 
 // On load
-window.onload = function(){
-    authenticate();
-}
+window.onload = function() {
+  authenticate();
+};
 
 // Export modules for testing
 if (typeof exports !== 'undefined') {
-    module.exports = {
-        authenticate,
-        setPreference,
-        pageAccess,
-        userAuth,
-    }
-}
+  module.exports = {
+    authenticate,
+    setPreference,
+    pageAccess,
+    userAuth,
+  }
+};
