@@ -49,7 +49,7 @@ test('check authentication for valid user', async () => {
     Promise.resolve({json: () => mockValidUser}));
   authenticate();
   expect(global.fetch).toHaveBeenCalledWith('/auth');
-  expect((await global.fetch()).json()).toEqual(validUser);
+  expect((await global.fetch()).json()).toEqual(mockValidUser);
   expect(userAuth).toBeTruthy();
 });
 
@@ -59,6 +59,6 @@ test('check authentication for invalid user', async () => {
     Promise.resolve({json: () => mockInvalidUser}));
   authenticate();
   expect(global.fetch).toHaveBeenCalledWith('/auth');
-  expect((await global.fetch()).json()).toEqual(invalidUser);
+  expect((await global.fetch()).json()).toEqual(mockInvalidUser);
   expect(script.userAuth).toBeFalsy();
 });
