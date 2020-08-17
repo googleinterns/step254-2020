@@ -12,14 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps;
+package com.google.sps.servlets;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.sps.servlets.AuthenticationServlet;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,17 +34,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
- * Tests for Exam Servlet. Test when an examID is provided, if exam is available, unavailable and 
+ * Tests for Exam Servlet. Test when an examID is provided, if exam is available, unavailable and
  * test if no examID is provided
  *
  * @author Aidan Molloy
@@ -104,7 +102,6 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
 
   /* Set up fake preferences for test user to test datastore */
   private void addPreference() {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity userInfoEntity = new Entity("UserInfo");
     userInfoEntity.setProperty("email", "test@example.com");
     userInfoEntity.setProperty("name", "Test User");
@@ -112,6 +109,7 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
     userInfoEntity.setProperty("font_size", "16");
     userInfoEntity.setProperty("bg_color", "white");
     userInfoEntity.setProperty("text_color", "black");
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(userInfoEntity);
   }
 
