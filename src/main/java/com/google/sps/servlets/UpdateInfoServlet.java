@@ -20,12 +20,11 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
-
+import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Servlet to update users preferences, overwrites current preferences linked with users email
@@ -54,37 +53,42 @@ public class UpdateInfoServlet extends HttpServlet {
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
 
-    String name, font, font_size, bg_color, text_color, email;
-    name = font = font_size = bg_color = text_color = email = null;
+    String name;
+    String font;
+    String fontSize;
+    String bgColor;
+    String textColor;
+    String email;
+    name = font = fontSize = bgColor = textColor = email = null;
 
     try {
       name = request.getParameter("name");
       font = request.getParameter("font");
-      font_size = request.getParameter("font_size");
-      bg_color = request.getParameter("bg_color");
-      text_color = request.getParameter("text_color");
+      fontSize = request.getParameter("font_size");
+      bgColor = request.getParameter("bg_color");
+      textColor = request.getParameter("text_color");
       email = userService.getCurrentUser().getEmail();
     } catch (Exception e) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       logger.atSevere().log("One or more null parameters");
     }
 
-    if (name == null || font == null || font_size == null || bg_color == null ||
-        text_color == null || email == null) {
+    if (name == null || font == null || fontSize == null || bgColor == null
+        || textColor == null || email == null) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       logger.atSevere().log("One or more null parameters");
       return;
     }
 
     try {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Entity userInfoEntity = new Entity("UserInfo", email);
       userInfoEntity.setProperty("email", email);
       userInfoEntity.setProperty("name", name);
       userInfoEntity.setProperty("font", font);
-      userInfoEntity.setProperty("font_size", font_size);
-      userInfoEntity.setProperty("bg_color", bg_color);
-      userInfoEntity.setProperty("text_color", text_color);
+      userInfoEntity.setProperty("font_size", fontSize);
+      userInfoEntity.setProperty("bg_color", bgColor);
+      userInfoEntity.setProperty("text_color", textColor);
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(userInfoEntity);
     } catch (Exception e) {
       logger.atSevere().log("There was an error with datastore: %s", e);
