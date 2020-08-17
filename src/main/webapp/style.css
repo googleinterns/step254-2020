@@ -1,0 +1,86 @@
+/* Global
+-------------------*/
+html{
+    box-sizing: border-box;
+}
+
+body{
+    color: #4D5061;
+    margin: 0;
+    padding: 0;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+h1{
+    font-size: 115%;
+}
+
+h2{
+
+    font-size: 110%;
+}
+
+h3{
+    font-size: 105%;
+}
+
+.content-wrap{
+    max-width: 800px;
+    width: 85%;
+    margin: 0 auto;
+    padding: 60px 0;
+}
+
+.title{
+    text-align: center;
+}
+
+/* Header
+-------------------*/
+.navtop{
+    background-color: #4D5061;
+    overflow: hidden;
+    height: auto;
+}
+
+.navtop a{
+    float: left;
+    color: #EBEBEB;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 120%;
+}
+
+.navtop a:hover{
+    background-color: #EBEBEB;
+    color: #4D5061;
+}
+
+.navtop a.active{
+    background-color: #EBEBEB;
+    color: #4D5061;
+}
+
+/* Dashboard
+-------------------*/
+#btnDash{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+.dashBtn{
+  background-color: #4D5061;
+  color: #EBEBEB;
+  padding: 14px 25px;
+  margin-left: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  justify-content: space-between;
+  border-radius: 5px;
+}
+

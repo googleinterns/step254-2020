@@ -13,43 +13,44 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
-import com.google.sps.data.UtilityClass;
+
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import java.io.IOException;
+import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.UtilityClass;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
 
 /**
  * The authentication servlet is responsible for authenticating users and retreiving user
  * preferences from datastore.
  *
- * @author  Aidan Molloy
+ * @author Aidan Molloy
  */
 @WebServlet("/auth")
 public class AuthenticationServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /**
    * Checks if the user is logged in with UserService and prints response in json.
    *
-   * @param   request     provides request information from the HTTP servlet
-   * @param   response    response object where servlet will write information to
+   * @param request  provides request information from the HTTP servlet
+   * @param response response object where servlet will write information to
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json;");
     UserService userService = UserServiceFactory.getUserService();
-    Map<String, String> authResponse = new HashMap<String, String>();
+    Map<String, String> authResponse = new HashMap<>();
 
-    try{
+    try {
       if (userService.isUserLoggedIn()) {
         // If logged in get email and create link to logout
         String userEmail = userService.getCurrentUser().getEmail();
@@ -65,8 +66,9 @@ public class AuthenticationServlet extends HttpServlet {
         String loginUrl = userService.createLoginURL("/");
         authResponse.put("loginUrl", loginUrl);
       }
-    }catch(Exception e) {
+    } catch (Exception e) {
       authResponse.put("errorMsg", "Something went wrong. Please try again later.");
+      logger.atSevere().log("There was an error: %s", e);
     }
 
     String json = UtilityClass.convertToJson(authResponse);
@@ -76,15 +78,15 @@ public class AuthenticationServlet extends HttpServlet {
   }
 
   /**
-   * Returns the preferences of the user with email, or null if the user has not set their 
+   * Returns the preferences of the user with email, or null if the user has not set their
    * preferences.
    *
-   * @param   email   the email of logged in user to retreive linked userInfo from datastore
-   * @return          a map of userInfo linked to the user email
+   * @param email the email of logged in user to retreive linked userInfo from datastore
+   * @return a map of userInfo linked to the user email
    */
   private Map<String, String> getUserInfo(String email) {
-    Map<String, String> userInfoResponse = new HashMap<String, String>();
-    try{
+    Map<String, String> userInfoResponse = new HashMap<>();
+    try {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query query =
           new Query("UserInfo")
@@ -101,8 +103,9 @@ public class AuthenticationServlet extends HttpServlet {
       userInfoResponse.put("bg_color", (String) entity.getProperty("bg_color"));
       userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
       return userInfoResponse;
-    }catch(Exception e) {
+    } catch (Exception e) {
       userInfoResponse.put("errorMsg", "Something went wrong. Please try again later.");
+      logger.atSevere().log("There was an error: %s", e);
       return null;
     }
   }

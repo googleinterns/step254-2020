@@ -14,12 +14,10 @@
 
 package com.google.sps;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.sps.servlets.AuthenticationServlet;
+import com.google.sps.servlets.ExamServlet;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,20 +30,22 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for Exam Servlet. Test when an examID is provided, if exam is available, unavailable and 
- * test if no examID is provided
+ * Tests for Authentication Servlet for logged out user, logged in user without preferences set
+ * and logged in users with preferences set.
  *
  * @author Aidan Molloy
  */
 @RunWith(JUnit4.class)
-public final class AuthenticationServletTest extends AuthenticationServlet {
+public final class ExamServletTest extends ExamServlet {
   private final LocalServiceTestHelper helper =
-      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
+          .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
 
   @Before
   public void setUp() {
@@ -57,12 +57,24 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
     helper.tearDown();
   }
 
+  /* Set up fake exam */
+  private void addExam() {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity examEntity = new Entity("Exam");
+    examEntity.setProperty("name", "Test Exam");
+    examEntity.setProperty("duration", "20");
+    examEntity.setProperty("ownerID", "test@example.com");
+    examEntity.setProperty("date", "20");
+    examEntity.setProperty("questionsList", new ArrayList<>());
+    datastore.put(examEntity);
+  }
+
   /* When no examID is provided. */
   @Test
   public void doGetTestNoExamID() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    AuthenticationServlet servlet = new AuthenticationServlet();
+    ExamServlet servlet = new ExamServlet();
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -70,26 +82,18 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("loginUrl\":\"/_ah/login?continue"));
-  }
-
-  /* Login user with email "test@example.com" */
-  private void helperLogin() {
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
-    helper.setEnvIsLoggedIn(true);
+    Assert.assertTrue(result.contains("Choose an exam to take"));
   }
 
   /**
-   * When logged in without preferences the users email and a logout link should be returned with
-   * a UserInfoRequired key set to true.
+   * When examID that does not exist is provided
    */
   @Test
-  public void doGetTestLoggedIn() throws IOException {
-    helperLogin();
+  public void doGetTestInvalidExamID() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    AuthenticationServlet servlet = new AuthenticationServlet();
+    ExamServlet servlet = new ExamServlet();
+    when(request.getParameter("examID")).thenReturn("1");
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -97,35 +101,32 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"email\":\"test@example.com\""));
-    Assert.assertTrue(result.contains("\"logoutUrl\":\"/_ah/logout?continue"));
-    Assert.assertTrue(result.contains("\"updateInfoRequired\":\"true\""));
+    Assert.assertTrue(result.contains("Selected exam is not available."));
+    Assert.assertTrue(result.contains("Choose an exam to take"));
   }
 
-  /* Set up fake preferences for test user to test datastore */
-  private void addPreference() {
+  /* Get the ExamID of existing exam */
+  public String getExamID() {
+    Query query = new Query("Exam");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Entity userInfoEntity = new Entity("UserInfo");
-    userInfoEntity.setProperty("email", "test@example.com");
-    userInfoEntity.setProperty("name", "Test User");
-    userInfoEntity.setProperty("font", "Arial");
-    userInfoEntity.setProperty("font_size", "16");
-    userInfoEntity.setProperty("bg_color", "white");
-    userInfoEntity.setProperty("text_color", "black");
-    datastore.put(userInfoEntity);
+    PreparedQuery results = datastore.prepare(query);
+    for (Entity entity : results.asIterable()) {
+      return String.valueOf(entity.getKey().getId());
+    }
+    return "1";
   }
 
   /**
-   * When logged in and preferences are set the users email, logout link and preferences should be
-   * returned.
+   * When a real exam is requested.
    */
   @Test
-  public void doGetTestUserInfo() throws IOException {
-    helperLogin();
-    addPreference();
+  public void doGetTestExam() throws IOException {
+    addExam();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    AuthenticationServlet servlet = new AuthenticationServlet();
+    ExamServlet servlet = new ExamServlet();
+    when(request.getParameter("examID")).thenReturn(getExamID());
+
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -133,13 +134,9 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"email\":\"test@example.com\""));
-    Assert.assertTrue(result.contains("\"logoutUrl\":\"/_ah/logout?continue"));
-    Assert.assertTrue(result.contains("\"name\":\"Test User\""));
-    Assert.assertTrue(result.contains("\"text_color\":\"black\""));
-    Assert.assertTrue(result.contains("\"font\":\"Arial\""));
-    Assert.assertTrue(result.contains("\"bg_color\":\"white\""));
-    Assert.assertTrue(result.contains("\"font_size\":\"16\""));
+    Assert.assertTrue(result.contains("Exam Name: Test Exam"));
+    Assert.assertTrue(result.contains("Length: 20"));
+    Assert.assertTrue(result.contains("Created By: test@example.com"));
   }
 
 }

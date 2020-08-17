@@ -18,7 +18,7 @@ import com.google.appengine.api.datastore.*;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.data.UtilityClass;
-import com.google.sps.servlets.UpdateInfoServlet;
+import com.google.sps.servlets.ExamResponseServlet;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,19 +31,19 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for Update Info Servlet to see if user preferences are stored correctly.
+ * Tests for Exam Response Servlet to see if users exam responses are stored correctly.
  *
  * @author Aidan Molloy
  */
+
 @RunWith(JUnit4.class)
-public final class UpdateInfoServletTest extends UpdateInfoServlet {
+public final class ExamResponseServletTest extends ExamResponseServlet {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
           .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
@@ -58,45 +58,37 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet {
     helper.tearDown();
   }
 
-  /* Test updating user preferences */
+  /* Test Storing a users answers to an exam */
+
   @Test
   public void doPostTest() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
-    when(request.getParameter("name")).thenReturn("Test User");
-    when(request.getParameter("font")).thenReturn("Arial");
-    when(request.getParameter("font_size")).thenReturn("16");
-    when(request.getParameter("bg_color")).thenReturn("white");
-    when(request.getParameter("text_color")).thenReturn("black");
+    List<String> parameterNames = new ArrayList<>();
+    parameterNames.add("1");
+    Enumeration<String> parameterNamesEnumerated = Collections.enumeration(parameterNames);
+    String[] parameterValues = {"Answer1"};
+
+    when(request.getParameterNames()).thenReturn(parameterNamesEnumerated);
+    when(request.getParameterValues("1")).thenReturn(parameterValues);
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
-    UpdateInfoServlet servlet = new UpdateInfoServlet();
+    ExamResponseServlet servlet = new ExamResponseServlet();
     servlet.doPost(request, response);
 
     // Make query to datastore to make sure it was stored correctly
-    Query query =
-        new Query("UserInfo")
-            .setFilter(new Query
-                .FilterPredicate("email", Query.FilterOperator.EQUAL, "test@example.com"));
+    Query query = new Query("1");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     Entity entity = results.asSingleEntity();
 
     // Convert the received entity into a json string to check content
-    Map<String, String> userInfoResponse = new HashMap<String, String>();
-    userInfoResponse.put("name", (String) entity.getProperty("name"));
-    userInfoResponse.put("font", (String) entity.getProperty("font"));
-    userInfoResponse.put("font_size", (String) entity.getProperty("font_size"));
-    userInfoResponse.put("bg_color", (String) entity.getProperty("bg_color"));
-    userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
-    String result = UtilityClass.convertToJson(userInfoResponse);
-    Assert.assertTrue(result.contains("\"bg_color\":\"white\""));
-    Assert.assertTrue(result.contains("\"font_size\":\"16\""));
-    Assert.assertTrue(result.contains("\"name\":\"Test User\""));
-    Assert.assertTrue(result.contains("\"text_color\":\"black\""));
-    Assert.assertTrue(result.contains("\"font\":\"Arial\""));
+    Map<String, String> examResponse = new HashMap<>();
+    examResponse.put("answer", (String) entity.getProperty("answer"));
+    String result = UtilityClass.convertToJson(examResponse);
+    Assert.assertTrue(result.contains("\"answer\":\"Answer1\""));
   }
 }

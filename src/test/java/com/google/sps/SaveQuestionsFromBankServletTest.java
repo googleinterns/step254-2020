@@ -13,37 +13,38 @@
 // limitations under the License.
 
 package com.google.sps;
+
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertTrue;
+
 import com.google.sps.servlets.SaveQuestionsFromBankServlet;
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.Before;
 import javax.servlet.http.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.Test;
 import java.io.*;
-import static org.mockito.Mockito.*;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import static org.junit.Assert.assertTrue;
-import java.util.Date;
+import org.junit.runner.RunWith;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import java.util.Date;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import org.junit.runners.JUnit4;
+
 @RunWith(JUnit4.class)
-public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBankServlet{
+public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBankServlet {
   private final LocalServiceTestHelper helper = 
-    new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-      .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
   @Before
   public void setUp() {
@@ -61,8 +62,7 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     SaveQuestionsFromBankServlet servlet = new SaveQuestionsFromBankServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
+    helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
     
@@ -70,28 +70,32 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     Entity testEntity = new Entity("Exam");
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID","test@example.com");
-    testEntity.setProperty("date", date);
-    datastore.put(testEntity); 
+    testEntity.setProperty("ownerID", "test@example.com");
+    testEntity.setProperty("date", date); 
 
     //Create Fake Questions
     Entity questionEntity = new Entity("Question");
-    questionEntity.setProperty("question","What day is it?");
-    questionEntity.setProperty("marks","5");
-    questionEntity.setProperty("date",date);
-    questionEntity.setProperty("ownerID","test@example.com");
-    datastore.put(questionEntity);
+    questionEntity.setProperty("question", "What day is it?");
+    questionEntity.setProperty("marks", "5");
+    questionEntity.setProperty("date", date);
+    questionEntity.setProperty("ownerID", "test@example.com");
 
     Entity anotherQuestionEntity = new Entity("Question");
-    anotherQuestionEntity.setProperty("question","What year is it?");
-    anotherQuestionEntity.setProperty("marks","10");
-    anotherQuestionEntity.setProperty("date",date);
-    anotherQuestionEntity.setProperty("ownerID","test@example.com");
+    anotherQuestionEntity.setProperty("question", "What year is it?");
+    anotherQuestionEntity.setProperty("marks", "10");
+    anotherQuestionEntity.setProperty("date", date);
+    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(testEntity);
+    datastore.put(questionEntity);
     datastore.put(anotherQuestionEntity);
+
     String questionEntityId = String.valueOf(questionEntity.getKey().getId());
     String anotherQuestionEntityId =String.valueOf(anotherQuestionEntity.getKey().getId());
     String[] questionsList ={questionEntityId,anotherQuestionEntityId};
     when(request.getParameterValues("question")).thenReturn(questionsList);
+    when(request.getParameter("test")).thenReturn("Trial");
     
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -101,7 +105,26 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Successfully added Question 2"));
     Assert.assertTrue(result.contains("Successfully added Question 3"));
-
+    verify(response).setStatus(HttpServletResponse.SC_OK);
   }
-  
+  @Test
+  public void testNotLoggedInUser() throws IOException {
+    // test to see if a not logged in user will be able to
+    // look at tests a user has created
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    
+    SaveQuestionsFromBankServlet servlet = new SaveQuestionsFromBankServlet();
+    servlet.doPost(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+  private void helperLogin() {
+    /* Login user with email "test@example.com" */
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
+  }
 }
