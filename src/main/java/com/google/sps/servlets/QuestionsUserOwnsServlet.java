@@ -69,8 +69,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
-    out.println("<a href=\"dashboard.html\">Navigation, will have login,"
-        + " click here to test rest" + " of page</a>");
+    out.println("<a href=\"dashboard.html\">Dashboard</a>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
