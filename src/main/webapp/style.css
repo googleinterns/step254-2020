@@ -13,10 +13,6 @@ body{
     line-height: 1.5;
 }
 
-main{
-    padding-top: 40px;
-}
-
 h1{
     font-size: 115%;
 }
@@ -35,6 +31,10 @@ h3{
     width: 85%;
     margin: 0 auto;
     padding: 60px 0;
+}
+
+.title{
+    text-align: center;
 }
 
 /* Header
@@ -66,11 +66,21 @@ h3{
 
 /* Dashboard
 -------------------*/
+#btnDash{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
 .dashBtn{
+  background-color: #4D5061;
+  color: #EBEBEB;
   padding: 14px 25px;
+  margin-left: 10px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
+  justify-content: space-between;
   border-radius: 5px;
 }
 
