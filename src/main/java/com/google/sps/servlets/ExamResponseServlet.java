@@ -20,14 +20,13 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
-
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
 
 /**
  * Servlet that processes users responses to exam questions and stores them in datastore.
@@ -39,7 +38,7 @@ public class ExamResponseServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * doPost process the information from the exam form response and send it to the datastore
+   * doPost process the information from the exam form response and send it to the datastore.
    *
    * @param request  provides request information from the HTTP servlet
    * @param response response object where servlet will write information to
