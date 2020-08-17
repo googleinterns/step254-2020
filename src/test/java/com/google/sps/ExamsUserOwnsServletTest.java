@@ -14,35 +14,38 @@
 
 package com.google.sps;
 
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertTrue;
+
 import com.google.sps.servlets.ExamsUserOwnsServlet;
 import java.io.IOException;
-import java.util.*;
-import javax.servlet.annotation.WebServlet;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.Before;
 import javax.servlet.http.*;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import java.io.*;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertTrue;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import org.junit.runners.JUnit4;
+
 @RunWith(JUnit4.class)
-public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet{
+public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
   private final LocalServiceTestHelper helper = 
-    new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-      .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
   @Before
   public void setUp() {
@@ -55,46 +58,67 @@ public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet{
   }
 
   @Test
-  public void testdoGetFunction() throws IOException{
+  public void testdoGetFunction() throws IOException {
     /*Tests the doGet function to see if all tests a user owns get
     * retrieved correctly.
     */
-    ExamsUserOwnsServlet servlet= new ExamsUserOwnsServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    Long date = (new Date()).getTime(); 
+    final Long date = (new Date()).getTime(); 
+    helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
 
     List<Long> list = new ArrayList<>();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     /*Create two fake TestEntities */
     Entity testEntity = new Entity("Exam");
-    testEntity.setProperty("name","Trial");
-    testEntity.setProperty("duration","30");
-    testEntity.setProperty("ownerID","test@example.com");
+    testEntity.setProperty("name", "Trial");
+    testEntity.setProperty("duration", "30");
+    testEntity.setProperty("ownerID", "test@example.com");
     testEntity.setProperty("date", date);
-    testEntity.setProperty("questionsList",list);
-    datastore.put(testEntity);
+    testEntity.setProperty("questionsList", list);
 
     Entity anotherEntity= new Entity("Exam");
-    anotherEntity.setProperty("name","AnotherExam");
-    anotherEntity.setProperty("duration","45");
-    anotherEntity.setProperty("ownerID","test@example.com");
+    anotherEntity.setProperty("name", "AnotherExam");
+    anotherEntity.setProperty("duration", "45");
+    anotherEntity.setProperty("ownerID", "test@example.com");
     anotherEntity.setProperty("date", date);
-    anotherEntity.setProperty("questionsList",list);
+    anotherEntity.setProperty("questionsList", list);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(testEntity);
     datastore.put(anotherEntity);
-
-
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
-
+    
+    ExamsUserOwnsServlet servlet = new ExamsUserOwnsServlet();
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"name\":\"Trial\",\"examID\":1,"+
-      "\"duration\":30.0,\"ownerID\":\"test@example.com\""));
-    Assert.assertTrue(result.contains("\"name\":\"AnotherExam\",\"examID\":2,"+
-      "\"duration\":45.0,\"ownerID\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"name\":\"Trial\",\"examID\":1,"
+        + "\"duration\":30.0,\"ownerID\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"name\":\"AnotherExam\",\"examID\":2,"
+        +"\"duration\":45.0,\"ownerID\":\"test@example.com\""));
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+  }
+  @Test
+  public void testNotLoggedInUser() throws IOException {
+    // test to see if a not logged in user will be able to
+    // look at tests a user has created
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    
+    ExamsUserOwnsServlet servlet= new ExamsUserOwnsServlet();
+    servlet.doGet(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+  private void helperLogin() {
+    /* Login user with email "test@example.com" */
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
   }
 }

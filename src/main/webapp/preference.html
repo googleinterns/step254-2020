@@ -11,13 +11,16 @@
   <body>
     <header>
       <div class="navtop">
-        <a  href="dashboard.html">Navigation, will have login, click here to test rest of page</a>
+        <p><a  href="index.html">Homepage</a></p>
+        <p><a  href="dashboard.html">Dashboard</a></p>
         <p id=logInOut></p>
       </div>
     </header>
     <main>
       <h2>Change Preferneces</h2>
       <form id="setPreference" action="/updateInfo" method="POST">
+        <label for="name">Name:</label>
+        <input type ="text" name="name" id="name"><br>
         <label for="font">Select your prefered font:</label>
         <select name="font" id="font">
           <option value="arial">Arial</option>

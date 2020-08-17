@@ -14,58 +14,55 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.data.ExamClass;
-import com.google.sps.data.UtilityClass;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.ArrayList;
+import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.UtilityClass;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Servlet to display the requested exam  and send responses to ExamResponseServlet or if no exam
  * is selected it will display a list of available exams.
  *
- * @author  Aidan Molloy
+ * @author Aidan Molloy
  */
 @WebServlet("/exam")
-public class ExamServlet extends HttpServlet{
+public class ExamServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /**
-   * Gets the exam ID from the httpRequest
+   * Gets the exam ID from the httpRequest, displays exam if it exists otherwise displays
+   * list of exams
    *
-   * Arguments: 
-   *  request: provides request information from the HTTP servlet.
-   *  response: response object where servlet will write information to.
+   * @param request  provides request information from the HTTP servlet
+   * @param response response object where servlet will write information to
    */
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
+      logger.atWarning().log("User is not logged in.");
       response.sendRedirect("/");
       return;
     }
+    logger.atInfo().log("user=%s", userService.getCurrentUser());
     response.setContentType("text/html;");
     PrintWriter out = response.getWriter();
     out.println("<!DOCTYPE html>");
     out.println("<html>");
     out.println("<head>");
     out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:wght@400;"
-      + "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""
-      + " rel=\"stylesheet\">");
+        + "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""
+        + " rel=\"stylesheet\">");
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
     out.println("<title>Take Exam</title>");
@@ -73,8 +70,7 @@ public class ExamServlet extends HttpServlet{
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
-    out.println("<a href=\"dashboard.html\">Navigation, will have login, click here to test rest"
-      + " of page</a>");
+    out.println("<a href=\"dashboard.html\">Dashboard</a>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -85,44 +81,53 @@ public class ExamServlet extends HttpServlet{
     if (examID != null) {
       // If an exam has been selected
       try {
-        examEntity = getEntity(examID);
-      } catch (EntityNotFoundException e) {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Key key = KeyFactory.createKey("Exam", Long.parseLong(examID));
+        examEntity = datastore.get(key);
+      } catch (Exception e) {
         out.println("<h3>Selected exam is not available.</h3>");
+        logger.atInfo().log("Exam ID does not exist: %s", e);
       }
       if (examEntity != null) {
         // If exam exists, then display the exam and questions
         String name = (String) examEntity.getProperty("name");
         String duration = (String) examEntity.getProperty("duration");
         String ownerID = (String) examEntity.getProperty("ownerID");
-        List<Long> questionsList = (List<Long>) examEntity.getProperty("questionsList");
-        ExamClass exam = new ExamClass(name,examEntity.getKey().getId()
-          , Double.parseDouble(duration),ownerID,questionsList);
-      
-        out.println("<h1>Exam Name: " + exam.getName() + "</h1>");
-        out.println("<h3>Length: " + exam.getDuration() + "</h3>");
-        out.println("<h3>Created By: " + exam.getOwnerID() + "</h3>");
+        List<Long> questionsList = null;
+        try {
+          questionsList = (List<Long>) examEntity.getProperty("questionsList");
+        } catch (Exception e) {
+          logger.atWarning().log("There was an error getting the questions list: %s", e);
+        }
+
+        out.println("<h1>Exam Name: " + name + "</h1>");
+        out.println("<h3>Length: " + duration + "</h3>");
+        out.println("<h3>Created By: " + ownerID + "</h3>");
+
+        // If there are questions
         if (questionsList != null) {
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<form action=\"/examResponse\" method=\"POST\">");
-          for (int i=0; i < questionsList.size(); i++) {
+          for (int i = 0; i < questionsList.size(); i++) {
             try {
               Key key = KeyFactory.createKey("Question", questionsList.get(i));
               Entity qs = datastore.get(key);
 
               long questionID = qs.getKey().getId();
               String question = (String) qs.getProperty("question");
-              out.println("<label for=\"" + questionID + "\">" + (i+1) + ") " + 
-                            question + ": </label>");
+              out.println("<label for=\"" + questionID + "\">" + (i + 1) + ") " +
+                  question + ": </label>");
               out.println("<input type=\"text\" id=\"" + questionID + "\" name=\"" +
-                            questionID + "\"><br><br>");
+                  questionID + "\"><br><br>");
 
-            } catch( Exception e) {
+            } catch (Exception e) {
               out.println("<p>Question was not found</p><br>");
+              logger.atWarning().log("Question does not exist: %s", e);
             }
           }
           out.println("<br><input type=\"submit\" value=\"Submit\">");
           out.println("</form>");
-        }else{
+        } else {
           out.println("<p>There are no questions associated with this exam.</p>");
         }
         out.println("</main></body>");
@@ -134,33 +139,26 @@ public class ExamServlet extends HttpServlet{
     out.println("<h1>Choose an exam to take.</h1>");
     out.println("<table><tr><th>ID</th><th>Name</th><th>Duration</th></tr>");
 
-    Query query = new Query("Exam");
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    PreparedQuery results = datastore.prepare(query);
-    for (Entity entity : results.asIterable()) {
-      long id = entity.getKey().getId();
-      String name = (String) entity.getProperty("name");
-      String duration = (String) entity.getProperty("duration");
+    try {
+      Query query = new Query("Exam");
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      PreparedQuery results = datastore.prepare(query);
+      for (Entity entity : results.asIterable()) {
+        long id = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        String duration = (String) entity.getProperty("duration");
 
-      out.println("<tr>");
-      out.println("<td>" + id + "</td>");
-      out.println("<td>" + name + "</td>");
-      out.println("<td>" + duration + "</td>");
-      out.println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
-      out.println("</tr>");
+        out.println("<tr>");
+        out.println("<td>" + id + "</td>");
+        out.println("<td>" + name + "</td>");
+        out.println("<td>" + duration + "</td>");
+        out.println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
+        out.println("</tr>");
+      }
+    } catch (Exception e) {
+      logger.atSevere().log("Error with Datastore: %s", e);
     }
     out.println("</table>");
     out.println("</body>");
-  }
-
-  private Entity getEntity(String entityID) throws EntityNotFoundException{
-    /*Function that will return a exam entity based on the entity ID */
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key key = KeyFactory.createKey("Exam", Long.parseLong(entityID));
-    Entity entity = datastore.get(key);
-    if(entity == null) {
-      return null;
-    }
-    return entity;
   }
 }
