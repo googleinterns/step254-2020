@@ -19,7 +19,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -33,17 +32,16 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.PrintWriter;
 
-/** Servlet that returns a checkbox form of all the questions owned by the user
-* A user can then select the questions they want to reuse by clicking on the
-* checkboxes.
+/** Servlet that creates a question form for the user to fill out.
+* A user can add a question to whichever test they want.
 * @author Klaudia Obieglo
 */
-@WebServlet("/returnQuestionsUserOwns")
-public class QuestionsUserOwnsServlet extends HttpServlet {
+@WebServlet("/questionForm")
+public class QuestionFormServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   @Override
   public void doGet(final HttpServletRequest request,
-       final HttpServletResponse response) throws IOException {
+        final HttpServletResponse response) throws IOException {
     /*Returns all the questions that the user has created */
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
@@ -52,16 +50,17 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
       response.sendRedirect("/");
       return;
     }
-    logger.atInfo().log("user=%s", userService.getCurrentUser());
+    logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
 
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
     out.println("<!DOCTYPE html>");
     out.println("<html>");
     out.println("<head>");
-    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine"
-        + ":wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,"
+    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:"
+        + "wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,"
         + "600;1,700&display=swap\" rel=\"stylesheet\">");
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
@@ -70,65 +69,37 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<a href=\"dashboard.html\">Navigation, will have login,"
-        + " click here to test rest" + " of page</a>");
+        + " click here to test rest of page</a>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
     out.println("<main>");
     out.println("<body>");
-    DatastoreService datastore = null;
-    // Find all questions created by the user
-    try {
-      datastore = DatastoreServiceFactory.getDatastoreService();
-      Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
-          FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
-      PreparedQuery results = datastore.prepare(query);
-
-      if (results.countEntities() <= 0) {
-        out.println("<h1>You have not created any questions yet! </h1>");
-        out.println("<button onclick=\"location.href='/questionForm'\""
-            + " type=\"button\">Go Back </button>");
-        logger.atInfo().log("User: %s , has not created any questions yet",ownerID);
-        return;
-      }
-      out.println("<h1>Check the questions you would like to reuse</h1>");
-      out.println("<form action=\"/saveQuestionsFromBank\" method=\"POST\">");
-      for (Entity entity : results.asIterable()) {
-        long questionId = entity.getKey().getId();
-        String question = (String) entity.getProperty("question");
-        String marks = (String) entity.getProperty("marks");
-        out.println("<input type=\"checkbox\" name=\"question\" value=\""
-          + String.valueOf(questionId) + "\">" + question
-          + " (" + marks + ")<br>");
-      }
-    } catch (DatastoreFailureException e) {
-      logger.atWarning().log("There was an error with retrieving the questions: %s",
-          e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
-    }
-
-    out.println("<h3> Select which test you want the questions added to </h1>");
-    out.println("<select name=\"test\">");
-
+    out.println("<h3>Create a New Question</h3>");
+    out.println("<form id=\"createQuestion\" action=\"/createQuestion\""
+        + " method=\"POST\">");
+    out.println("<label for=\"question\">Enter Question:</label><br>");
+    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" required>"
+        + "</textarea><br>");
+    out.println("<label for=\"marks\">Marks given for Question:</label><br>");
+    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" required>");
+    out.println("<h3> Select which test you want the questions added to</h1>");
+    out.println("<select name=\"testName\">");
     // Find all tests created by this user and display them as a dropdown menu.
     try {
-      datastore = DatastoreServiceFactory.getDatastoreService();
-      Query queryExams = new Query("Exam")
-          .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
-          ownerID)).addSort("date", SortDirection.DESCENDING);
+      Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
+          "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
+          SortDirection.DESCENDING);
       PreparedQuery listExams = datastore.prepare(queryExams);
-
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
         out.println("<option>" + name  + "</option>");
       }
-    } catch (DatastoreFailureException e) {
-      logger.atWarning().log("There was an error when retrieving the tests: %s",
+    } catch (Exception e) {
+      logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
     }
 
     out.println("</select>");
@@ -136,9 +107,14 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<br/>");
     out.println("<button>Submit</button>");
     out.println("</form>");
+    out.println("<h3> Click Below to Look Through Previous Questions You asked</h3>");
+    out.println("<form id=\"addQuestions\" action=\"/returnQuestionsUserOwns\""
+        + " method=\"GET\">");
+    out.println("<input type=\"submit\" value=\"Click\">");
+    out.println("</form>");
     out.println("</body>");
     response.setStatus(HttpServletResponse.SC_OK);
-    logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
-        + " and displayed correctly", userService.getCurrentUser());
+    logger.atInfo().log("Question form was displayed correctly for the User:"
+      + "%s", userService.getCurrentUser());
   }
 }

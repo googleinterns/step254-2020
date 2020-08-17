@@ -13,7 +13,7 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
-import com.google.sps.data.UtilityClass;
+
 import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import java.util.List;
@@ -30,73 +31,65 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.Date;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-/** Servlet that creates and stores questions.
+
+/** Servlet that saves selected questions to the test.
 * @author Klaudia Obieglo
 */
-@WebServlet("/createQuestion")
-public class CreateQuestionServlet extends HttpServlet {
+@WebServlet("/saveQuestionsFromBank")
+public class SaveQuestionsFromBankServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
-    /* Servlet Receives information from the client about the question
-    * they want to save */
-    Long date = (new Date()).getTime();
-    String testName = UtilityClass.getParameter(request, "testName", "");
-    String question = UtilityClass.getParameter(request, "question", "");
-    String marks = UtilityClass.getParameter(request, "marks", "");
-
-    if (testName == "" || question == "" || marks == "") {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      logger.atWarning().log("One or more null parameters");
-      return;
-    }
-
+    /*Saves the selected questions from the question bank to the latest test
+    * that the user has created
+    */
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendRedirect("/");
       return;
     }
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
+
+    String testName = request.getParameter("test");
+    String[] questionsList = request.getParameterValues("question");
+    if (testName == null || questionsList == null) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      logger.atWarning().log("One or more null parameters");
+      return;
+    }
     try {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      // Create a Question Entity with the parameters provided
-      Entity questionEntity = new Entity("Question");
-      questionEntity.setProperty("question", question);
-      questionEntity.setProperty("marks", marks);
-      questionEntity.setProperty("date", date);
-      questionEntity.setProperty("ownerID", ownerID);
-      datastore.put(questionEntity);
-      addQuestionToExamList(questionEntity.getKey().getId(), ownerID,
-          testName);
-
-      response.setContentType("application/json");
-      response.setStatus(HttpServletResponse.SC_CREATED);
-      logger.atInfo().log("question created=%s", questionEntity.getKey().getId());
-      response.getWriter().println(UtilityClass.convertToJson(questionEntity));
+      for (int i = 0; i < questionsList.length; i++) {
+        addQuestionToExamList(Long.valueOf(questionsList[i]), ownerID, testName);
+        response.getWriter().println("Successfully added Question "
+            + questionsList[i]);
+      }
+      response.setStatus(HttpServletResponse.SC_OK);
       response.sendRedirect("/questionForm");
     } catch (DatastoreFailureException e) {
-        logger.atSevere().log("Datastore Failure.Datastore is not responding:"
-          + " %s", e);
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        return;
+      logger.atSevere().log("Datastore Failure.Datastore is not responding"
+        + " : %s", e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
     }
+
   }
   private void addQuestionToExamList(final long questionEntityKey,
       final String ownerID, final String testName) {
-    /*Function that adds the question id to the list of questions
-    * in the exam entity
+    /*Function that adds the question id to the list of questions to the latest
+    *  test created by the user
     * Arguments
-    *  -QuestionEntityKey -id of the question entity we are adding to the list
-    *  -ownerID - email of the user adding this question */
-
-    //grab the exam created by the user and with the test name provided
+    * -QuestionEntityKey - id of the question Entity we are adding to the list
+    * -ownerID - email of the person who is adding this question to their test
+    */
+    //grab the latest exam created by the user
     try {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Entity latestExam = getExam(ownerID, testName);
@@ -114,21 +107,20 @@ public class CreateQuestionServlet extends HttpServlet {
       logger.atInfo().log("Added question: %s to test: %s", questionEntityKey,
           latestExam.getKey().getId());
     } catch (Exception e) {
-        logger.atSevere().log("Exam questions cannot be added: %s", e);
-        return;
+      logger.atWarning().log("Exam questions cannot be added: %s", e);
     }
-
   }
-  private Entity getExam(final String ownerId, final String testName) {
+  private Entity getExam(final String ownerID, final String testName) {
     /* Function that returns the exam created by the user
-    *  Arguments: ownerId - email of the user who's test we want to find
-    *  Return : Returns the entity of the test created by that user with
-    *  that test name.*/
+    *  Arguments: ownerID - email of the user who's last exam we want to find
+    *  Return : Returns the entity of the exam created by that user.
+    */
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query queryExam = new Query("Exam").setFilter(new FilterPredicate("ownerId",
-        FilterOperator.EQUAL, ownerId)).setFilter(new FilterPredicate("name",
-        FilterOperator.EQUAL, testName));
-    PreparedQuery pq = datastore.prepare(queryExam);
+    Query queryTest = new Query("Exam").setFilter(new FilterPredicate("ownerID",
+        FilterOperator.EQUAL, ownerID)).setFilter(new FilterPredicate(
+        "name", FilterOperator.EQUAL, testName)).addSort("date",
+        SortDirection.DESCENDING);
+    PreparedQuery pq = datastore.prepare(queryTest);
     Entity result = pq.asSingleEntity();
     return result;
   }

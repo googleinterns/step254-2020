@@ -13,32 +13,37 @@
 // limitations under the License.
 
 package com.google.sps;
-import com.google.sps.servlets.CreateTestServlet;
+
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertTrue;
+
+import com.google.sps.servlets.QuestionFormServlet;
 import java.io.IOException;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.Before;
 import javax.servlet.http.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.Test;
 import java.io.*;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertTrue;
+import org.junit.runner.RunWith;
+import java.util.Date;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import org.junit.runners.JUnit4;
+
 @RunWith(JUnit4.class)
-public final class CreateTestServletTest extends CreateTestServlet{
+public final class QuestionFormServletTest extends QuestionFormServlet {
   private final LocalServiceTestHelper helper = 
-    new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-      .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
   @Before
   public void setUp() {
@@ -49,28 +54,46 @@ public final class CreateTestServletTest extends CreateTestServlet{
   public void tearDown() {
     helper.tearDown();
   }
+  
+  @Test
+  public void testdoGetFunction() throws IOException {
+    //check if the form gets build and returns the correct
+    //status response.
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    helperLogin();
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+    
+    QuestionFormServlet servlet= new QuestionFormServlet();
+    servlet.doGet(request, response);
+    String result = stringWriter.toString();
+    System.out.println(result);
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+  }
 
   @Test
-  public void testdoPostFunction() throws IOException{
-    /*Tests the doPost function to see if the test gets stored correctly */
-    CreateTestServlet servlet = new CreateTestServlet();
+  public void testNotLoggedInUser() throws IOException {
+    // test to see if a not logged in user will be able to
+    // look at tests a user has created
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
 
     UserService userService = mock(UserService.class);
-    when(userService.isUserLoggedIn()).thenReturn(true);
-    //set the parameters that will be requested to test values
-    when(request.getParameter("testName")).thenReturn("Testing Test");
-    when(request.getParameter("duration")).thenReturn("30");
-
-
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringWriter);
-    when(response.getWriter()).thenReturn(writer);
-
-    servlet.doPost(request, response);
-    String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"ownerID\":\"test@example.com\",\"testDuration\":\"30\","+
-      "\"testName\":\"Testing Test\""));
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    
+    QuestionFormServlet servlet= new QuestionFormServlet();
+    servlet.doGet(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
+  private void helperLogin() {
+    /* Login user with email "test@example.com" */
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
+  }
+
 }

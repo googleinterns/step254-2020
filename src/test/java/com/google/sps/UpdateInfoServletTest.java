@@ -14,41 +14,40 @@
 
 package com.google.sps;
 
-import com.google.sps.servlets.UpdateInfoServlet;
-import java.io.IOException;
-import com.google.gson.Gson;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.After;
-import org.junit.Test;
-import javax.servlet.http.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import java.util.Date;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import com.google.gson.Gson;
-import static org.mockito.Mockito.*;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import static org.junit.Assert.assertTrue;
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.sps.data.UtilityClass;
+import com.google.sps.servlets.UpdateInfoServlet;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Tests for Update Info Servlet to see if user preferences are stored correctly.
+ *
+ * @author Aidan Molloy
+ */
 @RunWith(JUnit4.class)
-public final class UpdateInfoServletTest extends UpdateInfoServlet{
-  private final LocalServiceTestHelper helper = 
-    new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-    
+public final class UpdateInfoServletTest extends UpdateInfoServlet {
+  private final LocalServiceTestHelper helper =
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
+          .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+
   @Before
   public void setUp() {
     helper.setUp();
@@ -59,19 +58,45 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet{
     helper.tearDown();
   }
 
+  /* Test updating user preferences */
   @Test
-  public void doGetTest() throws IOException{
-    HttpServletRequest request = mock(HttpServletRequest.class);       
+  public void doPostTest() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    UpdateInfoServlet servlet = new UpdateInfoServlet();
+
+    when(request.getParameter("name")).thenReturn("Test User");
+    when(request.getParameter("font")).thenReturn("Arial");
+    when(request.getParameter("font_size")).thenReturn("16");
+    when(request.getParameter("bg_color")).thenReturn("white");
+    when(request.getParameter("text_color")).thenReturn("black");
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+    UpdateInfoServlet servlet = new UpdateInfoServlet();
+    servlet.doPost(request, response);
 
-    servlet.doGet(request, response);
-    String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Login <a href=\"/_ah/login?continue="));
+    // Make query to datastore to make sure it was stored correctly
+    Query query =
+        new Query("UserInfo")
+            .setFilter(new Query
+                .FilterPredicate("email", Query.FilterOperator.EQUAL, "test@example.com"));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    Entity entity = results.asSingleEntity();
+
+    // Convert the received entity into a json string to check content
+    Map<String, String> userInfoResponse = new HashMap<String, String>();
+    userInfoResponse.put("name", (String) entity.getProperty("name"));
+    userInfoResponse.put("font", (String) entity.getProperty("font"));
+    userInfoResponse.put("font_size", (String) entity.getProperty("font_size"));
+    userInfoResponse.put("bg_color", (String) entity.getProperty("bg_color"));
+    userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
+    String result = UtilityClass.convertToJson(userInfoResponse);
+    Assert.assertTrue(result.contains("\"bg_color\":\"white\""));
+    Assert.assertTrue(result.contains("\"font_size\":\"16\""));
+    Assert.assertTrue(result.contains("\"name\":\"Test User\""));
+    Assert.assertTrue(result.contains("\"text_color\":\"black\""));
+    Assert.assertTrue(result.contains("\"font\":\"Arial\""));
   }
-
 }

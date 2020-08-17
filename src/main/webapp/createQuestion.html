@@ -16,7 +16,7 @@
     </header>
     <main>
       <h3> Create New Question</h3>
-      <form id="createQuestion" action="/question" method="POST">
+      <form id="createQuestion" action="/createQuestion" method="POST">
         <label for="question">Enter Question:</label><br>
         <textarea name="question" rows="4" cols="50" required></textarea><br>
         <label for="marks">Marks given for Question:</label><br>
@@ -24,7 +24,7 @@
         <input type="submit" value="Submit Question"> 
       </form>
       <h3> Add Previously Used Questions</h3>
-      <form id="addQuestions">
+      <form id="addQuestions" action="/returnQuestionsUserOwns" method="GET">
         <input type="submit" value="Submit Selected Questions"> 
       </form>
     </main>

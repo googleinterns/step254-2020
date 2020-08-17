@@ -13,17 +13,12 @@
 // limitations under the License.
 
 package com.google.sps;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
 
-import com.google.sps.servlets.CreateQuestionServlet;
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertTrue;
+
+import com.google.sps.servlets.CreateExamServlet;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,16 +28,15 @@ import org.junit.After;
 import org.junit.Before;
 import javax.servlet.http.*;
 import org.junit.Test;
-import java.io.*;
 import org.junit.runner.RunWith;
+import java.io.*;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import org.junit.runners.JUnit4;
-
 @RunWith(JUnit4.class)
-public final class CreateQuestionServletTest extends CreateQuestionServlet {
+public final class CreateExamServletTest extends CreateExamServlet {
   private final LocalServiceTestHelper helper = 
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
@@ -58,47 +52,46 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
 
   @Test
   public void testdoPostFunction() throws IOException {
-    /*Tests the doPost function to see if the question gets stored correctly */
+    /*Tests the doPost function to see if the test gets stored correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
     //set the parameters that will be requested to test values
-    when(request.getParameter("question")).thenReturn("What does the fox say?");
-    when(request.getParameter("marks")).thenReturn("5");
-    when(request.getParameter("testName")).thenReturn("Trial");
-    //create Fake Test
-    createFakeTest();
+    when(request.getParameter("name")).thenReturn("Testing Exam");
+    when(request.getParameter("duration")).thenReturn("30");
+
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
 
-    CreateQuestionServlet servlet = new CreateQuestionServlet();
+    CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"question\":\"What does the fox say?\","
-      +"\"marks\":\"5\",\"ownerID\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"ownerID\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"duration\":\"30\""));
+    Assert.assertTrue(result.contains("\"name\":\"Testing Exam\""));
+    //check if the correct status has been applied
     verify(response).setStatus(HttpServletResponse.SC_CREATED);
   }
 
   @Test
-  public void testDoPostWithNullParameters() throws IOException {
-    /*Test do Post function with null parameters to check if
-    * the correct status code gets applied */
+  public void testDoPostWithNullInputs() throws IOException {
+    // Check if the correct status code will be applied when 
+    // the input is null. 
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-
+    helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-
     //set the parameters that will be requested to test values
-    when(request.getParameter("question")).thenReturn(null);
-    when(request.getParameter("marks")).thenReturn("10");
-    when(request.getParameter("testName")).thenReturn(null);
-    
-    CreateQuestionServlet servlet = new CreateQuestionServlet();
+    when(request.getParameter("name")).thenReturn(null);
+    when(request.getParameter("duration")).thenReturn("30");
+
+
+    CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_BAD_REQUEST);
   }
@@ -112,13 +105,14 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
 
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
+
     
     //set the parameters that will be requested to test values
-    when(request.getParameter("question")).thenReturn("How are you?");
-    when(request.getParameter("marks")).thenReturn("10");
-    when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("name")).thenReturn("trial");
+    when(request.getParameter("duration")).thenReturn("30");
+
     
-    CreateQuestionServlet servlet = new CreateQuestionServlet();
+    CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
@@ -127,17 +121,5 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     helper.setEnvAuthDomain("example.com");
     helper.setEnvEmail("test@example.com");
     helper.setEnvIsLoggedIn(true);
-  }
-  private void createFakeTest() {
-    /*Create a Fake test*/
-    Long date = (new Date()).getTime();
-    Entity testEntity = new Entity("Exam");
-    testEntity.setProperty("name", "Trial");
-    testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID", "test@example.com");
-    testEntity.setProperty("date", date);
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(testEntity); 
   }
 }

@@ -17,82 +17,78 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.google.common.flogger.FluentLogger;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
- * Servlet to set users preferences linked with specific emails
+ * Servlet to update users preferences, overwrites current preferences linked with users email
+ * on the datastore.
+ *
+ * @author Aidan Molloy
  */
 @WebServlet("/updateInfo")
 public class UpdateInfoServlet extends HttpServlet {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * doGet prints form to page for changing username
-   */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html");
-    PrintWriter out = response.getWriter();
-    out.println("<h1>Set Preferences</h1>");
-
-    UserService userService = UserServiceFactory.getUserService();
-    if (userService.isUserLoggedIn()) {
-      out.println("<p>Set your preferences here:</p>");
-      out.println("<form method=\"POST\" action=\"/updateInfo\">");
-      out.println("<input type=\"text\" name=\"name\" />");
-      out.println("<input type=\"text\" name=\"font\" />");
-      out.println("<input type=\"text\" name=\"font_size\" />");
-      out.println("<input type=\"text\" name=\"bg_color\" />");
-      out.println("<input type=\"text\" name=\"text_color\" />");
-      out.println("<br/>");
-      out.println("<button>Submit</button>");
-      out.println("</form>");
-    } else {
-      String loginUrl = userService.createLoginURL("/");
-      out.println("<p>Login <a href=\"" + loginUrl + "\">here</a>.</p>");
-    }
-  }
-
-  /**
-   * doPost process the information from the form links the new preferences to 
-   * the associated logged in email
+   * Get passed parameters for users new preferences and save to datastore.
+   *
+   * @param request  provides request information from the HTTP servlet
+   * @param response response object where servlet will write information to
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
+      logger.atWarning().log("User is not logged in.");
       response.sendRedirect("/");
       return;
     }
+    logger.atInfo().log("user=%s", userService.getCurrentUser());
 
-    String name = request.getParameter("name");
-    String font = request.getParameter("font");
-    String font_size = request.getParameter("font_size");
-    String bg_color = request.getParameter("bg_color");
-    String text_color = request.getParameter("text_color");
-    String email = userService.getCurrentUser().getEmail();
+    String name, font, font_size, bg_color, text_color, email;
+    name = font = font_size = bg_color = text_color = email = null;
+
+    try {
+      name = request.getParameter("name");
+      font = request.getParameter("font");
+      font_size = request.getParameter("font_size");
+      bg_color = request.getParameter("bg_color");
+      text_color = request.getParameter("text_color");
+      email = userService.getCurrentUser().getEmail();
+    } catch (Exception e) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      logger.atSevere().log("One or more null parameters");
+    }
+
+    if (name == null || font == null || font_size == null || bg_color == null ||
+        text_color == null || email == null) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      logger.atSevere().log("One or more null parameters");
+      return;
+    }
 
     try {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      Entity entity = new Entity("UserInfo", email);
-      entity.setProperty("email", email);
-      entity.setProperty("name", name);
-      entity.setProperty("font", font);
-      entity.setProperty("font_size", font_size);
-      entity.setProperty("bg_color", bg_color);
-      entity.setProperty("text_color", text_color);
-      // The put() function automatically inserts new data or updates existing data based on email
-      datastore.put(entity);
-    } catch(Exception e) {
-      System.out.println("Something went wrong with Datastore. Please try again later.");
+      Entity userInfoEntity = new Entity("UserInfo", email);
+      userInfoEntity.setProperty("email", email);
+      userInfoEntity.setProperty("name", name);
+      userInfoEntity.setProperty("font", font);
+      userInfoEntity.setProperty("font_size", font_size);
+      userInfoEntity.setProperty("bg_color", bg_color);
+      userInfoEntity.setProperty("text_color", text_color);
+      datastore.put(userInfoEntity);
+    } catch (Exception e) {
+      logger.atSevere().log("There was an error with datastore: %s", e);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     response.sendRedirect("/dashboard.html");
