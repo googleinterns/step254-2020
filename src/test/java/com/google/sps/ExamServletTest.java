@@ -12,28 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps;
+package com.google.sps.servlets;
 
-import com.google.appengine.api.datastore.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.sps.servlets.ExamServlet;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for Authentication Servlet for logged out user, logged in user without preferences set
@@ -59,13 +61,13 @@ public final class ExamServletTest extends ExamServlet {
 
   /* Set up fake exam */
   private void addExam() {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity examEntity = new Entity("Exam");
     examEntity.setProperty("name", "Test Exam");
     examEntity.setProperty("duration", "20");
     examEntity.setProperty("ownerID", "test@example.com");
     examEntity.setProperty("date", "20");
     examEntity.setProperty("questionsList", new ArrayList<>());
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(examEntity);
   }
 
@@ -85,9 +87,7 @@ public final class ExamServletTest extends ExamServlet {
     Assert.assertTrue(result.contains("Choose an exam to take"));
   }
 
-  /**
-   * When examID that does not exist is provided
-   */
+  /* When examID that does not exist is provided */
   @Test
   public void doGetTestInvalidExamID() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -105,7 +105,9 @@ public final class ExamServletTest extends ExamServlet {
     Assert.assertTrue(result.contains("Choose an exam to take"));
   }
 
-  /* Get the ExamID of existing exam */
+  /**
+   *  Get the ExamID of existing exam.
+   */
   public String getExamID() {
     Query query = new Query("Exam");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

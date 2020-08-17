@@ -14,22 +14,25 @@
 
 package com.google.sps.servlets;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
-
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * The authentication servlet is responsible for authenticating users and retreiving user
+ * The authentication servlet is responsible for authenticating users and retrieving user
  * preferences from datastore.
  *
  * @author Aidan Molloy
@@ -67,8 +70,8 @@ public class AuthenticationServlet extends HttpServlet {
         authResponse.put("loginUrl", loginUrl);
       }
     } catch (Exception e) {
-      authResponse.put("errorMsg", "Something went wrong. Please try again later.");
       logger.atSevere().log("There was an error: %s", e);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     String json = UtilityClass.convertToJson(authResponse);
@@ -81,7 +84,7 @@ public class AuthenticationServlet extends HttpServlet {
    * Returns the preferences of the user with email, or null if the user has not set their
    * preferences.
    *
-   * @param email the email of logged in user to retreive linked userInfo from datastore
+   * @param email the email of logged in user to retrieve linked userInfo from datastore
    * @return a map of userInfo linked to the user email
    */
   private Map<String, String> getUserInfo(String email) {
@@ -106,7 +109,7 @@ public class AuthenticationServlet extends HttpServlet {
     } catch (Exception e) {
       userInfoResponse.put("errorMsg", "Something went wrong. Please try again later.");
       logger.atSevere().log("There was an error: %s", e);
-      return null;
+      return userInfoResponse;
     }
   }
 }
