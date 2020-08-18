@@ -28,7 +28,7 @@ async function authenticate() {
       userAuth = true;
       logInOut.innerHTML = `<a id= "login" href="${userDetails.logoutUrl}"
       >Logout</a>`;
-      setPreference(); 
+      setPreference();
     } else {
       userAuth = false;
       logInOut.innerHTML = `<a href="${userDetails.loginUrl}">Login</a>`;
@@ -65,7 +65,7 @@ async function setPreference() {
  * Check if user has access to page
  */
 function pageAccess() {
-    console.log(userName);
+  console.log(userName);
   if (userAuth === true) {
     const page = newUser(userName);
     console.log(page);
