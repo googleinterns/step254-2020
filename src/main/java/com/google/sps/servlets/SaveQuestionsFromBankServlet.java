@@ -14,7 +14,6 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -24,15 +23,16 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 
 
 /** Servlet that saves selected questions to the test.
@@ -44,8 +44,8 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
-    /*Saves the selected questions from the question bank to the latest test
-    * that the user has created
+    /*Saves the selected questions from the question bank to the test
+    * that the user wants the questions saved to
     */
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
@@ -65,16 +65,14 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
       return;
     }
     try {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       for (int i = 0; i < questionsList.length; i++) {
         addQuestionToExamList(Long.valueOf(questionsList[i]), ownerID, testName);
         response.getWriter().println("Successfully added Question "
             + questionsList[i]);
       }
-      response.setStatus(HttpServletResponse.SC_OK);
       response.sendRedirect("/questionForm");
-    } catch (DatastoreFailureException e) {
-      logger.atSevere().log("Datastore Failure.Datastore is not responding"
+    } catch (Exception e) {
+      logger.atSevere().log("There was an error with saving the questions"
         + " : %s", e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
@@ -91,7 +89,6 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     */
     //grab the latest exam created by the user
     try {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Entity latestExam = getExam(ownerID, testName);
       if (latestExam.getProperty("questionsList") == null) {
         List<Long> questionList = new ArrayList<>();
@@ -103,6 +100,7 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
         questionList.add(questionEntityKey);
         latestExam.setProperty("questionsList", questionList);
       }
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(latestExam);
       logger.atInfo().log("Added question: %s to test: %s", questionEntityKey,
           latestExam.getKey().getId());
@@ -115,11 +113,11 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     *  Arguments: ownerID - email of the user who's last exam we want to find
     *  Return : Returns the entity of the exam created by that user.
     */
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query queryTest = new Query("Exam").setFilter(new FilterPredicate("ownerID",
         FilterOperator.EQUAL, ownerID)).setFilter(new FilterPredicate(
         "name", FilterOperator.EQUAL, testName)).addSort("date",
         SortDirection.DESCENDING);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryTest);
     Entity result = pq.asSingleEntity();
     return result;

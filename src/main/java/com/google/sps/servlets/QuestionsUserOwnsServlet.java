@@ -14,7 +14,6 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -24,14 +23,15 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import java.io.PrintWriter;
 
 /** Servlet that returns a checkbox form of all the questions owned by the user
 * A user can then select the questions they want to reuse by clicking on the
@@ -136,7 +136,6 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<button>Submit</button>");
     out.println("</form>");
     out.println("</body>");
-    response.setStatus(HttpServletResponse.SC_OK);
     logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
         + " and displayed correctly", userService.getCurrentUser());
   }

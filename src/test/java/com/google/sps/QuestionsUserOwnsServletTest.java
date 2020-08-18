@@ -12,34 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps;
+package com.google.sps.servlets;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import com.google.sps.servlets.QuestionsUserOwnsServlet;
-import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
-import javax.servlet.http.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import java.io.*;
-import java.util.Date;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Tests for Questions User Owns Servlet. Test is all questions created by the user get retrieved,
+ * if a user is not logged in check for an unauthorised error.
+ *
+ * @author Klaudia Obieglo
+ */
 @RunWith(JUnit4.class)
 public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet {
   private final LocalServiceTestHelper helper = 
@@ -75,7 +79,6 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("What day is it? (5)"));
     Assert.assertTrue(result.contains("What year is it? (10)"));
-    verify(response).setStatus(HttpServletResponse.SC_OK);
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
@@ -106,9 +109,16 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     anotherQuestionEntity.setProperty("date", date);
     anotherQuestionEntity.setProperty("ownerID", "test@example.com");
     
+    Entity questionByDifferentUser = new Entity("Question");
+    questionByDifferentUser.setProperty("question", "How many pets do you have?");
+    questionByDifferentUser.setProperty("marks", "15");
+    questionByDifferentUser.setProperty("date", date);
+    questionByDifferentUser.setProperty("ownerID", "person@example.com");
+    
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(questionEntity);
     datastore.put(anotherQuestionEntity);
+    datastore.put(questionByDifferentUser);
   }
   private void helperLogin() {
     /* Login user with email "test@example.com" */
