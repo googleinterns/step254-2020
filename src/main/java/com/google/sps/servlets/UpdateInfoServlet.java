@@ -69,11 +69,11 @@ public class UpdateInfoServlet extends HttpServlet {
       textColor = request.getParameter("text_color");
       email = userService.getCurrentUser().getEmail();
     } catch (Exception e) {
+      logger.atSevere().log("One or more null parameters in try/catch");
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      logger.atSevere().log("One or more null parameters");
     }
 
-    if (name == null || font == null || fontSize == null || bgColor == null
+    if (font == null || fontSize == null || bgColor == null
         || textColor == null || email == null) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       logger.atSevere().log("One or more null parameters");
