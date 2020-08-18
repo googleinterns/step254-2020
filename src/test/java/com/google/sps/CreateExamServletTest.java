@@ -12,29 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps;
+package com.google.sps.servlets;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import com.google.sps.servlets.CreateExamServlet;
-import java.io.IOException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
-import javax.servlet.http.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import java.io.*;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+/**
+ * Tests for Create Exam Servlet. Test if an exam gets saved correctly,if exam's parameters are null
+ * and if  a user is not logged in.
+ *
+ * @author Klaudia Obieglo
+ */
 @RunWith(JUnit4.class)
 public final class CreateExamServletTest extends CreateExamServlet {
   private final LocalServiceTestHelper helper = 
@@ -56,12 +61,12 @@ public final class CreateExamServletTest extends CreateExamServlet {
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     helperLogin();
+
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
     //set the parameters that will be requested to test values
     when(request.getParameter("name")).thenReturn("Testing Exam");
     when(request.getParameter("duration")).thenReturn("30");
-
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -73,12 +78,10 @@ public final class CreateExamServletTest extends CreateExamServlet {
     Assert.assertTrue(result.contains("\"ownerID\":\"test@example.com\""));
     Assert.assertTrue(result.contains("\"duration\":\"30\""));
     Assert.assertTrue(result.contains("\"name\":\"Testing Exam\""));
-    //check if the correct status has been applied
-    verify(response).setStatus(HttpServletResponse.SC_CREATED);
   }
 
   @Test
-  public void testDoPostWithNullInputs() throws IOException {
+  public void testDoPostWithNullInput() throws IOException {
     // Check if the correct status code will be applied when 
     // the input is null. 
     HttpServletRequest request = mock(HttpServletRequest.class);       
@@ -89,7 +92,6 @@ public final class CreateExamServletTest extends CreateExamServlet {
     //set the parameters that will be requested to test values
     when(request.getParameter("name")).thenReturn(null);
     when(request.getParameter("duration")).thenReturn("30");
-
 
     CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
@@ -106,12 +108,10 @@ public final class CreateExamServletTest extends CreateExamServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
 
-    
     //set the parameters that will be requested to test values
     when(request.getParameter("name")).thenReturn("trial");
     when(request.getParameter("duration")).thenReturn("30");
 
-    
     CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);

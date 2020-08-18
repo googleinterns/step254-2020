@@ -13,8 +13,7 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
-import com.google.sps.data.UtilityClass;
-import java.io.IOException;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -23,16 +22,19 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.UtilityClass;
+import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Date;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Date;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
+
 
 /** Servlet that creates and stores questions.
 * @author Klaudia Obieglo
@@ -65,19 +67,18 @@ public class CreateQuestionServlet extends HttpServlet {
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
     try {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       // Create a Question Entity with the parameters provided
       Entity questionEntity = new Entity("Question");
       questionEntity.setProperty("question", question);
       questionEntity.setProperty("marks", marks);
       questionEntity.setProperty("date", date);
       questionEntity.setProperty("ownerID", ownerID);
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(questionEntity);
       addQuestionToExamList(questionEntity.getKey().getId(), ownerID,
           testName);
 
       response.setContentType("application/json");
-      response.setStatus(HttpServletResponse.SC_CREATED);
       logger.atInfo().log("question created=%s", questionEntity.getKey().getId());
       response.getWriter().println(UtilityClass.convertToJson(questionEntity));
       response.sendRedirect("/questionForm");
@@ -98,7 +99,6 @@ public class CreateQuestionServlet extends HttpServlet {
 
     //grab the exam created by the user and with the test name provided
     try {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Entity latestExam = getExam(ownerID, testName);
       if (latestExam.getProperty("questionsList") == null) {
         List<Long> questionList = new ArrayList<>();
@@ -110,6 +110,7 @@ public class CreateQuestionServlet extends HttpServlet {
         questionList.add(questionEntityKey);
         latestExam.setProperty("questionsList", questionList);
       }
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(latestExam);
       logger.atInfo().log("Added question: %s to test: %s", questionEntityKey,
           latestExam.getKey().getId());
@@ -124,10 +125,10 @@ public class CreateQuestionServlet extends HttpServlet {
     *  Arguments: ownerId - email of the user who's test we want to find
     *  Return : Returns the entity of the test created by that user with
     *  that test name.*/
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query queryExam = new Query("Exam").setFilter(new FilterPredicate("ownerId",
         FilterOperator.EQUAL, ownerId)).setFilter(new FilterPredicate("name",
         FilterOperator.EQUAL, testName));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryExam);
     Entity result = pq.asSingleEntity();
     return result;
