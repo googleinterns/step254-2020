@@ -14,6 +14,7 @@
 //
 
 let userAuth = false;
+let userName = '';
 /**
  * Authenticate user
  */
@@ -48,6 +49,7 @@ async function setPreference() {
     const userFontSize = userDetails.font_size;
     const userFontColor = userDetails.text_color;
     const userBackgroundColor = userDetails.bg_color;
+    userName = userDetails.name;
 
     document.body.style.fontFamily = userFont;
     document.body.style.fontSize = userFontSize + 'px';
@@ -64,14 +66,30 @@ async function setPreference() {
  */
 function pageAccess() {
   if (userAuth === true) {
-    window.location.href = 'dashboard.html';
-    console.log(window.location.href );
+    const page = newUser(userName);
+    console.log(page);
+    window.location.href = page;
   } else {
     document.getElementById(
         'accessDenied',
     ).innerHTML = `<p> Cannot access until you login</p>`;
-  };
-}
+  }
+};
+
+/**
+ * Check if user is new
+ * @param {string} name name of the user
+ * @return {string} return href depending on user status
+ */
+function newUser(name) {
+  if (name === null) {
+    return 'userSetUp.html';
+  } else if (name === undefined) {
+    return 'userSetUp.html';
+  } else {
+    return 'dashboard.html';
+  }
+};
 /* eslint-enable no-unused-vars */
 
 // On load
@@ -86,5 +104,7 @@ if (typeof exports !== 'undefined') {
     setPreference,
     pageAccess,
     userAuth,
+    userName,
+    newUser,
   };
 };
