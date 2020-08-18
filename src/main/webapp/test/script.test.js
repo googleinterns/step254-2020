@@ -1,5 +1,6 @@
 const script = require('../script.js');
-let {userAuth, authenticate, pageAccess} = require('../script.js');
+let {userAuth, authenticate, pageAccess, userName, newUser} 
+  = require('../script.js');
 const mockPreference = {
   font: 'arial',
   bg_color: 'white',
@@ -22,17 +23,34 @@ const setAuthHtml = '<p id="logInOut"></p>';
 test('check page access false', () => {
   document.body.innerHTML= setAccessHtml;
   userAuth=false;
-  expect(userAuth).toBe(false);
   pageAccess();
+  expect(userAuth).toBeFalsy();
   expect( document.getElementById('accessDenied').innerHTML)
       .toBe(`<p> Cannot access until you login</p>`);
 });
 
 test('check page access true', () => {
   userAuth = true;
-  expect(userAuth).toBe(true);
   pageAccess();
+  expect(userAuth).toBeTruthy();
   expect(window.location.href).toBe('http://localhost/');
+});
+
+test('check old user', () => {
+  let response = newUser('name');
+  expect(response).toBe('dashboard.html');
+});
+
+test('check null user name', () => {
+  name = null;
+  let response = newUser(name);
+  expect(response).toBe('userSetUp.html');
+});
+
+test('check undefined user name', () => {
+  name = undefined;
+  let response = newUser(name);
+  expect(response).toBe('userSetUp.html');
 });
 
 test('check prefereneces can be set', async () => {
