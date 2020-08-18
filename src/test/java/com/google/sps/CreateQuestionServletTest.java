@@ -12,35 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+package com.google.sps.servlets;
 
-import com.google.sps.servlets.CreateQuestionServlet;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
-import javax.servlet.http.*;
-import org.junit.Test;
-import java.io.*;
-import org.junit.runner.RunWith;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Tests for Create Question Servlet. Test if a question gets saved correctly, if question does not
+ * get created when paramters are null, and test what happens when a user is not logged in. 
+ *
+ * @author Klaudia Obieglo
+ */
 @RunWith(JUnit4.class)
 public final class CreateQuestionServletTest extends CreateQuestionServlet {
   private final LocalServiceTestHelper helper = 
@@ -80,7 +83,6 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("\"question\":\"What does the fox say?\","
       +"\"marks\":\"5\",\"ownerID\":\"test@example.com\""));
-    verify(response).setStatus(HttpServletResponse.SC_CREATED);
   }
 
   @Test
@@ -117,7 +119,6 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     when(request.getParameter("question")).thenReturn("How are you?");
     when(request.getParameter("marks")).thenReturn("10");
     when(request.getParameter("testName")).thenReturn("Trial");
-    
     CreateQuestionServlet servlet = new CreateQuestionServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);

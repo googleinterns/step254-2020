@@ -12,34 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps;
+package com.google.sps.servlets;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
-import com.google.sps.servlets.QuestionFormServlet;
-import java.io.IOException;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
-import javax.servlet.http.*;
-import org.junit.Test;
-import java.io.*;
-import org.junit.runner.RunWith;
-import java.util.Date;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Tests for Question Form Servlet. Test if the proper question form gets displayed to the user,
+ * and if user is not logged in check for correct error status.
+ *
+ * @author Klaudia Obieglo
+ */
 @RunWith(JUnit4.class)
 public final class QuestionFormServletTest extends QuestionFormServlet {
   private final LocalServiceTestHelper helper = 
@@ -64,6 +65,7 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
+    
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
@@ -71,8 +73,7 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     QuestionFormServlet servlet= new QuestionFormServlet();
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    System.out.println(result);
-    verify(response).setStatus(HttpServletResponse.SC_OK);
+    Assert.assertTrue(result.contains("<label for=\"question\">Enter Question:</label><br>"));
   }
 
   @Test

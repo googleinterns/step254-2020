@@ -71,7 +71,7 @@ public class AuthenticationServlet extends HttpServlet {
       }
     } catch (Exception e) {
       logger.atSevere().log("There was an error: %s", e);
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     String json = UtilityClass.convertToJson(authResponse);
