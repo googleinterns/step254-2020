@@ -65,6 +65,7 @@ async function setPreference() {
  * Check if user has access to page
  */
 function pageAccess() {
+  console.log(userName);
   if (userAuth === true) {
     const page = newUser(userName);
     console.log(page);
