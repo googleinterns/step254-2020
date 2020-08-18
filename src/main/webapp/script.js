@@ -14,7 +14,7 @@
 //
 
 let userAuth = false;
-let userName = "";
+let userName = '';
 /**
  * Authenticate user
  */
@@ -67,9 +67,9 @@ async function setPreference() {
 function pageAccess() {
     console.log(userName);
   if (userAuth === true) {
-      let page = newUser(userName);
-      console.log(page);
-      window.location.href = page;
+    const page = newUser(userName);
+    console.log(page);
+    window.location.href = page;
   } else {
     document.getElementById(
         'accessDenied',
@@ -82,14 +82,12 @@ function pageAccess() {
  * @param {string} name name of the user
  * @return {string} return href depending on user status
  */
-function newUser(name){
-  if(name === null){
+function newUser(name) {
+  if (name === null) {
     return 'userSetUp.html';
-  }
-  else if(name === undefined){
+  } else if (name === undefined) {
     return 'userSetUp.html';
-  }
-  else{
+  } else {
     return 'dashboard.html';
   }
 };
@@ -108,6 +106,6 @@ if (typeof exports !== 'undefined') {
     pageAccess,
     userAuth,
     userName,
-    newUser
+    newUser,
   };
 };

@@ -1,6 +1,6 @@
 const script = require('../script.js');
-let {userAuth, authenticate, pageAccess, userName, newUser} 
-  = require('../script.js');
+let {userAuth, authenticate, pageAccess, newUser} =
+    require('../script.js');
 const mockPreference = {
   font: 'arial',
   bg_color: 'white',
@@ -37,19 +37,19 @@ test('check page access true', () => {
 });
 
 test('check old user', () => {
-  let response = newUser('name');
+  const response = newUser('name');
   expect(response).toBe('dashboard.html');
 });
 
 test('check null user name', () => {
   name = null;
-  let response = newUser(name);
+  const response = newUser(name);
   expect(response).toBe('userSetUp.html');
 });
 
 test('check undefined user name', () => {
   name = undefined;
-  let response = newUser(name);
+  const response = newUser(name);
   expect(response).toBe('userSetUp.html');
 });
 
