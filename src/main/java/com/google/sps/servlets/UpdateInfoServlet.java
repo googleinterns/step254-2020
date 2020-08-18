@@ -92,7 +92,7 @@ public class UpdateInfoServlet extends HttpServlet {
       datastore.put(userInfoEntity);
     } catch (Exception e) {
       logger.atSevere().log("There was an error with datastore: %s", e);
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     response.sendRedirect("/dashboard.html");

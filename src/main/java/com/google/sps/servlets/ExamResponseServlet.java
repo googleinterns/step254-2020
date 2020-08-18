@@ -72,7 +72,7 @@ public class ExamResponseServlet extends HttpServlet {
       }
     } catch (Exception e) {
       logger.atSevere().log("There was an error: %s", e);
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
     out.println("<h2>Responses Saved.</h2>");
     out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
