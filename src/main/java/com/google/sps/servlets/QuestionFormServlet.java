@@ -14,7 +14,7 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -23,14 +23,16 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import java.io.PrintWriter;
+
 
 /** Servlet that creates a question form for the user to fill out.
 * A user can add a question to whichever test they want.
@@ -50,7 +52,7 @@ public class QuestionFormServlet extends HttpServlet {
       response.sendRedirect("/");
       return;
     }
-    logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
+    logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -112,7 +114,6 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<input type=\"submit\" value=\"Click\">");
     out.println("</form>");
     out.println("</body>");
-    response.setStatus(HttpServletResponse.SC_OK);
     logger.atInfo().log("Question form was displayed correctly for the User:"
       + "%s", userService.getCurrentUser());
   }
