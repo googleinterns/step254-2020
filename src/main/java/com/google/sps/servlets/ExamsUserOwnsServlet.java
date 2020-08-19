@@ -48,7 +48,8 @@ public class ExamsUserOwnsServlet extends HttpServlet{
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+          "You are not authorised to view this page");
       return;
     }
     String ownerID = userService.getCurrentUser().getEmail(); 
@@ -74,9 +75,10 @@ public class ExamsUserOwnsServlet extends HttpServlet{
       response.sendRedirect("/createExam.html");
       response.getWriter().println(UtilityClass.convertToJson(examList));
     } catch (DatastoreFailureException e) {
-        logger.atSevere().log("Datastore error:%s" ,e);
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        return;
+      logger.atSevere().log("Datastore error:%s" ,e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to retrieve your exams");
+      return;
     }
   }
 }

@@ -48,8 +48,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+          "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
@@ -104,7 +104,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error with retrieving the questions: %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to retrieve your questions");
       return;
     }
 
@@ -127,7 +128,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error when retrieving the tests: %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to retrieve your Tests");
       return;
     }
 

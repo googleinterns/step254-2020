@@ -48,8 +48,8 @@ public class QuestionFormServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+        "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
@@ -101,7 +101,8 @@ public class QuestionFormServlet extends HttpServlet {
     } catch (Exception e) {
       logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your tests");
       return;
     }
 

@@ -53,7 +53,8 @@ public class CreateQuestionServlet extends HttpServlet {
     String marks = UtilityClass.getParameter(request, "marks", "");
 
     if (testName == "" || question == "" || marks == "") {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+          "You have entered one or more null parameters");
       logger.atWarning().log("One or more null parameters");
       return;
     }
@@ -61,7 +62,8 @@ public class CreateQuestionServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+          "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
@@ -85,7 +87,8 @@ public class CreateQuestionServlet extends HttpServlet {
     } catch (DatastoreFailureException e) {
         logger.atSevere().log("Datastore Failure.Datastore is not responding:"
           + " %s", e);
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            "Internal Error occurred when trying to create your question");
         return;
     }
   }
