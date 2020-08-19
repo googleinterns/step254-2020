@@ -102,9 +102,9 @@ function checkBox() {
   const checkBoxArray = [...checkBoxList];
   const areTheyChecked = checkBoxArray.some(box => box.checked );
   console.log(areTheyChecked);
-  if(areTheyChecked === true){
+  if(areTheyChecked === true) {
     submitButton.style.display = "block";
-  } else if (areTheyChecked === false) {
+  } else {
     submitButton.style.display = "none"; 
   }
 };
