@@ -19,7 +19,8 @@ let isDirty = false;
  * Notes if exam has been submitted
  */
 function setExamSubmitting() { 
-    formSubmitting = true; 
+    examSubmitting = true; 
+    return examSubmitting
 }
 
 /**
@@ -27,23 +28,31 @@ function setExamSubmitting() {
  */
 function setDirty () {
     isDirty = true;
+    return isDirty;
 }
 
 /**
  * Checks if user has unsaved changes before leaving page
+ * @param {Event} e BeforeUnloadEvent
+ * @param {Boolean} submitted submission state
+ * @param {Boolean} dirty form state
  * @return {window.event} warning if user has unsaved changes
  * @return {undefined} allows user leave page without warning
  */
-window.addEventListener("beforeunload", function (e) {
-  if (examSubmitting || !isDirty) {
+function isUnsubmitted (e, submitted, dirty) {
+ if (submitted || !dirty) {
     return undefined;
   }
-  const confirmationMessage = 'It looks like you have not submitted your exam'
-                        + 'If you leave before submitting, your exam will be lost.'
-                        + 'You may not be able to retake this exam.';
-
+  const confirmationMessage = 'It looks like you have not submitted your exam';
   (e || window.event).returnValue = confirmationMessage;
   return confirmationMessage;
+}
+
+/**
+ * Calls isUnsubmitted before user leaves page
+ */
+window.addEventListener('beforeunload', function (e) {
+  isUnsubmitted(e,examSubmitting,isDirty);
 });
 
 // Export modules for testing
@@ -53,5 +62,6 @@ if (typeof exports !== 'undefined') {
     setDirty,
     examSubmitting,
     isDirty,
+    isUnsubmitted,
   };
 };
