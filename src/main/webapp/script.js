@@ -81,14 +81,8 @@ function pageAccess() {
  * @param {string} name name of the user
  * @return {string} return href depending on user status
  */
-<<<<<<< HEAD
-function newUser(name){
-    console.log(name);
-  if(name === null){
-=======
 function newUser(name) {
   if (name === null) {
->>>>>>> 09e6177102d1461eb1d09ae197a64ccbae72ee5e
     return 'userSetUp.html';
   } else if (name === undefined) {
     return 'userSetUp.html';
