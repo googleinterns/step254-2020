@@ -97,7 +97,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
         long questionId = entity.getKey().getId();
         String question = (String) entity.getProperty("question");
         String marks = (String) entity.getProperty("marks");
-        out.println("<input type=\"checkbox\" name=\"question\" value=\""
+        out.println("<input onclick=\"checkBox()\" id=\"checkbox\" type=\"checkbox\" name=\"question\" value=\""
           + String.valueOf(questionId) + "\">" + question
           + " (" + marks + ")<br>");
       }
@@ -134,7 +134,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("</select>");
     out.println("<br/>");
     out.println("<br/>");
-    out.println("<button>Submit</button>");
+    out.println("<button style=\"display: none;\" id=\"checkBoxSubmit\">Submit</button>");
     out.println("</form>");
     out.println("</body>");
     logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
