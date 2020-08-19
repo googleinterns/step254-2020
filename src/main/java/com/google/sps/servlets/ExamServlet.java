@@ -70,12 +70,13 @@ public class ExamServlet extends HttpServlet {
         + " rel=\"stylesheet\">");
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
+    out.println("<script src=\"examSubmission.js\"></script>");
     out.println("<title>Take Exam</title>");
     out.println("</head>");
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
-    out.println("<a href=\"dashboard.html\">Dashboard</a>");
+    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -122,14 +123,15 @@ public class ExamServlet extends HttpServlet {
               out.println("<label for=\"" + questionID + "\">" + (i + 1) + ") "
                   + question + ": </label>");
               out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
-                  + questionID + "\"><br><br>");
+                  + questionID + "\" onchange=\"setDirty()\"><br><br>");
 
             } catch (Exception e) {
               out.println("<p>Question was not found</p><br>");
               logger.atWarning().log("Question does not exist: %s", e);
             }
           }
-          out.println("<br><input type=\"submit\" value=\"Submit\">");
+          out.println("<br><input type=\"submit\" value=\"Submit\"" 
+              + "onclick=\"setExamSubmitting\">");
           out.println("</form>");
         } else {
           out.println("<p>There are no questions associated with this exam.</p>");

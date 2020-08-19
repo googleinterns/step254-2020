@@ -83,6 +83,7 @@ function pageAccess() {
  * @return {string} return href depending on user status
  */
 function newUser(name){
+    console.log(name);
   if(name === null){
     return 'userSetUp.html';
   }
