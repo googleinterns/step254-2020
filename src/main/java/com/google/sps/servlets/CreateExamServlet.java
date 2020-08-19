@@ -39,7 +39,7 @@ public class CreateExamServlet extends HttpServlet {
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
-    //Servlet Recevies information from the client about an exam they
+    //Servlet Receives information from the client about an exam they
     //want to create and saves it in the datastore
     Long date = (new Date()).getTime();
     String name = UtilityClass.getParameter(request, "name", "");
