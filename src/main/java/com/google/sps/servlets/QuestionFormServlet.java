@@ -102,6 +102,7 @@ public class QuestionFormServlet extends HttpServlet {
       logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
     }
 
     out.println("</select>");
