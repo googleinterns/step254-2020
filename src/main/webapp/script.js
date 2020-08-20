@@ -97,15 +97,15 @@ function newUser(name) {
  * the submit button.
  */
 function checkBox() {
-  const checkBoxList = document.querySelectorAll("#checkbox");
-  const submitButton = document.getElementById("checkBoxSubmit");
+  const checkBoxList = document.querySelectorAll('#checkbox');
+  const submitButton = document.getElementById('checkBoxSubmit');
   const checkBoxArray = [...checkBoxList];
-  const areTheyChecked = checkBoxArray.some(box => box.checked );
+  const areTheyChecked = checkBoxArray.some((box) => box.checked );
   console.log(areTheyChecked);
-  if(areTheyChecked === true) {
-    submitButton.style.display = "block";
+  if (areTheyChecked === true) {
+    submitButton.style.display = 'block';
   } else {
-    submitButton.style.display = "none"; 
+    submitButton.style.display = 'none';
   }
 };
 /* eslint-enable no-unused-vars */
