@@ -124,6 +124,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
+        name = name.replaceAll("\\<.*?\\>", "");
         out.println("<option>" + name  + "</option>");
       }
     } catch (DatastoreFailureException e) {
