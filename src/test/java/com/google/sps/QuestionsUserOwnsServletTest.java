@@ -93,7 +93,7 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     QuestionsUserOwnsServlet servlet= new QuestionsUserOwnsServlet();
     servlet.doGet(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
-      "You are not authorised to view this page");
+        "You are not authorised to view this page");
   }
   private void setFakeQuestions () {
     /*Set up two fake question entities for testing purposes */
