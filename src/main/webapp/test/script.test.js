@@ -23,12 +23,15 @@ const setAccessHtml = '<p id="accessDenied"></p>';
 const setAuthHtml = '<p id="logInOut"></p>';
 const setCheckedHtml = 
   '<input type=\"checkbox\" name=\"question\" ' +
-  'value=\"Question one\" checked={true}> class=\"checkbox\"<br>' +
-  'value=\"Question two\" checked={false}> class=\"checkbox\"<br>' +
+  'value=\"Question one\" checked={true} class=\"checkbox\"> <br>' +
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question two\" class=\"checkbox\"> <br>' +
   '<input type=\"submit\" id=\"checkBoxSubmit\" value=\"Go\">';
 const setNotCheckedHtml = 
   '<input type=\"checkbox\" name=\"question\" ' +
-  'value=\"Question one\" checked={false} class=\"checkbox\"><br>' +
+  'value=\"Question one\" class=\"checkbox\"><br>' +
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question two\" class=\"checkbox\"><br>' +
   '<input type="submit" id="checkBoxSubmit" value="Go">';
 
 test('check page access false', () => {
@@ -94,16 +97,16 @@ test('check authentication for invalid user', async () => {
 
 test('check checkBox when box is not checked', () => {
   document.body.innerHTML= setNotCheckedHtml;
-  checkboxList = document.querySelectorAll('#checkbox');
-  submitButton = document.getElementById("checkBoxSubmit");
+  checkboxList = document.querySelectorAll('input[name="question"]');
+  submitButton = document.getElementById('checkBoxSubmit');
   expect(isChecked(checkboxList, submitButton)).toBeFalsy();
-  expect(submitButton.style.display).toBe("none")
+  expect(submitButton.style.display).toBe('none');
 });
 
 test('check checkBox when box is checked', () => {
   document.body.innerHTML = setCheckedHtml;
   checkboxList = document.querySelectorAll('input[name="question"]');
-  submitButton = document.getElementById("checkBoxSubmit");
+  submitButton = document.getElementById('checkBoxSubmit');
   expect(isChecked(checkboxList, submitButton)).toBeTruthy();
-  expect(submitButton.style.display).toBe("block")
+  expect(submitButton.style.display).toBe('block');
 });
