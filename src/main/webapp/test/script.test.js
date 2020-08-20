@@ -1,6 +1,6 @@
 const script = require('../script.js');
 let {userAuth, authenticate, pageAccess, newUser,
-    checkBox} =
+    isChecked} =
     require('../script.js');
 
 const mockPreference = {
@@ -23,11 +23,12 @@ const setAccessHtml = '<p id="accessDenied"></p>';
 const setAuthHtml = '<p id="logInOut"></p>';
 const setCheckedHtml = 
   '<input type=\"checkbox\" name=\"question\" ' +
-  'value=\"Question one\" checked={true}><br>' +
-  '<input type="submit" id="checkBoxSubmit" value="Go">';
+  'value=\"Question one\" checked={true}> class=\"checkbox\"<br>' +
+  'value=\"Question two\" checked={false}> class=\"checkbox\"<br>' +
+  '<input type=\"submit\" id=\"checkBoxSubmit\" value=\"Go\">';
 const setNotCheckedHtml = 
   '<input type=\"checkbox\" name=\"question\" ' +
-  'value=\"Question one\" checked={false}><br>' +
+  'value=\"Question one\" checked={false} class=\"checkbox\"><br>' +
   '<input type="submit" id="checkBoxSubmit" value="Go">';
 
 test('check page access false', () => {
@@ -91,14 +92,18 @@ test('check authentication for invalid user', async () => {
   expect(script.userAuth).toBeFalsy();
 });
 
-test('check checkBox when box is checked', () => {
-  document.body.innerHTML= setCheckedHtml;
-  const submitButton = document.getElementById("checkBoxSubmit");
-  script.checkBox();
-  expect(submitButton.style.display).toBe('block');
+test('check checkBox when box is not checked', () => {
+  document.body.innerHTML= setNotCheckedHtml;
+  checkboxList = document.querySelectorAll('#checkbox');
+  submitButton = document.getElementById("checkBoxSubmit");
+  expect(isChecked(checkboxList, submitButton)).toBeFalsy();
+  expect(submitButton.style.display).toBe("none")
 });
 
 test('check checkBox when box is checked', () => {
-  //document.body.innerHTML= setNotCheckedHtml;
-  expect(script.checkBox()).toBeFalsy();
+  document.body.innerHTML = setCheckedHtml;
+  checkboxList = document.querySelectorAll('input[name="question"]');
+  submitButton = document.getElementById("checkBoxSubmit");
+  expect(isChecked(checkboxList, submitButton)).toBeTruthy();
+  expect(submitButton.style.display).toBe("block")
 });
