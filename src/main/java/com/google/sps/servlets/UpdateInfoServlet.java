@@ -48,7 +48,7 @@ public class UpdateInfoServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());

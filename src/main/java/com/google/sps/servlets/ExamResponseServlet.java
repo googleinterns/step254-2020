@@ -49,7 +49,7 @@ public class ExamResponseServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
@@ -73,6 +73,7 @@ public class ExamResponseServlet extends HttpServlet {
     } catch (Exception e) {
       logger.atSevere().log("There was an error: %s", e);
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
     out.println("<h2>Responses Saved.</h2>");
     out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
