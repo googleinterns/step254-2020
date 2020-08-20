@@ -15,6 +15,7 @@
 package com.google.sps.servlets;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -46,8 +47,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class ExamServletTest extends ExamServlet {
   private final LocalServiceTestHelper helper =
-      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-          .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   @Before
   public void setUp() {
@@ -59,8 +59,26 @@ public final class ExamServletTest extends ExamServlet {
     helper.tearDown();
   }
 
+  /* Test logged out user exception. */
+  @Test
+  public void doGetTestLoggedOut() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    ExamServlet servlet = new ExamServlet();
+    servlet.doGet(request, response);
+    verify(response).sendRedirect("/");
+  }
+
+  /* Login user with email "test@example.com" */
+  private void helperLogin() {
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
+  }
+
   /* Set up fake exam */
   private void addExam() {
+    helperLogin();
     Entity examEntity = new Entity("Exam");
     examEntity.setProperty("name", "Test Exam");
     examEntity.setProperty("duration", "20");
@@ -74,6 +92,7 @@ public final class ExamServletTest extends ExamServlet {
   /* When no examID is provided. */
   @Test
   public void doGetTestNoExamID() throws IOException {
+    helperLogin();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     ExamServlet servlet = new ExamServlet();
@@ -90,6 +109,7 @@ public final class ExamServletTest extends ExamServlet {
   /* When examID that does not exist is provided */
   @Test
   public void doGetTestInvalidExamID() throws IOException {
+    helperLogin();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     ExamServlet servlet = new ExamServlet();
@@ -123,6 +143,7 @@ public final class ExamServletTest extends ExamServlet {
    */
   @Test
   public void doGetTestExam() throws IOException {
+    helperLogin();
     addExam();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
