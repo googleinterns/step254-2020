@@ -48,8 +48,8 @@ public class QuestionFormServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+        "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
@@ -81,10 +81,10 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<form id=\"createQuestion\" action=\"/createQuestion\""
         + " method=\"POST\">");
     out.println("<label for=\"question\">Enter Question:</label><br>");
-    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" required>"
+    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" maxlength=\"200\"required>"
         + "</textarea><br>");
     out.println("<label for=\"marks\">Marks given for Question:</label><br>");
-    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" required>");
+    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" min=\"0\"max=\"1000\" step=\"0.01\"required>");
     out.println("<h3> Select which test you want the questions added to</h1>");
     out.println("<select name=\"testName\">");
     // Find all tests created by this user and display them as a dropdown menu.
@@ -101,7 +101,9 @@ public class QuestionFormServlet extends HttpServlet {
     } catch (Exception e) {
       logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your tests");
+      return;
     }
 
     out.println("</select>");

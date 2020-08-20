@@ -39,21 +39,25 @@ public class CreateExamServlet extends HttpServlet {
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
-    //Servlet Recevies information from the client about an exam they
+    //Servlet Receives information from the client about an exam they
     //want to create and saves it in the datastore
     Long date = (new Date()).getTime();
     String name = UtilityClass.getParameter(request, "name", "");
+    // Remove all html tags and trim the spaces in the exam name.
+    name = name.replaceAll("\\<.*?\\>", "");
+    name = name.trim();
     String duration = UtilityClass.getParameter(request, "duration", "");
     if (name == "" || duration == "") {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+        "You have entered one or more null parameters");
       logger.atWarning().log("One or more null parameters");
       return;
     }
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+        "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
@@ -77,7 +81,8 @@ public class CreateExamServlet extends HttpServlet {
 
     } catch (DatastoreFailureException e) {
       logger.atSevere().log("Error with datastore: %s", e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to create your exam");
       return;
     }
   }

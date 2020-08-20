@@ -50,8 +50,8 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+          "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
@@ -74,7 +74,8 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     } catch (Exception e) {
       logger.atSevere().log("There was an error with saving the questions"
         + " : %s", e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to save your questions to the test");
       return;
     }
 
