@@ -96,9 +96,10 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
       for (Entity entity : results.asIterable()) {
         long questionId = entity.getKey().getId();
         String question = (String) entity.getProperty("question");
+        String plainQuestion = question.replaceAll("\\<.*?\\>", "");
         String marks = (String) entity.getProperty("marks");
         out.println("<input onclick=\"checkBox()\" id=\"checkbox\" type=\"checkbox\" name=\"question\" value=\""
-          + String.valueOf(questionId) + "\">" + question
+          + String.valueOf(questionId) + "\">" + plainQuestion
           + " (" + marks + ")<br>");
       }
     } catch (DatastoreFailureException e) {
