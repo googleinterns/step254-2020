@@ -15,6 +15,7 @@
 package com.google.sps;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -48,8 +49,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class UpdateInfoServletTest extends UpdateInfoServlet {
   private final LocalServiceTestHelper helper =
-      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-          .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   @Before
   public void setUp() {
@@ -61,9 +61,39 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet {
     helper.tearDown();
   }
 
+  /* Test logged out user exception. */
+  @Test
+  public void doGetTestLoggedOut() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    UpdateInfoServlet servlet = new UpdateInfoServlet();
+    servlet.doPost(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  /* Login user with email "test@example.com" */
+  private void helperLogin() {
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
+  }
+  
+  /* Test what happens when nothing is passed */
+  @Test
+  public void testDoPostWithNullInput() throws IOException {
+    helperLogin();
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    UpdateInfoServlet servlet = new UpdateInfoServlet();
+    servlet.doPost(request, response);
+    verify(response).sendError(HttpServletResponse.SC_BAD_REQUEST);
+  }
+
   /* Test updating user preferences */
   @Test
   public void doPostTest() throws IOException {
+    helperLogin();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 

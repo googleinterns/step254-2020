@@ -15,6 +15,7 @@
 package com.google.sps.servlets;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -52,8 +53,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class ExamResponseServletTest extends ExamResponseServlet {
   private final LocalServiceTestHelper helper =
-      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
-          .setEnvIsLoggedIn(true).setEnvEmail("test@example.com").setEnvAuthDomain("example.com");
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   @Before
   public void setUp() {
@@ -65,12 +65,29 @@ public final class ExamResponseServletTest extends ExamResponseServlet {
     helper.tearDown();
   }
 
-  /* Test Storing a users answers to an exam */
+  /* Test logged out user exception. */
+  @Test
+  public void doGetTestLoggedOut() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    ExamResponseServlet servlet = new ExamResponseServlet();
+    servlet.doPost(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
 
+  /* Login user with email "test@example.com" */
+  private void helperLogin() {
+    helper.setEnvAuthDomain("example.com");
+    helper.setEnvEmail("test@example.com");
+    helper.setEnvIsLoggedIn(true);
+  }
+
+  /* Test Storing a users answers to an exam */
   @Test
   public void doPostTest() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     final HttpServletResponse response = mock(HttpServletResponse.class);
+    helperLogin();
 
     List<String> parameterNames = new ArrayList<>();
     parameterNames.add("1");

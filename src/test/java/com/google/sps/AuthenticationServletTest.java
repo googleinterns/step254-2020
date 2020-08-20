@@ -55,9 +55,9 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
     helper.tearDown();
   }
 
-  /* When no examID is provided. */
+  /* Test logged out user. */
   @Test
-  public void doGetTestNoExamID() throws IOException {
+  public void doGetTestLoggedOut() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     AuthenticationServlet servlet = new AuthenticationServlet();
