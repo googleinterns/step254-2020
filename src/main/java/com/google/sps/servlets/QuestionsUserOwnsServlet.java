@@ -96,10 +96,9 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
       for (Entity entity : results.asIterable()) {
         long questionId = entity.getKey().getId();
         String question = (String) entity.getProperty("question");
-        String plainQuestion = question.replaceAll("\\<.*?\\>", "");
         String marks = (String) entity.getProperty("marks");
         out.println("<input onclick=\"checkBox()\" id=\"checkbox\" type=\"checkbox\" name=\"question\" value=\""
-          + String.valueOf(questionId) + "\">" + plainQuestion
+          + String.valueOf(questionId) + "\">" + question
           + " (" + marks + ")<br>");
       }
     } catch (DatastoreFailureException e) {
@@ -124,7 +123,6 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
-        name = name.replaceAll("\\<.*?\\>", "");
         out.println("<option>" + name  + "</option>");
       }
     } catch (DatastoreFailureException e) {

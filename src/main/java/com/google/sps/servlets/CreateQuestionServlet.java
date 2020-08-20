@@ -50,6 +50,9 @@ public class CreateQuestionServlet extends HttpServlet {
     Long date = (new Date()).getTime();
     String testName = UtilityClass.getParameter(request, "testName", "");
     String question = UtilityClass.getParameter(request, "question", "");
+    //Remove all html tags and trim the spaces in the questions.
+    question = question.replaceAll("\\<.*?\\>", "");
+    question = question.trim();
     String marks = UtilityClass.getParameter(request, "marks", "");
 
     if (testName == "" || question == "" || marks == "") {

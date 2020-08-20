@@ -43,6 +43,9 @@ public class CreateExamServlet extends HttpServlet {
     //want to create and saves it in the datastore
     Long date = (new Date()).getTime();
     String name = UtilityClass.getParameter(request, "name", "");
+    // Remove all html tags and trim the spaces in the exam name.
+    name = name.replaceAll("\\<.*?\\>", "");
+    name = name.trim();
     String duration = UtilityClass.getParameter(request, "duration", "");
     if (name == "" || duration == "") {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
