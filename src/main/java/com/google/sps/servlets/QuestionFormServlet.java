@@ -81,10 +81,10 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<form id=\"createQuestion\" action=\"/createQuestion\""
         + " method=\"POST\">");
     out.println("<label for=\"question\">Enter Question:</label><br>");
-    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" required>"
+    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" maxlength=\"200\"required>"
         + "</textarea><br>");
     out.println("<label for=\"marks\">Marks given for Question:</label><br>");
-    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" required>");
+    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" min=\"0\"max=\"1000\" step=\"0.1\"required>");
     out.println("<h3> Select which test you want the questions added to</h1>");
     out.println("<select name=\"testName\">");
     // Find all tests created by this user and display them as a dropdown menu.
