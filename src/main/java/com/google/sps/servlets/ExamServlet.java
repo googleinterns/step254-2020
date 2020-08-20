@@ -132,7 +132,7 @@ public class ExamServlet extends HttpServlet {
             }
           }
           out.println("<br><input type=\"submit\" value=\"Submit\"" 
-              + "onclick=\"setExamSubmitting\">");
+              + "onclick=\"setExamSubmitting()\">");
           out.println("</form>");
         } else {
           out.println("<p>There are no questions associated with this exam.</p>");

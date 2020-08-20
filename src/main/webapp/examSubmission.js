@@ -20,7 +20,7 @@ let isDirty = false;
  */
 function setExamSubmitting() { 
     examSubmitting = true; 
-    return examSubmitting
+    return examSubmitting;
 }
 
 /**
