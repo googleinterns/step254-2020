@@ -14,7 +14,7 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -23,14 +23,16 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import java.io.PrintWriter;
+
 
 /** Servlet that creates a question form for the user to fill out.
 * A user can add a question to whichever test they want.
@@ -46,11 +48,11 @@ public class QuestionFormServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+        "You are not authorised to view this page");
       return;
     }
-    logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
+    logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -68,7 +70,8 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
-    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
+    out.println("<p><a  href=\"index.html\">Homepage</a></p>");
+    out.println("<p><a  href=\"dashboard.html\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -78,10 +81,10 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<form id=\"createQuestion\" action=\"/createQuestion\""
         + " method=\"POST\">");
     out.println("<label for=\"question\">Enter Question:</label><br>");
-    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" required>"
+    out.println("<textarea name=\"question\" rows=\"4\" cols=\"50\" maxlength=\"200\"required>"
         + "</textarea><br>");
     out.println("<label for=\"marks\">Marks given for Question:</label><br>");
-    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" required>");
+    out.println("<input type=\"number\" id=\"marks\" name=\"marks\" min=\"0\"max=\"1000\" step=\"0.01\"required>");
     out.println("<h3> Select which test you want the questions added to</h1>");
     out.println("<select name=\"testName\">");
     // Find all tests created by this user and display them as a dropdown menu.
@@ -98,7 +101,9 @@ public class QuestionFormServlet extends HttpServlet {
     } catch (Exception e) {
       logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your tests");
+      return;
     }
 
     out.println("</select>");
@@ -112,7 +117,6 @@ public class QuestionFormServlet extends HttpServlet {
     out.println("<input type=\"submit\" value=\"Click\">");
     out.println("</form>");
     out.println("</body>");
-    response.setStatus(HttpServletResponse.SC_OK);
     logger.atInfo().log("Question form was displayed correctly for the User:"
       + "%s", userService.getCurrentUser());
   }

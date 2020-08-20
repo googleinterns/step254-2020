@@ -12,35 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps;
+package com.google.sps.servlets;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import com.google.sps.servlets.SaveQuestionsFromBankServlet;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
-import javax.servlet.http.*;
-import org.junit.Test;
-import java.io.*;
-import org.junit.runner.RunWith;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Tests for Save Questions Servlet. Test if all questions checked get saved 
+ * to the chosen exams questions list, if a user is not logged in check for an unauthorised error.
+ *
+ * @author Klaudia Obieglo
+ */
 @RunWith(JUnit4.class)
 public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBankServlet {
   private final LocalServiceTestHelper helper = 
@@ -105,7 +109,6 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Successfully added Question 2"));
     Assert.assertTrue(result.contains("Successfully added Question 3"));
-    verify(response).setStatus(HttpServletResponse.SC_OK);
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
@@ -119,7 +122,8 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     
     SaveQuestionsFromBankServlet servlet = new SaveQuestionsFromBankServlet();
     servlet.doPost(request, response);
-    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
+      "You are not authorised to view this page");
   }
   private void helperLogin() {
     /* Login user with email "test@example.com" */

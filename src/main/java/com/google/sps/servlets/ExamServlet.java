@@ -76,6 +76,7 @@ public class ExamServlet extends HttpServlet {
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
+    out.println("<p><a href=\"index.html\">Homepage</a></p>");
     out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");

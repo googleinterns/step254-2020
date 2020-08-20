@@ -14,9 +14,6 @@
 
 package com.google.sps.servlets;
  
-import com.google.sps.data.ExamClass;
-import com.google.sps.data.UtilityClass;
-import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -26,15 +23,18 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.ExamClass;
+import com.google.sps.data.UtilityClass;
+import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 
 /** Servlet that returns the exams owned by the user
 * @author Klaudia Obieglo
@@ -48,7 +48,8 @@ public class ExamsUserOwnsServlet extends HttpServlet{
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+          "You are not authorised to view this page");
       return;
     }
     String ownerID = userService.getCurrentUser().getEmail(); 
@@ -69,16 +70,15 @@ public class ExamsUserOwnsServlet extends HttpServlet{
             ownerID, list);
         examList.add(exam);
       }
-      response.setStatus(HttpServletResponse.SC_OK);
       logger.atInfo().log("Exams were displayed correctly for user=%s", ownerID);
       response.setContentType("application/json;");
       response.sendRedirect("/createExam.html");
       response.getWriter().println(UtilityClass.convertToJson(examList));
     } catch (DatastoreFailureException e) {
-        logger.atSevere().log("Datastore Failure.Datastore is not responding:"
-          + " %s", e);
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        return;
+      logger.atSevere().log("Datastore error:%s" ,e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to retrieve your exams");
+      return;
     }
   }
 }

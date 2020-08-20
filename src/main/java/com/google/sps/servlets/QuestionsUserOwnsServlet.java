@@ -14,7 +14,6 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -24,14 +23,15 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.flogger.FluentLogger;
+import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import com.google.common.flogger.FluentLogger;
 import javax.servlet.http.HttpServletResponse;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import java.io.PrintWriter;
 
 /** Servlet that returns a checkbox form of all the questions owned by the user
 * A user can then select the questions they want to reuse by clicking on the
@@ -48,8 +48,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      response.sendRedirect("/");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+          "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
@@ -69,7 +69,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
-    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
+    out.println("<p><a  href=\"index.html\">Homepage</a></p>");
+    out.println("<p><a  href=\"dashboard.html\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -103,7 +104,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error with retrieving the questions: %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to retrieve your questions");
       return;
     }
 
@@ -126,17 +128,17 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error when retrieving the tests: %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to retrieve your Tests");
       return;
     }
 
     out.println("</select>");
     out.println("<br/>");
     out.println("<br/>");
-    out.println("<button>Submit</button>");
+    out.println("<button style=\"display: none;\" id=\"checkBoxSubmit\">Submit</button>");
     out.println("</form>");
     out.println("</body>");
-    response.setStatus(HttpServletResponse.SC_OK);
     logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
         + " and displayed correctly", userService.getCurrentUser());
   }
