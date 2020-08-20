@@ -96,7 +96,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
         long questionId = entity.getKey().getId();
         String question = (String) entity.getProperty("question");
         String marks = (String) entity.getProperty("marks");
-        out.println("<input type=\"checkbox\" name=\"question\" value=\""
+        out.println("<input onclick=\"checkBox()\" id=\"checkbox\" type=\"checkbox\" name=\"question\" value=\""
           + String.valueOf(questionId) + "\">" + question
           + " (" + marks + ")<br>");
       }

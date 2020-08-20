@@ -1,6 +1,8 @@
 const script = require('../script.js');
-let {userAuth, authenticate, pageAccess, newUser} =
+let {userAuth, authenticate, pageAccess, newUser,
+    checkBox} =
     require('../script.js');
+
 const mockPreference = {
   font: 'arial',
   bg_color: 'white',
@@ -19,6 +21,14 @@ const mockInvalidUser = {
 
 const setAccessHtml = '<p id="accessDenied"></p>';
 const setAuthHtml = '<p id="logInOut"></p>';
+const setCheckedHtml = 
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question one\" checked={true}><br>' +
+  '<input type="submit" id="checkBoxSubmit" value="Go">';
+const setNotCheckedHtml = 
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question one\" checked={false}><br>' +
+  '<input type="submit" id="checkBoxSubmit" value="Go">';
 
 test('check page access false', () => {
   document.body.innerHTML= setAccessHtml;
@@ -79,4 +89,16 @@ test('check authentication for invalid user', async () => {
   expect(global.fetch).toHaveBeenCalledWith('/auth');
   expect((await global.fetch()).json()).toEqual(mockInvalidUser);
   expect(script.userAuth).toBeFalsy();
+});
+
+test('check checkBox when box is checked', () => {
+  document.body.innerHTML= setCheckedHtml;
+  const submitButton = document.getElementById("checkBoxSubmit");
+  script.checkBox();
+  expect(submitButton.style.display).toBe('block');
+});
+
+test('check checkBox when box is checked', () => {
+  //document.body.innerHTML= setNotCheckedHtml;
+  expect(script.checkBox()).toBeFalsy();
 });

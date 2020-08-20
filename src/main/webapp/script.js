@@ -60,14 +60,32 @@ async function setPreference() {
   }
 }
 
+/**
+ * If user has not checked a box do not show
+ * the submit button.
+ * @returns {boolean} returns if boxes have been checked
+ */
+function checkBox() {
+  const checkBoxList = document.querySelectorAll('#checkbox');
+  const submitButton = document.getElementById('checkBoxSubmit');
+  const checkBoxArray = [...checkBoxList];
+  const areTheyChecked = checkBoxArray.some(box => box.checked );
+  console.log(checkBoxList);
+  if(areTheyChecked) {
+    submitButton.style.display = 'block';
+  } else {
+    submitButton.style.display = 'none'; 
+  }
+  return areTheyChecked;
+};
+
 /* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
  */
 function pageAccess() {
-  if (userAuth === true) {
+  if (userAuth) {
     const page = newUser(userName);
-    console.log(page);
     window.location.href = page;
   } else {
     document.getElementById(
@@ -106,5 +124,6 @@ if (typeof exports !== 'undefined') {
     userAuth,
     userName,
     newUser,
+    checkBox,
   };
 };

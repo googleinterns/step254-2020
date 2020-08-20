@@ -1,4 +1,3 @@
-const script = require('../examSubmission.js');
 let {setExamSubmitting, setDirty, isUnsubmitted} =
     require('../examSubmission.js');
 
