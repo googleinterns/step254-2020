@@ -87,6 +87,7 @@ function isChecked (checkBoxList, submitButton){
   return areTheyChecked;
 }
 
+
 /* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
