@@ -17,18 +17,20 @@ let examSubmitting = false;
 let isDirty = false;
 /**
  * Notes if exam has been submitted
+ * @return {Boolean} examSubmitting submission state
  */
-function setExamSubmitting() { 
-    examSubmitting = true; 
-    return examSubmitting;
+function setExamSubmitting() {
+  examSubmitting = true;
+  return examSubmitting;
 }
 
 /**
  * Notes if exam any of the exam has been completed
+ * @return {Boolean} isDirty form state
  */
-function setDirty () {
-    isDirty = true;
-    return isDirty;
+function setDirty() {
+  isDirty = true;
+  return isDirty;
 }
 
 /**
@@ -39,8 +41,8 @@ function setDirty () {
  * @return {window.event} warning if user has unsaved changes
  * @return {undefined} allows user leave page without warning
  */
-function isUnsubmitted (e, submitted, dirty) {
- if (submitted || !dirty) {
+function isUnsubmitted(e, submitted, dirty) {
+  if (submitted || !dirty) {
     return undefined;
   }
   const confirmationMessage = 'It looks like you have not submitted your exam';
@@ -51,8 +53,8 @@ function isUnsubmitted (e, submitted, dirty) {
 /**
  * Calls isUnsubmitted before user leaves page
  */
-window.addEventListener('beforeunload', function (e) {
-  isUnsubmitted(e,examSubmitting,isDirty);
+window.addEventListener('beforeunload', function(e) {
+  isUnsubmitted(e, examSubmitting, isDirty);
 });
 
 // Export modules for testing
