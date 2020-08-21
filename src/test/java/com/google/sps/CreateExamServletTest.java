@@ -96,7 +96,7 @@ public final class CreateExamServletTest extends CreateExamServlet {
     CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_BAD_REQUEST,
-      "You have entered one or more null parameters");
+        "You have entered one or more null parameters");
   }
 
   @Test
@@ -116,7 +116,7 @@ public final class CreateExamServletTest extends CreateExamServlet {
     CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
-      "You are not authorised to view this page");
+        "You are not authorised to view this page");
   }
   private void helperLogin() {
     /* Login user with email "test@example.com" */

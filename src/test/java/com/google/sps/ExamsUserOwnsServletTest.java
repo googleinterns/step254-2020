@@ -118,7 +118,7 @@ public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
     ExamsUserOwnsServlet servlet= new ExamsUserOwnsServlet();
     servlet.doGet(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
-      "You are not authorised to view this page");
+        "You are not authorised to view this page");
   }
   private void helperLogin() {
     /* Login user with email "test@example.com" */
