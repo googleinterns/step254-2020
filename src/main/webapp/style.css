@@ -26,6 +26,14 @@ h3{
     font-size: 105%;
 }
 
+#about-us, #about{
+    background: #F6F4F5;
+}
+
+#inspiration{
+    background: #EBEBEB;
+}
+
 .content-wrap{
     max-width: 800px;
     width: 85%;
@@ -82,5 +90,32 @@ h3{
   display: inline-block;
   justify-content: space-between;
   border-radius: 6px;
+}
+
+/* About Us
+---------------*/
+.accordion {
+  background-color: #4D5061;
+  color: #EBEBEB;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  font-size: 105%;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+}
+
+.active, .accordion:hover {
+  background-color: #7A7E94;
+}
+
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 }
 

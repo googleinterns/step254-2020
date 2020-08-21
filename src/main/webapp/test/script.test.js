@@ -1,6 +1,8 @@
 const script = require('../script.js');
-let {userAuth, authenticate, pageAccess, newUser} =
+let {userAuth, authenticate, pageAccess, newUser,
+  isChecked} =
     require('../script.js');
+
 const mockPreference = {
   font: 'arial',
   bg_color: 'white',
@@ -19,6 +21,18 @@ const mockInvalidUser = {
 
 const setAccessHtml = '<p id="accessDenied"></p>';
 const setAuthHtml = '<p id="logInOut"></p>';
+const setCheckedHtml =
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question one\" checked={true} class=\"checkbox\"> <br>' +
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question two\" class=\"checkbox\"> <br>' +
+  '<input type=\"submit\" id=\"checkBoxSubmit\" value=\"Go\">';
+const setNotCheckedHtml =
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question one\" class=\"checkbox\"><br>' +
+  '<input type=\"checkbox\" name=\"question\" ' +
+  'value=\"Question two\" class=\"checkbox\"><br>' +
+  '<input type="submit" id="checkBoxSubmit" value="Go">';
 
 test('check page access false', () => {
   document.body.innerHTML= setAccessHtml;
@@ -79,4 +93,20 @@ test('check authentication for invalid user', async () => {
   expect(global.fetch).toHaveBeenCalledWith('/auth');
   expect((await global.fetch()).json()).toEqual(mockInvalidUser);
   expect(script.userAuth).toBeFalsy();
+});
+
+test('check checkBox when box is not checked', () => {
+  document.body.innerHTML= setNotCheckedHtml;
+  checkboxList = document.querySelectorAll('input[name="question"]');
+  submitButton = document.getElementById('checkBoxSubmit');
+  expect(isChecked(checkboxList, submitButton)).toBeFalsy();
+  expect(submitButton.style.display).toBe('none');
+});
+
+test('check checkBox when box is checked', () => {
+  document.body.innerHTML = setCheckedHtml;
+  checkboxList = document.querySelectorAll('input[name="question"]');
+  submitButton = document.getElementById('checkBoxSubmit');
+  expect(isChecked(checkboxList, submitButton)).toBeTruthy();
+  expect(submitButton.style.display).toBe('block');
 });

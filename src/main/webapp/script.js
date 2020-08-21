@@ -65,10 +65,8 @@ async function setPreference() {
  * Check if user has access to page
  */
 function pageAccess() {
-  console.log(userName);
-  if (userAuth === true) {
+  if (userAuth) {
     const page = newUser(userName);
-    console.log(page);
     window.location.href = page;
   } else {
     document.getElementById(
@@ -93,20 +91,29 @@ function newUser(name) {
 };
 
 /**
- * If user has not checked a box do not show
- * the submit button.
+ * Gets the list of checkbox items
  */
-function checkBox() {
+function getCheckBox() {
   const checkBoxList = document.querySelectorAll('#checkbox');
   const submitButton = document.getElementById('checkBoxSubmit');
+  isChecked(checkBoxList, submitButton);
+};
+
+/**
+ * Checks if any items in the list are checked
+ * @param {NodeListOf<Element>} checkBoxList List of checkbox items
+ * @param {HTMLElement} submitButton Html for submit button
+ * @return {Boolean} returns if any boxes are checked
+ */
+function isChecked(checkBoxList, submitButton) {
   const checkBoxArray = [...checkBoxList];
-  const areTheyChecked = checkBoxArray.some((box) => box.checked );
-  console.log(areTheyChecked);
-  if (areTheyChecked === true) {
+  const areTheyChecked = checkBoxArray.some((box) => box.checked);
+  if (areTheyChecked) {
     submitButton.style.display = 'block';
   } else {
     submitButton.style.display = 'none';
   }
+  return areTheyChecked;
 };
 /* eslint-enable no-unused-vars */
 
@@ -124,5 +131,6 @@ if (typeof exports !== 'undefined') {
     userAuth,
     userName,
     newUser,
+    isChecked,
   };
 };
