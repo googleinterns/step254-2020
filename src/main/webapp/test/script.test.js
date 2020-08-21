@@ -1,6 +1,6 @@
 const script = require('../script.js');
 let {userAuth, authenticate, pageAccess, newUser,
-    isChecked} =
+  isChecked} =
     require('../script.js');
 
 const mockPreference = {
@@ -21,13 +21,13 @@ const mockInvalidUser = {
 
 const setAccessHtml = '<p id="accessDenied"></p>';
 const setAuthHtml = '<p id="logInOut"></p>';
-const setCheckedHtml = 
+const setCheckedHtml =
   '<input type=\"checkbox\" name=\"question\" ' +
   'value=\"Question one\" checked={true} class=\"checkbox\"> <br>' +
   '<input type=\"checkbox\" name=\"question\" ' +
   'value=\"Question two\" class=\"checkbox\"> <br>' +
   '<input type=\"submit\" id=\"checkBoxSubmit\" value=\"Go\">';
-const setNotCheckedHtml = 
+const setNotCheckedHtml =
   '<input type=\"checkbox\" name=\"question\" ' +
   'value=\"Question one\" class=\"checkbox\"><br>' +
   '<input type=\"checkbox\" name=\"question\" ' +
