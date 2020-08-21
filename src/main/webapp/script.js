@@ -107,7 +107,7 @@ function getCheckBox() {
  */
 function isChecked(checkBoxList, submitButton) {
   const checkBoxArray = [...checkBoxList];
-  const areTheyChecked = checkBoxArray.some(box => (box.checked ));
+  const areTheyChecked = checkBoxArray.some((box) => box.checked);
   if (areTheyChecked) {
     submitButton.style.display = 'block';
   } else {
