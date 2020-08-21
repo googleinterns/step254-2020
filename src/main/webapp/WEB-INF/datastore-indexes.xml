@@ -6,7 +6,7 @@
             <property name="date" direction="desc"/>
     </datastore-index>
 
-    <datastore-index kind="Question" ancestor="false" source="auto">
+    <datastore-index kind="Question" ancestor="false" source="manual">
             <property name="ownerID" direction="asc"/>
             <property name="date" direction="asc"/>
     </datastore-index>
