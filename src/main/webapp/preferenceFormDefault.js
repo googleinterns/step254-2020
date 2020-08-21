@@ -19,13 +19,13 @@ async function setPreferenceForm() {
   try {
     const response = await fetch('/auth');
     const userDetails = await response.json();
-    //const userName = userDetails.name;
+    const userName = userDetails.name;
     const userFont = userDetails.font;
     const userFontSize = userDetails.font_size;
     const userFontColor = userDetails.text_color;
     const userBackgroundColor = userDetails.bg_color;
 
-    //setValue('name', userName);
+    setValue('name', userName);
     setValue('font', userFont);
     setValue('font_size', userFontSize);
     setValue('text_color', userFontColor);
