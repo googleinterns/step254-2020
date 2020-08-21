@@ -60,34 +60,6 @@ async function setPreference() {
   }
 }
 
-/**
- * Gets the list of checkbox items
- */
-function getCheckBox() {
-  const checkBoxList = document.querySelectorAll('#checkbox');
-  const submitButton = document.getElementById('checkBoxSubmit');
-  
-  isChecked(checkBoxList, submitButton);
-};
-
-/**
- * Checks if any items in the list are checked
- * @param {NodeListOf<Element>} checkBoxList List of checkbox items
- * @param {HTMLElement} submitButton Html for submit button
- * @returns {Boolean} returns if any boxes are checked
- */
-function isChecked (checkBoxList, submitButton){
-  const checkBoxArray = [...checkBoxList];
-  const areTheyChecked = checkBoxArray.some(box => box.checked );
-  if(areTheyChecked) {
-    submitButton.style.display = 'block';
-  } else {
-    submitButton.style.display = 'none'; 
-  }
-  return areTheyChecked;
-}
-
-
 /* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
@@ -116,6 +88,32 @@ function newUser(name) {
   } else {
     return 'dashboard.html';
   }
+};
+
+/**
+ * Gets the list of checkbox items
+ */
+function getCheckBox() {
+  const checkBoxList = document.querySelectorAll('#checkbox');
+  const submitButton = document.getElementById('checkBoxSubmit');
+  isChecked(checkBoxList, submitButton);
+};
+
+/**
+ * Checks if any items in the list are checked
+ * @param {NodeListOf<Element>} checkBoxList List of checkbox items
+ * @param {HTMLElement} submitButton Html for submit button
+ * @return {Boolean} returns if any boxes are checked
+ */
+function isChecked(checkBoxList, submitButton) {
+  const checkBoxArray = [...checkBoxList];
+  const areTheyChecked = checkBoxArray.some(box => (box.checked ));
+  if (areTheyChecked) {
+    submitButton.style.display = 'block';
+  } else {
+    submitButton.style.display = 'none';
+  }
+  return areTheyChecked;
 };
 /* eslint-enable no-unused-vars */
 
