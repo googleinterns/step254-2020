@@ -67,7 +67,7 @@ public class CreateExamServlet extends HttpServlet {
     Long id = rd.nextLong();
     //Set up the new Exam and save it in the datastore
     try {
-      Entity examEntity = new Entity("Exam",id);
+      Entity examEntity = new Entity("Exam",rd.nextLong());
       examEntity.setProperty("name", name);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
