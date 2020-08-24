@@ -65,11 +65,20 @@ public class CreateExamServlet extends HttpServlet {
     }
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
+<<<<<<< HEAD
     Long id = UtilityClass.generateUniqueId();
     //Set up the new Exam and save it in the datastore
     try {
       Entity examEntity = new Entity("Exam", id);
+=======
+    Random rd = new Random();
+    Long id = rd.nextLong();
+    //Set up the new Exam and save it in the datastore
+    try {
+      Entity examEntity = new Entity("Exam",id);
+>>>>>>> d4f0262... Fix datastore index issue
       examEntity.setProperty("name", name);
+      System.out.println(id);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
       examEntity.setProperty("date", date);
