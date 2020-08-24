@@ -25,6 +25,7 @@ import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.Random;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -62,10 +63,10 @@ public class CreateExamServlet extends HttpServlet {
     }
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-
+    Random rd = new Random();
     //Set up the new Exam and save it in the datastore
     try {
-      Entity examEntity = new Entity("Exam");
+      Entity examEntity = new Entity("Exam",rd.nextLong());
       examEntity.setProperty("name", name);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
