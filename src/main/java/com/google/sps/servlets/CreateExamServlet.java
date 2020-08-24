@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that stores and returns exams.
+/** Servlet that creates and stores exams in the datastore.
 * @author Klaudia Obieglo.
 */
 @WebServlet("/createExam")
@@ -69,7 +69,6 @@ public class CreateExamServlet extends HttpServlet {
     try {
       Entity examEntity = new Entity("Exam",id);
       examEntity.setProperty("name", name);
-      System.out.println(id);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
       examEntity.setProperty("date", date);

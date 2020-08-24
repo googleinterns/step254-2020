@@ -95,7 +95,6 @@ public class QuestionFormServlet extends HttpServlet {
       PreparedQuery listExams = datastore.prepare(queryExams);
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
-        System.out.println(examID +"EXAM ID");
         String name = (String) entity.getProperty("name");
         out.println("<option>" + name  + "</option>");
       }

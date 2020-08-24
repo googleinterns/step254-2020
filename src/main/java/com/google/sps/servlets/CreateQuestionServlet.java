@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-/** Servlet that creates and stores questions.
+/** Servlet that creates and stores questions in the datastore.
 * @author Klaudia Obieglo
 */
 @WebServlet("/createQuestion")
