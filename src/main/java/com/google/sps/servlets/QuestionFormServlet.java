@@ -22,6 +22,7 @@ import freemarker.template.TemplateExceptionHandler;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
@@ -87,9 +88,8 @@ public class QuestionFormServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Template template = cfg.getTemplate("QuestionForm.ftl");
-    System.out.println(template +"TEMPLATE");
     PrintWriter out = response.getWriter();
-    Map referenceData = new HashMap();
+    Map testsData = new HashMap();
     Map<Long,String> testMap = new HashMap<Long,String>();
     try {
       Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
@@ -100,9 +100,9 @@ public class QuestionFormServlet extends HttpServlet {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
         testMap.put(examID,name);
-        referenceData.put("tests", testMap);
+        testsData.put("tests", testMap);
       }
-    } catch (Exception e) {
+    } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -110,11 +110,14 @@ public class QuestionFormServlet extends HttpServlet {
       return;
     }
     try {
-        template.process(referenceData, out);
-    } catch ( TemplateException e){
-        System.out.println(e);
-    }
-    logger.atInfo().log("Question form was displayed correctly for the User:"
+      template.process(testsData, out);
+      logger.atInfo().log("Question form was displayed correctly for the User:"
       + "%s", userService.getCurrentUser());
+    } catch (TemplateException e) {
+      logger.atWarning().log("There was a problem with processing the template %s", e);
+      response.sendError((HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your tests");
+      return;
+    }
   }
 }
