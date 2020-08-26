@@ -17,8 +17,6 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -45,21 +43,15 @@ public class UpdateInfoServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
-    UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
-      logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      return;
-    }
-    logger.atInfo().log("user=%s", userService.getCurrentUser());
+    String email = request.getParameter("email");
+    logger.atInfo().log("user=%s", email);
 
     String name;
     String font;
     String fontSize;
     String bgColor;
     String textColor;
-    String email;
-    name = font = fontSize = bgColor = textColor = email = null;
+    name = font = fontSize = bgColor = textColor = null;
 
     try {
       name = request.getParameter("name");
@@ -67,7 +59,6 @@ public class UpdateInfoServlet extends HttpServlet {
       fontSize = request.getParameter("font_size");
       bgColor = request.getParameter("bg_color");
       textColor = request.getParameter("text_color");
-      email = userService.getCurrentUser().getEmail();
     } catch (Exception e) {
       logger.atSevere().log("One or more null parameters in try/catch");
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);

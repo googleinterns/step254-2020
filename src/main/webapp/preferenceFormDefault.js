@@ -15,16 +15,25 @@
 /**
  * Get current user prefernces to set as default value in preference form.
  */
-async function setPreferenceForm() {
+async function setPreferenceForm(email) {
   try {
-    const response = await fetch('/auth');
+    const response = await fetch('/preferences', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'email': email,
+      },
+    });
     const userDetails = await response.json();
+    const userEmail = userDetails.email;
     const userName = userDetails.name;
     const userFont = userDetails.font;
     const userFontSize = userDetails.font_size;
     const userFontColor = userDetails.text_color;
     const userBackgroundColor = userDetails.bg_color;
 
+
+    setValue('email', userEmail);
     setValue('name', userName);
     setValue('font', userFont);
     setValue('font_size', userFontSize);
@@ -41,15 +50,12 @@ async function setPreferenceForm() {
  * @param {string} val The value the element is being changed to.
  */
 function setValue(id, val) {
-  if (val == undefined) {
+  if (val == undefined || val == null) {
     document.getElementById(id).value = document.getElementById(id).value;
   } else {
     document.getElementById(id).value = val;
   }
 }
-
-// Call Functions
-setPreferenceForm();
 
 // Export modules for testing
 if (typeof exports !== 'undefined') {

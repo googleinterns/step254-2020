@@ -19,8 +19,6 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
 import java.io.IOException;
@@ -37,8 +35,9 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Aidan Molloy
  */
-@WebServlet("/auth")
-public class AuthenticationServlet extends HttpServlet {
+ 
+@WebServlet("/preferences")
+public class PreferencesServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -50,30 +49,12 @@ public class AuthenticationServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json;");
-    UserService userService = UserServiceFactory.getUserService();
+    String email = request.getHeaders("email").nextElement();
     Map<String, String> authResponse = new HashMap<>();
 
-    try {
-      if (userService.isUserLoggedIn()) {
-        // If logged in get email and create link to logout
-        String userEmail = userService.getCurrentUser().getEmail();
-        String logoutUrl = userService.createLogoutURL("/");
-
-        authResponse.put("email", userEmail);
-        authResponse.put("logoutUrl", logoutUrl);
-
-        // Get User Info and add it to the response
-        authResponse.putAll(getUserInfo(userService.getCurrentUser().getEmail()));
-      } else {
-        // If logged out get login link
-        String loginUrl = userService.createLoginURL("/");
-        authResponse.put("loginUrl", loginUrl);
-      }
-    } catch (Exception e) {
-      logger.atSevere().log("There was an error: %s", e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
+    // Get User Info and add it to the response
+    authResponse.putAll(getUserInfo(email));
+  
     String json = UtilityClass.convertToJson(authResponse);
 
     // Write response to /auth
@@ -98,6 +79,7 @@ public class AuthenticationServlet extends HttpServlet {
       Entity entity = results.asSingleEntity();
       if (entity == null) {
         userInfoResponse.put("updateInfoRequired", "true");
+        userInfoResponse.put("email", email);
         return userInfoResponse;
       }
       userInfoResponse.put("name", (String) entity.getProperty("name"));
@@ -105,6 +87,7 @@ public class AuthenticationServlet extends HttpServlet {
       userInfoResponse.put("font_size", (String) entity.getProperty("font_size"));
       userInfoResponse.put("bg_color", (String) entity.getProperty("bg_color"));
       userInfoResponse.put("text_color", (String) entity.getProperty("text_color"));
+      userInfoResponse.put("email", email);
       return userInfoResponse;
     } catch (Exception e) {
       userInfoResponse.put("errorMsg", "Something went wrong. Please try again later.");

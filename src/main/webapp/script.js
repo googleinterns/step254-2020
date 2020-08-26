@@ -13,37 +13,18 @@
 // limitations under the License.
 //
 
-let userAuth = false;
-let userName = '';
-/**
- * Authenticate user
- */
-async function authenticate() {
-  try {
-    logInOut = document.getElementById('logInOut');
-    const response = await fetch('/auth');
-    const userDetails = await response.json();
-
-    if (userDetails.email) {
-      userAuth = true;
-      logInOut.innerHTML = `<a id= "login" href="${userDetails.logoutUrl}"
-      >Logout</a>`;
-      setPreference();
-    } else {
-      userAuth = false;
-      logInOut.innerHTML = `<a href="${userDetails.loginUrl}">Login</a>`;
-    }
-  } catch (e) {
-    console.log('Error: ', e.message);
-  }
-};
-
 /**
  * Set user UI preferneces
  */
-async function setPreference() {
+async function setPreference(email) {
   try {
-    const response = await fetch('/auth');
+    const response = await fetch('/preferences', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'email': email,
+      },
+    });
     const userDetails = await response.json();
     const userFont = userDetails.font;
     const userFontSize = userDetails.font_size;
@@ -116,11 +97,6 @@ function isChecked(checkBoxList, submitButton) {
   return areTheyChecked;
 };
 /* eslint-enable no-unused-vars */
-
-// On load
-window.onload = function() {
-  authenticate();
-};
 
 // Export modules for testing
 if (typeof exports !== 'undefined') {

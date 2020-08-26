@@ -1,11 +1,28 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+let userAuth = false;
+let userName = '';
+
 /**
-  * initApp handles setting up UI event listeners and registering Firebase auth listeners:
+  * initAuth handles setting up UI event listeners and registering Firebase auth listeners:
   *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
   *    out, and that is where we update the UI.
   */
-function initApp() {
+function initAuth() {
   // Listening for auth state changes.
-  // [START authstatelistener]
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
       // User is signed in.
@@ -16,50 +33,32 @@ function initApp() {
       var isAnonymous = user.isAnonymous;
       var uid = user.uid;
       var providerData = user.providerData;
-      // [START_EXCLUDE]
-      document.getElementById('quickstart-sign-in-status').textContent = 'Signed in';
-      document.getElementById('quickstart-sign-in').textContent = 'Sign out';
-      document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
-      // [END_EXCLUDE]
+      userAuth = true;
+      document.getElementById('sign-in').textContent = 'Sign out';
+      setPreference(email);
+      setPreferenceForm(email);
     } else {
       // User is signed out.
-      // [START_EXCLUDE]
-      document.getElementById('quickstart-sign-in-status').textContent = 'Signed out';
-      document.getElementById('quickstart-sign-in').textContent = 'Sign in with Google';
-      document.getElementById('quickstart-account-details').textContent = 'null';
-      document.getElementById('quickstart-oauthtoken').textContent = 'null';
-      // [END_EXCLUDE]
+      document.getElementById('sign-in').textContent = 'Sign in with Google';
     }
-    // [START_EXCLUDE]
-    document.getElementById('quickstart-sign-in').disabled = false;
-    // [END_EXCLUDE]
+    document.getElementById('sign-in').disabled = false;
   });
-  // [END authstatelistener]
 
-  document.getElementById('quickstart-sign-in').addEventListener('click', toggleSignIn, false);
+  document.getElementById('sign-in').addEventListener('click', toggleSignIn, false);
 }
 
 /**
   * Function called when clicking the Login/Logout button.
   */
-// [START buttoncallback]
 function toggleSignIn() {
   if (!firebase.auth().currentUser) {
-    // [START createprovider]
     var provider = new firebase.auth.GoogleAuthProvider();
-    // [END createprovider]
-    // [START addscopes]
     // If we want access to contacts provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-    // [END addscopes]
-    // [START signin]
     firebase.auth().signInWithPopup(provider).then(function(result) {
       // This gives you a Google Access Token. You can use it to access the Google API.
       var token = result.credential.accessToken;
       // The signed-in user info.
       var user = result.user;
-      // [START_EXCLUDE]
-      document.getElementById('quickstart-oauthtoken').textContent = token;
-      // [END_EXCLUDE]
     }).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
@@ -68,7 +67,6 @@ function toggleSignIn() {
       var email = error.email;
       // The firebase.auth.AuthCredential type that was used.
       var credential = error.credential;
-      // [START_EXCLUDE]
       if (errorCode === 'auth/account-exists-with-different-credential') {
         alert('You have already signed up with a different auth provider for that email.');
         // If you are using multiple auth providers on your app you should handle linking
@@ -76,19 +74,12 @@ function toggleSignIn() {
       } else {
         console.error(error);
       }
-      // [END_EXCLUDE]
     });
-    // [END signin]
   } else {
-    // [START signout]
     firebase.auth().signOut();
-    // [END signout]
   }
-  // [START_EXCLUDE]
-  document.getElementById('quickstart-sign-in').disabled = true;
-  // [END_EXCLUDE]
+  document.getElementById('sign-in').disabled = true;
 }
-// [END buttoncallback]
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
