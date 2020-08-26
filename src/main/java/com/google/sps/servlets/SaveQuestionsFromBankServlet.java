@@ -26,6 +26,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -57,18 +58,26 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
 
-    String testName = request.getParameter("test");
+    String testName = UtilityClass.getParameter(request, "testName", "");
     String[] questionsList = request.getParameterValues("question");
+    
     if (testName == null || questionsList == null) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      logger.atWarning().log("One or more null parameters");
+      logger.atWarning().log("One or more null parameters, testName:%s, questionsList:%s",
+          testName,questionsList);
       return;
     }
     try {
       for (int i = 0; i < questionsList.length; i++) {
-        addQuestionToExamList(Long.valueOf(questionsList[i]), ownerID, testName);
-        response.getWriter().println("Successfully added Question "
-            + questionsList[i]);
+        long qsID = Long.valueOf(questionsList[i].replaceAll(",", "").toString());
+        boolean success = addQuestionToExamList(qsID, ownerID, testName);
+        if(success) {
+          response.getWriter().println("Successfully added Question " +
+              qsID + " to the test " + testName);
+        } else {
+          response.getWriter().println("Could not add Question " + qsID +
+              " to the test " + testName);
+        }
       }
       response.sendRedirect("/questionForm");
     } catch (Exception e) {
@@ -80,17 +89,20 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     }
 
   }
-  private void addQuestionToExamList(final long questionEntityKey,
+  private boolean addQuestionToExamList(final long questionEntityKey,
       final String ownerID, final String testName) {
     /*Function that adds the question id to the list of questions to the latest
     *  test created by the user
     * Arguments
     * -QuestionEntityKey - id of the question Entity we are adding to the list
     * -ownerID - email of the person who is adding this question to their test
+    * Returns true if questions were added successfully and false if there was
+    * an exception
     */
-    //grab the latest exam created by the user
     try {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Entity latestExam = getExam(ownerID, testName);
+
       if (latestExam.getProperty("questionsList") == null) {
         List<Long> questionList = new ArrayList<>();
         questionList.add(questionEntityKey);
@@ -101,12 +113,13 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
         questionList.add(questionEntityKey);
         latestExam.setProperty("questionsList", questionList);
       }
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(latestExam);
       logger.atInfo().log("Added question: %s to test: %s", questionEntityKey,
           latestExam.getKey().getId());
-    } catch (Exception e) {
-      logger.atWarning().log("Exam questions cannot be added: %s", e);
+      return true;
+    } catch (DatastoreFailureException e) {
+        logger.atWarning().log("Exam questions cannot be added: %s", e);
+        return false;
     }
   }
   private Entity getExam(final String ownerID, final String testName) {

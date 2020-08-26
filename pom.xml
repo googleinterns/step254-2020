@@ -91,11 +91,6 @@
       <artifactId>freemarker</artifactId>
       <version>2.3.30</version>
     </dependency>
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker-gae</artifactId>
-      <version>2.3.30</version>
-    </dependency>
   </dependencies>
 
  
