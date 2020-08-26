@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header>
+      <div class="navtop">
+        <p><a class="active" href="index.html">Homepage</a></p>
+        <p><a onclick="pageAccess()">Dashboard</a></p>
+        <p id=logInOut>Login Unavailable</p>
+      </div>
+    </header>
+    <main>    
+      <div id="accessDenied"></div>  
+      <!-- ***********************  ABOUT *********************** -->
+      <section id="about">
+        <div class="content-wrap">
+            <h2>What is _______?</h2>
+            <p> 
+                [name] is an online exam platform that allows students and teachers to have more contol
+                over how their platform looks. Our aim is to make online testing a more inclussive place 
+                for everyone involved. [name] allows users to change their dashboard styling 
+                so that it reflects what the user needs as well as all the usual exam platform features. 
+                Users have contol over text styling and page colour so that their exam experience is just 
+                as managable as in person exams.
+            </p>
+        </div>
+      </section>
+      <!-- ***********************  Inspiration  *********************** -->
+      <section id="inspiration">
+        <div class="content-wrap">
+            <h2>What inspired us</h2>
+            <section class="inspo-item">
+              <div class="img-box">
+
+              </div>
+              <div class="content-box">
+                <h3>Accesibility</h3>
+                <p>
+                    Most testing platforms currently used by colleges put students with disabilities 
+                    at a disadvantage. During in person examinations students with disabilities 
+                    would be offered accommodations, to ensure that they can compete equally with their peers, 
+                    such as scribes, exam papers in alternate formats and readers. These accommodations have not 
+                    been implemented in online testing environments, making reading exams and answering the questions 
+                    difficult during an already stressful period for these students. We wanted to create a platform
+                    that is customisable to a student's specific needs so that they aren't at a disadvantage.
+                </p>
+              </div>
+            </section>
+            <hr class="inspo-divide">
+            <section class="inspo-item">
+              <div class="img-box">
+               
+              </div>
+              <div class="content-box">
+                <h3>Covid-19</h3>
+                <p>
+                    Due to social distancing restrictions it is difficult for colleges and universities to hold their 
+                    exams in person and they are instead turning to online testing platforms. The rush to move from in 
+                    person exams to online exams meant that many students and teachers alike were left confused about 
+                    online testing and how to use these platforms. As college students we felt like this was a big 
+                    aspect of our lives and is something that has been effecting us since March for this reason we wanted
+                    to look at the issue and work on a solution.
+                </p>
+              </div>
+            </section>
+            <hr class="inspo-divide">
+            <section class="inspo-item">
+              <div class="img-box">
+               
+              </div>
+              <div class="content-box">
+                <h3>Usability</h3>
+                <p>
+                    As students we have used exam platforms and know that they don't always have an intuative design.
+                    Many exam platforms have too many features that can overwhelm users during an alreadying 
+                    overwhelming period. We wanted our platform to to be simple and easy to use so that students and
+                    lecturers could quickly and easily do what they need to do.
+                </p>
+              </div>
+            </section>
+          </div>
+      </section>
+      <!-- ***********************  About Us  *********************** -->
+      <section id="about-us">
+        <div class="content-wrap">
+          <button class="accordion">Aidan Molloy</button>
+          <div class="panel">
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 
+                tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
+          </div>
+
+          <button class="accordion">Róisín O'Farrell</button>
+          <div class="panel">
+            <p>
+                I am Róisín and I am a computer engineering student in Trinity College Dublin 
+                going into third year. I choose to study engineering as I was unsure what area of STEM 
+                I wanted to go into and engineering allowed me to explore mulitple areas. I am a 2020
+                STEP intern based in Google Dublin. I strongly believe that you can't be what you can't 
+                see and I am dedicated to introducing as many women and girls to programming and technology 
+                as possible. 
+            </p>
+          </div>
+
+          <button class="accordion">Klaudia Obieglo</button>
+          <div class="panel">
+            <p>
+               Hi! My name is Klaudia and I am a 2020 STEP Intern here at Google. 
+               I am currently pursuing a  Bachelor's Degree in Computer Science and 
+               Business in Trinity College, Dublin. Apart from interests in coding 
+               and software development I have a huge passion for travel and giving 
+               back to the community.
+            </p>
+          </div>
+          <script>
+            let acc = document.getElementsByClassName('accordion');
+            let i;
+
+            for (i = 0; i < acc.length; i++) {
+              acc[i].addEventListener('click', function() {
+                this.classList.toggle('active');
+                var panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                  panel.style.maxHeight = null;
+                } else {
+                  panel.style.maxHeight = panel.scrollHeight + 'px';
+                }
+              });
+            }
+          </script>
+        </div>
+      </section>
+    </main>
+    <footer>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>

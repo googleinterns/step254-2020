@@ -36,7 +36,7 @@
       <version>1.9.64</version>
     </dependency>
 
-         <!-- Test Dependencies -->
+    <!-- Test Dependencies -->
     <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -67,12 +67,23 @@
         <version>1.23.0</version>
         <scope>test</scope>
     </dependency>
-
     <dependency>
        <groupId>org.mockito</groupId>
        <artifactId>mockito-core</artifactId>
        <version>3.2.4</version>
        <scope>test</scope>
+    </dependency>
+
+    <!-- Flogger -->
+    <dependency>
+      <groupId>com.google.flogger</groupId>
+      <artifactId>flogger</artifactId>
+      <version>0.5.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.flogger</groupId>
+      <artifactId>flogger-system-backend</artifactId>
+      <version>0.5.1</version>
     </dependency>
   </dependencies>
 
@@ -87,8 +98,7 @@
         <artifactId>appengine-maven-plugin</artifactId>
         <version>2.2.0</version>
         <configuration>
-          <!-- TODO: set project ID. -->
-          <deploy.projectId></deploy.projectId>
+          <deploy.projectId>google.com:step-2020-capstone-exam-app</deploy.projectId>
           <deploy.version>1</deploy.version>
         </configuration>
       </plugin>
