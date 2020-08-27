@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -44,6 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
+import freemarker.cache.*;
 
 
 /** Servlet that creates a question form for the user to fill out.
@@ -58,12 +60,11 @@ public class QuestionFormServlet extends HttpServlet {
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
     cfg = new Configuration(Configuration.VERSION_2_3_30);
-    String path =getServletContext().getRealPath("/WEB-INF/templates/");
+    String path = getServletContext().getRealPath("/WEB-INF/templates/");
     try {
       cfg.setDirectoryForTemplateLoading(new File(path));
-    //   cfg.setDirectoryForTemplateLoading(file);
     } catch (IOException e) {
-      System.out.println(e);
+      logger.atWarning().log("Could not set directory for template loading: %s", e);
     }
     // Recommended settings for new projects:
     cfg.setDefaultEncoding("UTF-8");
@@ -72,6 +73,7 @@ public class QuestionFormServlet extends HttpServlet {
     cfg.setWrapUncheckedExceptions(true);
     cfg.setFallbackOnNullLoopVariable(false);
   }
+
   @Override
   public void doGet(final HttpServletRequest request,
         final HttpServletResponse response) throws IOException {
@@ -86,16 +88,16 @@ public class QuestionFormServlet extends HttpServlet {
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
-    Template template = cfg.getTemplate("QuestionForm.ftl");
-    PrintWriter out = response.getWriter();
+    
+    //create Map with all the tests the user own
     Map testsData = new HashMap();
-    Map<Long,String> testMap = new HashMap<Long,String>();
+    Map<Long,String> testMap = new LinkedHashMap<Long,String>();
     try {
       Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
           "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
           SortDirection.DESCENDING);
       PreparedQuery listExams = datastore.prepare(queryExams);
+      
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
@@ -109,14 +111,17 @@ public class QuestionFormServlet extends HttpServlet {
           "Internal Error occurred when trying to find your tests");
       return;
     }
+    // run to freemarker template
     try {
+      Template template = cfg.getTemplate("QuestionForm.ftl");
+      PrintWriter out = response.getWriter();
       template.process(testsData, out);
       logger.atInfo().log("Question form was displayed correctly for the User:"
-      + "%s", userService.getCurrentUser());
+          + "%s", userService.getCurrentUser());
     } catch (TemplateException e) {
       logger.atWarning().log("There was a problem with processing the template %s", e);
-      response.sendError((HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to find your tests");
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to display the Question Form");
       return;
     }
   }
