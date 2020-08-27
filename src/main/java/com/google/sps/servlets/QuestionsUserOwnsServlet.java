@@ -87,10 +87,11 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     String ownerID = userService.getCurrentUser().getEmail();
 
     DatastoreService datastore = null;
-    // Find all questions created by the user
     Map data = new HashMap();
     Map<Long,String> testMap = new LinkedHashMap<Long,String>();
     Map<Long,String> questionsMap = new LinkedHashMap<Long,String>();
+
+    //Find all questions a user owns
     try {
       datastore = DatastoreServiceFactory.getDatastoreService();
       Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
@@ -102,8 +103,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
         String question = (String) entity.getProperty("question");
         String marks = (String) entity.getProperty("marks");
         String qs = question + " (" + marks+")";
-        questionsMap.put(questionId,qs);
-        data.put("questions",questionsMap);
+        questionsMap.put(questionId, qs);
+        data.put("questions", questionsMap);
       }
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error with retrieving the questions: %s",
@@ -112,6 +113,7 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
           "Internal Error occurred when trying to retrieve your questions");
       return;
     }
+    //Find all the Exams a user owns
     try {
       datastore = DatastoreServiceFactory.getDatastoreService();
       Query queryExams = new Query("Exam")
@@ -122,8 +124,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
-        testMap.put(examID,name);
-        data.put("tests",testMap);
+        testMap.put(examID, name);
+        data.put("tests", testMap);
       }
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error when retrieving the tests: %s",
