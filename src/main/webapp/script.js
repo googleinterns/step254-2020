@@ -15,6 +15,7 @@
 
 let userAuth = false;
 let userName = '';
+let counter = 1;
 /**
  * Authenticate user
  */
@@ -133,4 +134,60 @@ if (typeof exports !== 'undefined') {
     newUser,
     isChecked,
   };
+};
+//Checks if the MCQ checkbox is checked
+function getMcqChecked() {
+  const mcqCheck = document.getElementById('mcqCheckBox');
+  const addFieldsButton = document.getElementById('addFields');
+  const removeFieldsButton= document.getElementById('removeFields');
+  const fieldsList = document.getElementById('fieldsList');
+  const mcqAnswer = document.getElementById('mcqAnswer');
+  const mcqLine = document.getElementById('mcq');
+  if(mcqCheck.checked) {
+    addFieldsButton.style.display = 'block';
+    removeFieldsButton.style.display = 'block';
+    fieldsList.style.display = 'block';
+    mcqLine.style.display = 'block';
+    mcqAnswer.style.display = 'block';
+  } else {
+    addFieldsButton.style.display = 'none' ;
+    removeFieldsButton.style.display = 'none';
+    mcqAnswer.style.display = 'none';
+    mcqLine.style.display = 'none';
+    fieldsList.style.display = 'none';
+  }
+};
+// Add more input fields for the MCQ answers
+function moreFields() {
+  if(counter >= 5) {
+    document.getElementById('popup').style.display = 'block';
+  } else {
+    const dropdown = document.createElement('OPTION');
+    dropdown.innerHTML ='<option>' + counter + '</option';
+    document.getElementById('mcqAnswer').append(dropdown);
+    document.getElementById('mcqAnswer').style.display = 'block';
+    document.getElementById('mcq').style.display = 'block';
+    const number = document.createElement('SPAN');
+    number.innerHTML = counter + '. ';
+    const field = document.createElement('input');
+    field.type ="text";
+    field.name = "mcqField";
+    field.id = "mcqField";
+    field.cols="50";
+    field.rows ="3";
+    field.style.display = 'block';
+    number.append(field);
+    document.getElementById('fieldsList').append(number);
+    document.getElementById('removeFields').style.display = 'block';
+    counter++;
+    }
+};
+// Remove the last field from the MCQ answers
+function lessFields() {
+  if (counter > 1) {
+    const listOfFields = document.getElementById('fieldsList').lastChild;
+    listOfFields.parentNode.removeChild(listOfFields);
+    document.getElementById('popup').style.display = 'none';
+    counter--;
+  }
 };

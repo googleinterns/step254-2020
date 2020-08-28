@@ -71,6 +71,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     when(request.getParameter("question")).thenReturn("What does the fox say?");
     when(request.getParameter("marks")).thenReturn("5");
     when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("type")).thenReturn(null);
     //create Fake Test
     createFakeTest();
 
@@ -81,8 +82,10 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     CreateQuestionServlet servlet = new CreateQuestionServlet();
     servlet.doPost(request, response);
     String result = stringWriter.toString();
+    System.out.println(result);
     Assert.assertTrue(result.contains("\"question\":\"What does the fox say?\","
-      +"\"marks\":\"5\",\"ownerID\":\"test@example.com\""));
+      + "\"mcqPossibleAnswers\":[],\"marks\":\"5\",\"ownerID\":\"test@example.com\","
+      + "\"type\":\"Normal\""));
   }
 
   @Test
@@ -99,6 +102,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     when(request.getParameter("question")).thenReturn(null);
     when(request.getParameter("marks")).thenReturn("10");
     when(request.getParameter("testName")).thenReturn(null);
+    when(request.getParameter("type")).thenReturn(null);
     
     CreateQuestionServlet servlet = new CreateQuestionServlet();
     servlet.doPost(request, response);
@@ -120,6 +124,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     when(request.getParameter("question")).thenReturn("How are you?");
     when(request.getParameter("marks")).thenReturn("10");
     when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("type")).thenReturn(null);
     CreateQuestionServlet servlet = new CreateQuestionServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
