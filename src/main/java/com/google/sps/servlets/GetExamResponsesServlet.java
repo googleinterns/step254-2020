@@ -57,7 +57,7 @@ import freemarker.cache.*;
  * @author Róisín O'Farrell
  */
 @WebServlet("/getExamResponses")
-public class GetExamResponses extends HttpServlet {
+public class GetExamResponsesServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   Configuration cfg;
   //set up the configuration once
@@ -89,7 +89,7 @@ public class GetExamResponses extends HttpServlet {
        final HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
@@ -112,12 +112,13 @@ public class GetExamResponses extends HttpServlet {
           "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
           SortDirection.DESCENDING);
       PreparedQuery listExams = datastore.prepare(queryExams);
-      
+      System.out.println("1");
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
         testMap.put(examID,name);
         data.put("tests", testMap);
+        System.out.println("2");
         List<Long> questionsList = null;
         try {
           questionsList = (List<Long>) entity.getProperty("questionsList");
@@ -127,6 +128,7 @@ public class GetExamResponses extends HttpServlet {
         if(questionsList != null){
           Long questionID = questionsList.get(0);
           String responseQuery = Long.toString(questionID);
+          System.out.println("3");
           /* Get all responses from owner using query as the question response does not 
              have a known ID/Name*/
           Query queryResponses = new Query(responseQuery);
@@ -137,6 +139,7 @@ public class GetExamResponses extends HttpServlet {
              String email = (String) responders.getProperty("email");
              studentMap.put(examID, email);
              data.put("students", studentMap);
+             System.out.println("4");
            }  
           }
         }

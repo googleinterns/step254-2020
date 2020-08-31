@@ -59,7 +59,7 @@ import freemarker.cache.*;
  * @author Róisín O'Farrell
  */
 @WebServlet("/markExam")
-public class MarkExam extends HttpServlet {
+public class MarkExamServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   Configuration cfg;
   
@@ -93,7 +93,7 @@ public class MarkExam extends HttpServlet {
        final HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
