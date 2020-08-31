@@ -176,6 +176,7 @@ function moreFields() {
     field.cols="50";
     field.rows ="3";
     field.style.display = 'block';
+    field.required = true;
     number.append(field);
     document.getElementById('fieldsList').append(number);
     document.getElementById('removeFields').style.display = 'block';
