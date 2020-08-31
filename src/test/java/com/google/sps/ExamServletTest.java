@@ -69,10 +69,10 @@ public final class ExamServletTest extends ExamServlet {
     verify(response).sendRedirect("/");
   }
 
-  /* Login user with email "test@example.com" */
+  /* Login user with email "test@google.com" */
   private void helperLogin() {
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 
@@ -82,7 +82,7 @@ public final class ExamServletTest extends ExamServlet {
     Entity examEntity = new Entity("Exam");
     examEntity.setProperty("name", "Test Exam");
     examEntity.setProperty("duration", "20");
-    examEntity.setProperty("ownerID", "test@example.com");
+    examEntity.setProperty("ownerID", "test@google.com");
     examEntity.setProperty("date", "20");
     examEntity.setProperty("questionsList", new ArrayList<>());
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -159,7 +159,7 @@ public final class ExamServletTest extends ExamServlet {
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Exam Name: Test Exam"));
     Assert.assertTrue(result.contains("Length: 20"));
-    Assert.assertTrue(result.contains("Created By: test@example.com"));
+    Assert.assertTrue(result.contains("Created By: test@google.com"));
   }
 
 }

@@ -54,7 +54,7 @@ public class ExamServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendRedirect("/");
       return;

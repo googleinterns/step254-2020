@@ -79,14 +79,14 @@ public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
     Entity testEntity = new Entity("Exam");
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID", "test@example.com");
+    testEntity.setProperty("ownerID", "test@google.com");
     testEntity.setProperty("date", date);
     testEntity.setProperty("questionsList", list);
 
     Entity anotherEntity= new Entity("Exam");
     anotherEntity.setProperty("name", "AnotherExam");
     anotherEntity.setProperty("duration", "45");
-    anotherEntity.setProperty("ownerID", "test@example.com");
+    anotherEntity.setProperty("ownerID", "test@google.com");
     anotherEntity.setProperty("date", date);
     anotherEntity.setProperty("questionsList", list);
 
@@ -101,9 +101,9 @@ public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
     servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("\"name\":\"Trial\",\"examID\":1,"
-        + "\"duration\":30.0,\"ownerID\":\"test@example.com\""));
+        + "\"duration\":30.0,\"ownerID\":\"test@google.com\""));
     Assert.assertTrue(result.contains("\"name\":\"AnotherExam\",\"examID\":2,"
-        +"\"duration\":45.0,\"ownerID\":\"test@example.com\""));
+        +"\"duration\":45.0,\"ownerID\":\"test@google.com\""));
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
@@ -121,9 +121,9 @@ public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
         "You are not authorised to view this page");
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }
