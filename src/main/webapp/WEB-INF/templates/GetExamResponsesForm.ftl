@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -21,12 +20,22 @@
       </div>
     </header>
     <main>
-      <h1 class="title"> Welcome to your dashboard</h1>
-      <div class="testdash">
-        <div class="done"></div>
-        <div class="todo"></div>
-        <div class="created"></div>
-      </div>
+     <h3> Grade an Exam </h3>
+     <form id="getExam" action="/markExam" method="POST">
+        <h3> Select which test you want to grade</h3>
+        <select name="testName">
+          <#list tests as key, value>
+            <option class="exam">${value}</option>
+          </#list>
+        </select>
+        <h3> Select which student you want to grade</h3>
+        <select name="studentName">
+          <#list students as key, value>
+            <option class="students">${value}</option>
+          </#list>
+        </select>
+        <button>Submit</button>
+      </form>
     </main>
     <footer>
     </footer>
