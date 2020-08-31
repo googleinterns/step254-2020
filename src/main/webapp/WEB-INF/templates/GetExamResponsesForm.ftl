@@ -30,8 +30,8 @@
         </select>
         <h3> Select which student you want to grade</h3>
         <select name="studentName">
-          <#list students as key, value>
-            <option class="students">${value}</option>
+          <#list students as student>
+            <option class="students">${student}</option>
           </#list>
         </select>
         <button>Submit</button>

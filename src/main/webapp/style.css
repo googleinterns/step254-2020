@@ -38,7 +38,7 @@ h3{
     max-width: 800px;
     width: 85%;
     margin: 0 auto;
-    padding: 60px 0;
+    padding: 60px 20px;
 }
 
 .title{
@@ -119,3 +119,6 @@ h3{
   transition: max-height 0.2s ease-out;
 }
 
+form{
+  padding: 20px;
+}

@@ -103,7 +103,9 @@ public class GetExamResponsesServlet extends HttpServlet {
        taken one of those exams*/
     Map data = new HashMap();
     Map<Long,String> testMap = new LinkedHashMap<Long,String>();
-    Map<Long,String> studentMap = new LinkedHashMap<Long,String>();
+    //Map<Long, String> studentMap = new LinkedHashMap<Long,String>();
+    List<String> studentList = new ArrayList();
+    //int responseNumber = 0;
     /*Look up each Exam to get the question list and look up students who have 
       answered those questions*/
     try {
@@ -112,13 +114,11 @@ public class GetExamResponsesServlet extends HttpServlet {
           "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
           SortDirection.DESCENDING);
       PreparedQuery listExams = datastore.prepare(queryExams);
-      System.out.println("1");
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
         testMap.put(examID,name);
         data.put("tests", testMap);
-        System.out.println("2");
         List<Long> questionsList = null;
         try {
           questionsList = (List<Long>) entity.getProperty("questionsList");
@@ -128,7 +128,6 @@ public class GetExamResponsesServlet extends HttpServlet {
         if(questionsList != null){
           Long questionID = questionsList.get(0);
           String responseQuery = Long.toString(questionID);
-          System.out.println("3");
           /* Get all responses from owner using query as the question response does not 
              have a known ID/Name*/
           Query queryResponses = new Query(responseQuery);
@@ -137,13 +136,12 @@ public class GetExamResponsesServlet extends HttpServlet {
           for (Entity responders : questionResponses.asIterable()) {
            if(responders != null){
              String email = (String) responders.getProperty("email");
-             studentMap.put(examID, email);
-             data.put("students", studentMap);
-             System.out.println("4");
+             studentList.add(email);
            }  
           }
         }
       }
+    data.put("students", studentList);
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);

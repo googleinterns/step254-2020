@@ -57,7 +57,8 @@ public class UpdateExamResponseServlet extends HttpServlet {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+      "You are not authorised to view this page");
       return;
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
@@ -68,7 +69,7 @@ public class UpdateExamResponseServlet extends HttpServlet {
     examName= studentEmail = givenMark = null;
 
     try {
-      examName = request.getParameter("examName");
+      examName = request.getParameter("testName");
       studentEmail = request.getParameter("studentEmail");
     } catch (Exception e) {
       logger.atSevere().log("One or more null parameters in try/catch");
@@ -82,7 +83,7 @@ public class UpdateExamResponseServlet extends HttpServlet {
       Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
           "name", FilterOperator.EQUAL, examName));
       PreparedQuery listExams = datastore.prepare(queryExams);
-      
+
       for (Entity entity : listExams.asIterable()) {
         List<Long> questionsList = null;
         try {

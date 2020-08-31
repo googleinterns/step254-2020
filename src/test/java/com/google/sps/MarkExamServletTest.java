@@ -52,7 +52,7 @@ import org.junit.runners.JUnit4;
  * @author Róisín O'Farrell
  */
 @RunWith(JUnit4.class)
-public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
+public final class MarkExamServletTest extends MarkExamServlet {
   private final LocalServiceTestHelper helper = 
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
@@ -67,7 +67,7 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
   }
 
   @Test
-  public void testdoGetFunction() throws IOException, ServletException{
+  public void testdoPostFunction() throws IOException, ServletException{
     /*Tests the doGet function to see if the questions that the
     * user owns get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
@@ -77,7 +77,10 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
+     when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("studentName")).thenReturn("student@google.com");
     setFakeTest();
+    setFakeQuestions();
     setFakeResponeses();
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -91,13 +94,16 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
     
     
-    GetExamResponsesServlet servlet= new GetExamResponsesServlet();
+    MarkExamServlet servlet= new MarkExamServlet();
     servlet.init(config);
-    servlet.doGet(request, response);
+    servlet.doPost(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Trial"));
     Assert.assertTrue(result.contains("student@google.com"));
-    Assert.assertTrue(result.contains("otherStudent@google.com"));
+    Assert.assertTrue(result.contains("What day is it?"));
+    Assert.assertTrue(result.contains("Tuesday"));
+    Assert.assertFalse(result.contains("person@example.com"));
+    Assert.assertFalse(result.contains("How many pets do you have?"));
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
@@ -109,8 +115,8 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
-    QuestionsUserOwnsServlet servlet= new QuestionsUserOwnsServlet();
-    servlet.doGet(request, response);
+    MarkExamServlet servlet= new MarkExamServlet();
+    servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
@@ -131,26 +137,53 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
   }
 
    private void setFakeResponeses () {
-    /*Set up two response entities for testing purposes */
-    Entity responseEntity = new Entity("1");
+    /*Set up two fake response entities for testing purposes */
+    Entity responseEntity = new Entity("1", "student@google.com");
     responseEntity.setProperty("answer", "Tuesday");
     responseEntity.setProperty("marks", "5");
     responseEntity.setProperty("email", "student@google.com");
 
-    Entity anotherResponseEntity = new Entity("1");
-    anotherResponseEntity.setProperty("answer", "Tuesday");
+    Entity anotherResponseEntity = new Entity("2", "student@google.com");
+    anotherResponseEntity.setProperty("answer", "2011");
     anotherResponseEntity.setProperty("marks", "5");
-    anotherResponseEntity.setProperty("email", "otherStudent@google.com");
+    anotherResponseEntity.setProperty("email", "student@google.com");
     
-    Entity responseToDifferentQ = new Entity("4");
-    responseToDifferentQ.setProperty("answer", "6");
-    responseToDifferentQ.setProperty("marks", "15");
-    responseToDifferentQ.setProperty("email", "person@example.com");
+    Entity responseToDifferentUser = new Entity("4", "person@example.com");
+    responseToDifferentUser.setProperty("answer", "6");
+    responseToDifferentUser.setProperty("marks", "15");
+    responseToDifferentUser.setProperty("email", "person@example.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(responseEntity);
     datastore.put(anotherResponseEntity);
-    datastore.put(responseToDifferentQ);
+    datastore.put(responseToDifferentUser);
+  }
+
+   private void setFakeQuestions () {
+    /*Set up two fake question entities for testing purposes */
+    Long date = (new Date()).getTime(); 
+    Entity questionEntity = new Entity("Question", 1L);
+    questionEntity.setProperty("question", "What day is it?");
+    questionEntity.setProperty("marks", "5");
+    questionEntity.setProperty("date", date);
+    questionEntity.setProperty("ownerID", "test@example.com");
+
+    Entity anotherQuestionEntity = new Entity("Question", 2L);
+    anotherQuestionEntity.setProperty("question", "What year is it?");
+    anotherQuestionEntity.setProperty("marks", "10");
+    anotherQuestionEntity.setProperty("date", date);
+    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    
+    Entity questionByDifferentUser = new Entity("Question", 4L);
+    questionByDifferentUser.setProperty("question", "How many pets do you have?");
+    questionByDifferentUser.setProperty("marks", "15");
+    questionByDifferentUser.setProperty("date", date);
+    questionByDifferentUser.setProperty("ownerID", "person@example.com");
+    
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(questionEntity);
+    datastore.put(anotherQuestionEntity);
+    datastore.put(questionByDifferentUser);
   }
   private void helperLogin() {
     /* Login user with email "test@example.com" */

@@ -21,13 +21,18 @@ import static org.mockito.Mockito.when;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +57,7 @@ import org.junit.runners.JUnit4;
  * @author Róisín O'Farrell
  */
 @RunWith(JUnit4.class)
-public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
+public final class UpdateExamResponseServletTest extends UpdateExamResponseServlet {
   private final LocalServiceTestHelper helper = 
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
@@ -67,7 +72,7 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
   }
 
   @Test
-  public void testdoGetFunction() throws IOException, ServletException{
+  public void testdoPostFunction() throws IOException, ServletException{
     /*Tests the doGet function to see if the questions that the
     * user owns get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
@@ -77,6 +82,10 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
+    when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("studentEmail")).thenReturn("student@google.com");
+    when(request.getParameter("1")).thenReturn("100");
+    when(request.getParameter("2")).thenReturn("200");
     setFakeTest();
     setFakeResponeses();
     StringWriter stringWriter = new StringWriter();
@@ -91,13 +100,29 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
     
     
-    GetExamResponsesServlet servlet= new GetExamResponsesServlet();
+    UpdateExamResponseServlet servlet= new UpdateExamResponseServlet();
     servlet.init(config);
-    servlet.doGet(request, response);
-    String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Trial"));
+    servlet.doPost(request, response);
+
+    // Make query to datastore to make sure it was stored correctly
+    Query query =
+        new Query("1")
+            .setFilter(new Query
+                .FilterPredicate("email", Query.FilterOperator.EQUAL, "student@google.com"));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    Entity entity = results.asSingleEntity();
+
+    // Convert the received entity into a json string to check content
+    Map<String, String> userResponseInfo = new HashMap<String, String>();
+    userResponseInfo.put("email", (String) entity.getProperty("email"));
+    userResponseInfo.put("answer", (String) entity.getProperty("answer"));
+    userResponseInfo.put("marks", (String) entity.getProperty("marks"));
+    String result = UtilityClass.convertToJson(userResponseInfo);
+    System.out.println(result);
+    Assert.assertTrue(result.contains("100"));
     Assert.assertTrue(result.contains("student@google.com"));
-    Assert.assertTrue(result.contains("otherStudent@google.com"));
+    Assert.assertTrue(result.contains("Tuesday"));
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
@@ -109,8 +134,8 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
-    QuestionsUserOwnsServlet servlet= new QuestionsUserOwnsServlet();
-    servlet.doGet(request, response);
+    UpdateExamResponseServlet servlet= new UpdateExamResponseServlet();
+    servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
@@ -131,27 +156,28 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
   }
 
    private void setFakeResponeses () {
-    /*Set up two response entities for testing purposes */
-    Entity responseEntity = new Entity("1");
+    /*Set up two fake response entities for testing purposes */
+    Entity responseEntity = new Entity("1", "student@google.com");
     responseEntity.setProperty("answer", "Tuesday");
-    responseEntity.setProperty("marks", "5");
+    responseEntity.setProperty("marks", "2");
     responseEntity.setProperty("email", "student@google.com");
 
-    Entity anotherResponseEntity = new Entity("1");
-    anotherResponseEntity.setProperty("answer", "Tuesday");
+    Entity anotherResponseEntity = new Entity("2", "student@google.com");
+    anotherResponseEntity.setProperty("answer", "2011");
     anotherResponseEntity.setProperty("marks", "5");
-    anotherResponseEntity.setProperty("email", "otherStudent@google.com");
+    anotherResponseEntity.setProperty("email", "student@google.com");
     
-    Entity responseToDifferentQ = new Entity("4");
-    responseToDifferentQ.setProperty("answer", "6");
-    responseToDifferentQ.setProperty("marks", "15");
-    responseToDifferentQ.setProperty("email", "person@example.com");
+    Entity responseToDifferentUser = new Entity("4", "person@example.com");
+    responseToDifferentUser.setProperty("answer", "6");
+    responseToDifferentUser.setProperty("marks", "15");
+    responseToDifferentUser.setProperty("email", "person@example.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(responseEntity);
     datastore.put(anotherResponseEntity);
-    datastore.put(responseToDifferentQ);
+    datastore.put(responseToDifferentUser);
   }
+
   private void helperLogin() {
     /* Login user with email "test@example.com" */
     helper.setEnvAuthDomain("google.com");
