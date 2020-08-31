@@ -92,9 +92,9 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
         "You are not authorised to view this page");
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 

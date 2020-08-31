@@ -102,19 +102,19 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
     questionEntity.setProperty("date", date);
-    questionEntity.setProperty("ownerID", "test@example.com");
+    questionEntity.setProperty("ownerID", "test@google.com");
 
     Entity anotherQuestionEntity = new Entity("Question");
     anotherQuestionEntity.setProperty("question", "What year is it?");
     anotherQuestionEntity.setProperty("marks", "10");
     anotherQuestionEntity.setProperty("date", date);
-    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    anotherQuestionEntity.setProperty("ownerID", "test@google.com");
     
     Entity questionByDifferentUser = new Entity("Question");
     questionByDifferentUser.setProperty("question", "How many pets do you have?");
     questionByDifferentUser.setProperty("marks", "15");
     questionByDifferentUser.setProperty("date", date);
-    questionByDifferentUser.setProperty("ownerID", "person@example.com");
+    questionByDifferentUser.setProperty("ownerID", "person@google.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(questionEntity);
@@ -122,9 +122,9 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     datastore.put(questionByDifferentUser);
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }

@@ -82,7 +82,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     servlet.doPost(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("\"question\":\"What does the fox say?\","
-      +"\"marks\":\"5\",\"ownerID\":\"test@example.com\""));
+      +"\"marks\":\"5\",\"ownerID\":\"test@google.com\""));
   }
 
   @Test
@@ -126,9 +126,9 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
         "You are not authorised to view this page");
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
   private void createFakeTest() {
@@ -137,7 +137,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     Entity testEntity = new Entity("Exam");
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID", "test@example.com");
+    testEntity.setProperty("ownerID", "test@google.com");
     testEntity.setProperty("date", date);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

@@ -74,7 +74,7 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     Entity testEntity = new Entity("Exam");
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID", "test@example.com");
+    testEntity.setProperty("ownerID", "test@google.com");
     testEntity.setProperty("date", date); 
 
     //Create Fake Questions
@@ -82,13 +82,13 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
     questionEntity.setProperty("date", date);
-    questionEntity.setProperty("ownerID", "test@example.com");
+    questionEntity.setProperty("ownerID", "test@google.com");
 
     Entity anotherQuestionEntity = new Entity("Question");
     anotherQuestionEntity.setProperty("question", "What year is it?");
     anotherQuestionEntity.setProperty("marks", "10");
     anotherQuestionEntity.setProperty("date", date);
-    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    anotherQuestionEntity.setProperty("ownerID", "test@google.com");
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(testEntity);
@@ -126,9 +126,9 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
         "You are not authorised to view this page");
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }
