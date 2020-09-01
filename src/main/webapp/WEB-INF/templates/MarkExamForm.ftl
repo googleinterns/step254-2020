@@ -30,7 +30,7 @@
             <output>Answer: </output><br>
             <output class="questionValue">${response.answer}</output><br>
             <label for="marks">Marks:</label><br>
-            <input type="number" id=${response.questionID} name=${response.questionID} style="width:4em" value=${response.givenMarks} reqired>
+            <input type="number" id=${response.questionID} name=${response.questionID} style="width:4em" value=${response.givenMarks} required>
             <output> /${response.possibleMarks}</output><br>
             <hr>
           </#list>

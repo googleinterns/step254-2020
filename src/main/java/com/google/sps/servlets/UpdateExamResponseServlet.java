@@ -69,13 +69,14 @@ public class UpdateExamResponseServlet extends HttpServlet {
     examName= studentEmail = givenMark = null;
 
     try {
-      examName = request.getParameter("testName");
+      examName = request.getParameter("examName");
       studentEmail = request.getParameter("studentEmail");
     } catch (Exception e) {
       logger.atSevere().log("One or more null parameters in try/catch");
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
-
+    System.out.println(examName);
+    System.out.println(studentEmail);
     // Look up each response servlet for exam question list and overwrite entity corresponding with studentEmail
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     try {
@@ -83,8 +84,9 @@ public class UpdateExamResponseServlet extends HttpServlet {
       Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
           "name", FilterOperator.EQUAL, examName));
       PreparedQuery listExams = datastore.prepare(queryExams);
-
+      System.out.println("here 1");
       for (Entity entity : listExams.asIterable()) {
+          System.out.println("here 2");
         List<Long> questionsList = null;
         try {
           questionsList = (List<Long>) entity.getProperty("questionsList");
@@ -92,11 +94,13 @@ public class UpdateExamResponseServlet extends HttpServlet {
           logger.atWarning().log("There was an error getting the questions list: %s", e);
         }
         if(questionsList != null){
+            System.out.println("here 3");
           for(Long questionID: questionsList){
             String responseName = Long.toString(questionID);
             try{
               // Get passed value for givenMark from questionID
               givenMark = request.getParameter(responseName);
+              System.out.println(givenMark);
               // Get current values for answer, email and givenMark
               Key responseKey = KeyFactory.createKey(responseName, studentEmail);
               Entity res = datastore.get(responseKey);

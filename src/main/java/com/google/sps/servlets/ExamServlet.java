@@ -112,19 +112,36 @@ public class ExamServlet extends HttpServlet {
 
         // If there are questions
         if (questionsList != null) {
+          int questionNumber = 0;
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<form action=\"/examResponse\" method=\"POST\">");
-          for (int i = 0; i < questionsList.size(); i++) {
+          for (Long question : questionsList) {
             try {
-              Key key = KeyFactory.createKey("Question", questionsList.get(i));
+              questionNumber++;
+              Key key = KeyFactory.createKey("Question", question);
               Entity qs = datastore.get(key);
 
-              long questionID = qs.getKey().getId();
-              String question = (String) qs.getProperty("question");
-              out.println("<label for=\"" + questionID + "\">" + (i + 1) + ") "
-                  + question + ": </label>");
-              out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
-                  + questionID + "\" onchange=\"setDirty()\"><br><br>");
+              Long questionID = qs.getKey().getId();
+              String questionValue = (String) qs.getProperty("question");
+              String type = (String) qs.getProperty("type");
+
+              if (type.equals("MCQ")){
+                 List<String> answerList = (List<String>) qs.getProperty("mcqPossibleAnswers");
+                 out.println("<output>" + questionNumber + ") "
+                     + questionValue + ": </output><br>");
+                  for(String answer : answerList){
+                    out.println("<input type=\"radio\" id=\"" + answer + "\" name=\""
+                        + questionID + "\" value=\"" + answer + "\"onchange=\"setDirty()\"><br><br>");
+                    out.println("<label for=\"" + answer + "\">" + answer +"</label>");
+                    
+                  }
+              } else{
+                out.println("<label for=\"" + questionID + "\">" + questionNumber + ") "
+                    + questionValue + ": </label>");
+                out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
+                    + questionID + "\" onchange=\"setDirty()\"><br><br>");
+              }
+
 
             } catch (Exception e) {
               out.println("<p>Question was not found</p><br>");

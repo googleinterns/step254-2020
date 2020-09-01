@@ -82,7 +82,7 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("examName")).thenReturn("Trial");
     when(request.getParameter("studentEmail")).thenReturn("student@google.com");
     when(request.getParameter("1")).thenReturn("100");
     when(request.getParameter("2")).thenReturn("200");
