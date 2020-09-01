@@ -15,7 +15,6 @@
         <p id=logInOut></p>
         <p><a href="/exam">Take Exam</a></p>
         <p><a href="createExam.html">Create Exam</a></p>
-        <p><a href="preference.html">Set Preferences</a></p>
         <p><a href="/getExamResponses">Set Preferences</a></p>
       </div>
     </header>

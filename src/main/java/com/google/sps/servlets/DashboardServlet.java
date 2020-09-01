@@ -151,6 +151,7 @@ public class DashboardServlet extends HttpServlet{
       PreparedQuery result = datastore.prepare(query);
       Entity user = result.asSingleEntity();
       if(user.getProperty("examsTaken") != null) {
+        System.out.println("Here");
         List<Long> examsTakenList = (List<Long>) user.getProperty("examsTaken");
         for(int i=0; i<examsTakenList.size(); i++) {
           Key key = KeyFactory.createKey("Exam", examsTakenList.get(i));
