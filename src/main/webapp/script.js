@@ -68,7 +68,7 @@ async function setPreference() {
 function pageAccess() {
   if (userAuth) {
     const page = newUser(userName);
-    window.location.href = page;
+    window.location.href = "/dashboardServlet";
   } else {
     document.getElementById(
         'accessDenied',
