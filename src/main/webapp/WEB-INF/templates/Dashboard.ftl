@@ -25,6 +25,13 @@
         <div class="done">
           <h2> Exam's Completed </h2>
           <#if examCompleted??>
+            <#list examCompleted as name, id>
+              <tr>
+              <td> ${name} </td>
+              <td><a href=/examsTaken?examID=${id?c}>Look at Exam</a></td>
+              </tr>
+              <br>
+            </#list>
 
           <#else>
             <h3>You have not completed any exams yet </h3>
