@@ -45,8 +45,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for Get Exam Responses Servlet. Test are all exam created by the user retrieved,
- * are all student who took any of these exams retrieved,
+ * Tests for Mark Exam Servlet. Test is marking formprinted as expected,
  * if a user is not logged in check for an unauthorised error.
  *
  * @author Róisín O'Farrell
@@ -68,8 +67,8 @@ public final class MarkExamServletTest extends MarkExamServlet {
 
   @Test
   public void testdoPostFunction() throws IOException, ServletException{
-    /*Tests the doGet function to see if the questions that the
-    * user owns get retrieved correctly */
+    /*Tests the doPost function to see if the marking form is 
+    * printed correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     ServletConfig config = mock(ServletConfig.class);
@@ -148,10 +147,10 @@ public final class MarkExamServletTest extends MarkExamServlet {
     anotherResponseEntity.setProperty("marks", "5");
     anotherResponseEntity.setProperty("email", "student@google.com");
     
-    Entity responseToDifferentUser = new Entity("4", "person@example.com");
+    Entity responseToDifferentUser = new Entity("4", "person@google.com");
     responseToDifferentUser.setProperty("answer", "6");
     responseToDifferentUser.setProperty("marks", "15");
-    responseToDifferentUser.setProperty("email", "person@example.com");
+    responseToDifferentUser.setProperty("email", "person@google.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(responseEntity);
@@ -166,19 +165,19 @@ public final class MarkExamServletTest extends MarkExamServlet {
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
     questionEntity.setProperty("date", date);
-    questionEntity.setProperty("ownerID", "test@example.com");
+    questionEntity.setProperty("ownerID", "test@google.com");
 
     Entity anotherQuestionEntity = new Entity("Question", 2L);
     anotherQuestionEntity.setProperty("question", "What year is it?");
     anotherQuestionEntity.setProperty("marks", "10");
     anotherQuestionEntity.setProperty("date", date);
-    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    anotherQuestionEntity.setProperty("ownerID", "test@google.com");
     
     Entity questionByDifferentUser = new Entity("Question", 4L);
     questionByDifferentUser.setProperty("question", "How many pets do you have?");
     questionByDifferentUser.setProperty("marks", "15");
     questionByDifferentUser.setProperty("date", date);
-    questionByDifferentUser.setProperty("ownerID", "person@example.com");
+    questionByDifferentUser.setProperty("ownerID", "person@google.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(questionEntity);

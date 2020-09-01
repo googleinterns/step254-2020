@@ -50,9 +50,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for Get Exam Responses Servlet. Test are all exam created by the user retrieved,
- * are all student who took any of these exams retrieved,
- * if a user is not logged in check for an unauthorised error.
+ * Tests for Update Exam Response Servlet. Test are updated marks changed
+ * and stored, if a user is not logged in check for an unauthorised error.
  *
  * @author Róisín O'Farrell
  */
@@ -73,8 +72,8 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
 
   @Test
   public void testdoPostFunction() throws IOException, ServletException{
-    /*Tests the doGet function to see if the questions that the
-    * user owns get retrieved correctly */
+    /*Tests the doPost function to see if the students exam marks
+    are updated correctly*/
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     ServletConfig config = mock(ServletConfig.class);
@@ -167,10 +166,10 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
     anotherResponseEntity.setProperty("marks", "5");
     anotherResponseEntity.setProperty("email", "student@google.com");
     
-    Entity responseToDifferentUser = new Entity("4", "person@example.com");
+    Entity responseToDifferentUser = new Entity("4", "person@google.com");
     responseToDifferentUser.setProperty("answer", "6");
     responseToDifferentUser.setProperty("marks", "15");
-    responseToDifferentUser.setProperty("email", "person@example.com");
+    responseToDifferentUser.setProperty("email", "person@google.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(responseEntity);

@@ -145,7 +145,7 @@ public final class GetExamResponsesServletTest extends GetExamResponsesServlet {
     Entity responseToDifferentQ = new Entity("4");
     responseToDifferentQ.setProperty("answer", "6");
     responseToDifferentQ.setProperty("marks", "15");
-    responseToDifferentQ.setProperty("email", "person@example.com");
+    responseToDifferentQ.setProperty("email", "person@google.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(responseEntity);
