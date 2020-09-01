@@ -40,8 +40,9 @@ public class CreateExamServlet extends HttpServlet {
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
-    //Servlet Receives information from the client about an exam they
-    //want to create and saves it in the datastore
+    /*Servlet Receives information from the client about an exam they
+    * want to create and saves it in the datastore
+    */
     Long date = (new Date()).getTime();
     String name = UtilityClass.getParameter(request, "name", "");
     // Remove all html tags and trim the spaces in the exam name.
@@ -51,7 +52,8 @@ public class CreateExamServlet extends HttpServlet {
     if (name == "" || duration == "") {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         "You have entered one or more null parameters");
-      logger.atWarning().log("One or more null parameters");
+      logger.atWarning().log("One or more null parameters, name:%s, duration:%s",
+          name, duration);
       return;
     }
     UserService userService = UserServiceFactory.getUserService();
@@ -67,7 +69,7 @@ public class CreateExamServlet extends HttpServlet {
     Long id = rd.nextLong();
     //Set up the new Exam and save it in the datastore
     try {
-      Entity examEntity = new Entity("Exam",id);
+      Entity examEntity = new Entity("Exam", id);
       examEntity.setProperty("name", name);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
@@ -77,8 +79,7 @@ public class CreateExamServlet extends HttpServlet {
       datastore.put(examEntity);
       logger.atInfo().log("Exam: %s , was saved successfully in the datastore",
           examEntity.getKey().getId());
-    //   response.sendRedirect("/questionForm");
-      response.sendRedirect("/returnExamsUserOwns");
+      response.sendRedirect("/questionForm");
       response.setContentType("application/json");
       response.getWriter().println(UtilityClass.convertToJson(examEntity));
 

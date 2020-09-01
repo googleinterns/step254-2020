@@ -92,8 +92,7 @@ public class CreateQuestionServlet extends HttpServlet {
     Random rd = new Random();
     try {
       // Create a Question Entity with the parameters provided
-
-      Entity questionEntity = new Entity("Question",rd.nextLong());
+      Entity questionEntity = new Entity("Question", rd.nextLong());
       questionEntity.setProperty("question", question);
       questionEntity.setProperty("marks", marks);
       questionEntity.setProperty("date", date);
@@ -103,6 +102,7 @@ public class CreateQuestionServlet extends HttpServlet {
       questionEntity.setProperty("mcqPossibleAnswers", mcqPossibleAnswers);
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(questionEntity);
+      
       addQuestionToExamList(questionEntity.getKey().getId(), ownerID,
           testName);
 
