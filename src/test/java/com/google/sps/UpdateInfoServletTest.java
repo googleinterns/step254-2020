@@ -71,10 +71,10 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet {
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
-  /* Login user with email "test@example.com" */
+  /* Login user with email "test@google.com" */
   private void helperLogin() {
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
   
@@ -113,7 +113,7 @@ public final class UpdateInfoServletTest extends UpdateInfoServlet {
     Query query =
         new Query("UserInfo")
             .setFilter(new Query
-                .FilterPredicate("email", Query.FilterOperator.EQUAL, "test@example.com"));
+                .FilterPredicate("email", Query.FilterOperator.EQUAL, "test@google.com"));
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     Entity entity = results.asSingleEntity();

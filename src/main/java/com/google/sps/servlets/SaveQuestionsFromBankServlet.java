@@ -48,7 +48,7 @@ public class SaveQuestionsFromBankServlet extends HttpServlet {
     * that the user wants the questions saved to
     */
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
           "You are not authorised to view this page");
