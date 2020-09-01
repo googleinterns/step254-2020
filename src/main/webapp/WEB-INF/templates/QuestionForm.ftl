@@ -25,9 +25,11 @@
         <input type="number" id="marks" name="marks" min="0" max="1000" step="0.01" required> 
         <h3> Select which test you want the questions added to</h1>
         <select name="testName">
+        <#if tests??>
           <#list tests as key, value>
             <option>${value}</option>
           </#list>
+        </#if>
         </select>
         <button>Submit</button>
       </form>

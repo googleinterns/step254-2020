@@ -123,7 +123,7 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     Entity testEntity = new Entity("Exam");
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID", "test@example.com");
+    testEntity.setProperty("ownerID", "test@google.com");
     testEntity.setProperty("date", date); 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(testEntity);
