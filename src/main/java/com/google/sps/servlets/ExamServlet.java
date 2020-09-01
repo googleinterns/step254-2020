@@ -131,8 +131,8 @@ public class ExamServlet extends HttpServlet {
                      + questionValue + ": </output><br>");
                   for(String answer : answerList){
                     out.println("<input type=\"radio\" id=\"" + answer + "\" name=\""
-                        + questionID + "\" value=\"" + answer + "\"onchange=\"setDirty()\"><br><br>");
-                    out.println("<label for=\"" + answer + "\">" + answer +"</label>");
+                        + questionID + "\" value=\"" + answer + "\"onchange=\"setDirty()\">");
+                    out.println("<label for=\"" + answer + "\">" + answer +"</label><br><br>");
                     
                   }
               } else{
