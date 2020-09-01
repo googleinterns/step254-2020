@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -23,9 +22,35 @@
     <main>
       <h1 class="title"> Welcome to your dashboard</h1>
       <div class="testdash">
-        <div class="done"></div>
-        <div class="todo"></div>
-        <div class="created"></div>
+        <div class="done">
+          <h2> Exam's Completed </h2>
+          <#if examCompleted??>
+
+          <#else>
+            <h3>You have not completed any exams yet </h3>
+          </#if>
+
+        </div>
+        <div class="todo">
+          <h2> Exam's To Do </h2>
+          <#if examToComplete??>
+
+          <#else>
+            <h4> You do not have any exams to take at the moment </h4>
+          </#if>
+        </div>
+        <div class="created">
+          <h2> Exam's Created</h2>
+          <#if examOwned??>
+            <#list examOwned as name, id >
+              <tr>
+              <td> ${name} </td>
+              <td><a href=/showExam?examID=${id?c}>Look at Exam</a></td>
+              </tr>
+              <br>
+            </#list>
+          </#if>
+        </div>
       </div>
     </main>
     <footer>
