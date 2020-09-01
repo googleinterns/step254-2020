@@ -101,7 +101,7 @@ public class ExamsTakenServlet extends HttpServlet {
     }
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-    String examName = request.getParameter("testName");
+    String examName =UtilityClass.getParameter(request, "examID", null);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     
     // Create Map with all the test information needed to mark exam
