@@ -13,7 +13,7 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
-
+ 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
@@ -22,8 +22,8 @@ import freemarker.template.TemplateExceptionHandler;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.DatastoreFailureException;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -31,8 +31,12 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.ExamClass;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -45,16 +49,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
+import freemarker.cache.*;
 
-/** Servlet that returns a checkbox form of all the questions owned by the user
-* A user can then select the questions they want to reuse by clicking on the
-* checkboxes.
+/** Servlet that returns the users created exams, to-do exams and completed exams to the
+* users dashboard
 * @author Klaudia Obieglo
 */
-@WebServlet("/returnQuestionsUserOwns")
-public class QuestionsUserOwnsServlet extends HttpServlet {
+@WebServlet("/returnExamsUserOwns")
+public class DashboardServlet extends HttpServlet{
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   Configuration cfg;
+  Map dashboardData = new HashMap();
   //set up the configuration once
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -73,9 +78,8 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     cfg.setFallbackOnNullLoopVariable(false);
   }
   @Override
-  public void doGet(final HttpServletRequest request,
-       final HttpServletResponse response) throws IOException {
-    /*Returns all the questions that the user has created */
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    /*Returns the exams that the user has created */
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       logger.atWarning().log("User is not logged in.");
@@ -83,69 +87,50 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
           "You are not authorised to view this page");
       return;
     }
-    logger.atInfo().log("user=%s", userService.getCurrentUser());
-    String ownerID = userService.getCurrentUser().getEmail();
-
-    DatastoreService datastore = null;
-    Map data = new HashMap();
-    Map<Long,String> testMap = new LinkedHashMap<Long,String>();
-    Map<Long,String> questionsMap = new LinkedHashMap<Long,String>();
-
-    //Find all questions a user owns
+    String ownerID = userService.getCurrentUser().getEmail(); 
+    //grab exams user owns
+    getTestsOwnedByUser(ownerID);
+    // run to freemarker template
     try {
-      datastore = DatastoreServiceFactory.getDatastoreService();
-      Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
-          FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
-      PreparedQuery results = datastore.prepare(query);
-
-      for (Entity entity : results.asIterable()) {
-        long questionId = entity.getKey().getId();
-        String question = (String) entity.getProperty("question");
-        String marks = (String) entity.getProperty("marks");
-        String qs = question + " (" + marks+")";
-        questionsMap.put(questionId, qs);
-        data.put("questions", questionsMap);
-      }
-    } catch (DatastoreFailureException e) {
-      logger.atWarning().log("There was an error with retrieving the questions: %s",
-          e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to retrieve your questions");
-      return;
-    }
-    //Find all the Exams a user owns
-    try {
-      datastore = DatastoreServiceFactory.getDatastoreService();
-      Query queryExams = new Query("Exam")
-          .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
-          ownerID)).addSort("date", SortDirection.DESCENDING);
-      PreparedQuery listExams = datastore.prepare(queryExams);
-
-      for (Entity entity : listExams.asIterable()) {
-        long examID = entity.getKey().getId();
-        String name = (String) entity.getProperty("name");
-        testMap.put(examID, name);
-        data.put("tests", testMap);
-      }
-    } catch (DatastoreFailureException e) {
-      logger.atWarning().log("There was an error when retrieving the tests: %s",
-          e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to retrieve your Tests");
-      return;
-    }
-    // run the freemarker template
-    try {
-      Template template = cfg.getTemplate("QuestionsUsersOwn.ftl");
+      Template template = cfg.getTemplate("Dashboard.ftl");
       PrintWriter out = response.getWriter();
-      template.process(data, out);
-      logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
-        + " and displayed correctly", userService.getCurrentUser());
+
+      template.process(dashboardData, out);
+      logger.atInfo().log("Dashboard was displayed correctly for the User:"
+          + "%s", userService.getCurrentUser());
     } catch (TemplateException e) {
       logger.atWarning().log("There was a problem with processing the template %s", e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to find your tests");
+          "Internal Error occurred when trying to display the Question Form");
       return;
     }
+  }
+  public void getTestsOwnedByUser(String ownerID) {
+    Map<String,Long> examsOwnedMap = new LinkedHashMap<String, Long>();
+    try {
+      Query query = new Query("Exam").setFilter(new FilterPredicate("ownerID",
+          FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      PreparedQuery results = datastore.prepare(query);
+
+      for (Entity entity : results.asIterable()) {
+        long id = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        examsOwnedMap.put(name, id);
+        dashboardData.put("examOwned", examsOwnedMap);
+      }
+      logger.atInfo().log("Exams, if any, were found for the user %s", ownerID);
+    } catch (DatastoreFailureException e) {
+      logger.atSevere().log("Datastore error:%s" ,e);
+      return;
+    }
+  }
+
+  public void getTestsCompletedByTheUser(String ownerID){
+    //Returns the exams that have been completed by the user
+    
+  }
+  public void getTestsToDoByTheUser(String ownerID){
+    //Returns the exams that the user still has to complete
   }
 }
