@@ -48,7 +48,7 @@ import org.junit.runners.JUnit4;
  */
 
 @RunWith(JUnit4.class)
-public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
+public final class DashboardServletTest extends DashboardServlet {
   private final LocalServiceTestHelper helper = 
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
@@ -74,6 +74,7 @@ public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
 
+<<<<<<< HEAD:src/test/java/com/google/sps/ExamsUserOwnsServletTest.java
     List<Long> list = new ArrayList<>();
     /*Create two fake TestEntities */
     Entity testEntity = new Entity("Exam");
@@ -115,7 +116,7 @@ public final class ExamsUserOwnsServletTest extends ExamsUserOwnsServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
-    ExamsUserOwnsServlet servlet= new ExamsUserOwnsServlet();
+    DashboardServlet servlet= new DashboardServlet();
     servlet.doGet(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");

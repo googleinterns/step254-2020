@@ -76,7 +76,8 @@ public class CreateExamServlet extends HttpServlet {
       datastore.put(examEntity);
       logger.atInfo().log("Exam: %s , was saved successfully in the datastore",
           examEntity.getKey().getId());
-      response.sendRedirect("/questionForm");
+    //   response.sendRedirect("/questionForm");
+      response.sendRedirect("/returnExamsUserOwns");
       response.setContentType("application/json");
       response.getWriter().println(UtilityClass.convertToJson(examEntity));
 
