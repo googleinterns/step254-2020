@@ -28,6 +28,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -76,6 +77,7 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     testEntity.setProperty("duration", "30");
     testEntity.setProperty("ownerID", "test@google.com");
     testEntity.setProperty("date", date); 
+    testEntity.setProperty("questionsList", new ArrayList<>());
 
     //Create Fake Questions
     Entity questionEntity = new Entity("Question");
@@ -99,7 +101,7 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     String anotherQuestionEntityId =String.valueOf(anotherQuestionEntity.getKey().getId());
     String[] questionsList ={questionEntityId,anotherQuestionEntityId};
     when(request.getParameterValues("question")).thenReturn(questionsList);
-    when(request.getParameter("test")).thenReturn("Trial");
+    when(request.getParameter("testName")).thenReturn("Trial");
     
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -107,8 +109,10 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
 
     servlet.doPost(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Successfully added Question 2"));
-    Assert.assertTrue(result.contains("Successfully added Question 3"));
+    Assert.assertTrue(result.contains("Successfully added Question "
+        + questionEntity.getKey().getId() + " to the test Trial"));
+    Assert.assertTrue(result.contains("Successfully added Question "
+        + questionEntity.getKey().getId() + " to the test Trial"));
   }
   @Test
   public void testNotLoggedInUser() throws IOException {

@@ -32,12 +32,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that stores and returns exams.
+/** Servlet that creates and stores exams in the datastore.
 * @author Klaudia Obieglo.
 */
 @WebServlet("/createExam")
@@ -74,10 +75,11 @@ public class CreateExamServlet extends HttpServlet {
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
     long examID = 0;
-
+    Random rd = new Random();
+    Long id = rd.nextLong();
     //Set up the new Exam and save it in the datastore
     try {
-      Entity examEntity = new Entity("Exam");
+      Entity examEntity = new Entity("Exam",rd.nextLong());
       examEntity.setProperty("name", name);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
