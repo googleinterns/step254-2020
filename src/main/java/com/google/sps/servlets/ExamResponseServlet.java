@@ -17,10 +17,17 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 import javax.servlet.annotation.WebServlet;
@@ -55,6 +62,7 @@ public class ExamResponseServlet extends HttpServlet {
     logger.atInfo().log("user=%s", userService.getCurrentUser());
     PrintWriter out = response.getWriter();
     response.setContentType("text/html");
+    String examID = request.getParameter("examID");
 
     Enumeration<String> parameterNames = request.getParameterNames();
     try {
@@ -70,6 +78,7 @@ public class ExamResponseServlet extends HttpServlet {
         examResponseEntity.setProperty("marks", null);
         datastore.put(examResponseEntity);
       }
+      examTaken(email, Long.parseLong(examID));
     } catch (Exception e) {
       logger.atSevere().log("There was an error: %s", e);
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -77,5 +86,27 @@ public class ExamResponseServlet extends HttpServlet {
     }
     out.println("<h2>Responses Saved.</h2>");
     out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
+  }
+
+  public void examTaken(String email, Long examID) {
+    /*Marks what exam a user has taken by storing that exam id in their 
+    * UserInfo.
+    */
+    Query queryUser = new Query("UserInfo").setFilter(new FilterPredicate(
+          "email", FilterOperator.EQUAL, email));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery pq = datastore.prepare(queryUser);
+    Entity user = pq.asSingleEntity();
+    if (user.getProperty("examsTaken") == null) {
+        List<Long> examsTakenList = new ArrayList<>();
+        examsTakenList.add(examID);
+        user.setProperty("examsTaken", examsTakenList);
+      } else {
+        List<Long> examsTakenList =
+            (List<Long>) user.getProperty("examsTaken");
+        examsTakenList.add(examID);
+        user.setProperty("examsTaken", examsTakenList);
+      }
+    datastore.put(user);
   }
 }

@@ -22,6 +22,9 @@ import freemarker.template.TemplateExceptionHandler;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -49,13 +52,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
-import freemarker.cache.*;
 
 /** Servlet that returns the users created exams, to-do exams and completed exams to the
 * users dashboard
 * @author Klaudia Obieglo
 */
-@WebServlet("/returnExamsUserOwns")
+@WebServlet("/dashboardServlet")
 public class DashboardServlet extends HttpServlet{
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   Configuration cfg;
@@ -79,7 +81,7 @@ public class DashboardServlet extends HttpServlet{
   }
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    /*Returns the exams that the user has created */
+    /*Returns exams created, to be completed and completed by the user */
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
@@ -89,7 +91,13 @@ public class DashboardServlet extends HttpServlet{
     }
     String ownerID = userService.getCurrentUser().getEmail(); 
     //grab exams user owns
-    getTestsOwnedByUser(ownerID);
+    getExamsOwnedByUser(ownerID);
+    //get exams completed by the user
+    try{
+      getExamsCompletedByTheUser(ownerID);
+    } catch (EntityNotFoundException e) {
+      logger.atWarning().log("The exams completed by the user %s were not found",ownerID);
+    }
     // run to freemarker template
     try {
       Template template = cfg.getTemplate("Dashboard.ftl");
@@ -105,7 +113,11 @@ public class DashboardServlet extends HttpServlet{
       return;
     }
   }
-  public void getTestsOwnedByUser(String ownerID) {
+  public void getExamsOwnedByUser(String ownerID) {
+    /* Saves the exams owned by the user in the Dashboard Data Map
+    * Argument: OwnerID- email of the user that we are trying to find 
+    *    the exams for.
+    */
     Map<String,Long> examsOwnedMap = new LinkedHashMap<String, Long>();
     try {
       Query query = new Query("Exam").setFilter(new FilterPredicate("ownerID",
@@ -126,9 +138,33 @@ public class DashboardServlet extends HttpServlet{
     }
   }
 
-  public void getTestsCompletedByTheUser(String ownerID){
-    //Returns the exams that have been completed by the user
-    
+  public void getExamsCompletedByTheUser(String email) throws EntityNotFoundException{
+    /*Saves the exams that have been completed by the user in the Dashboard Data map
+    * Argument: email - email of the user that we want to check for completion
+    * of any exams.
+    */
+    Map<String, Long> examsCompletedMap = new LinkedHashMap<String, Long>();
+    try {
+      Query query = new Query("UserInfo").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, email));
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      PreparedQuery result = datastore.prepare(query);
+      Entity user = result.asSingleEntity();
+      if(user.getProperty("examsTaken") != null) {
+        List<Long> examsTakenList = (List<Long>) user.getProperty("examsTaken");
+        for(int i=0; i<examsTakenList.size(); i++) {
+          Key key = KeyFactory.createKey("Exam", examsTakenList.get(i));
+          Entity exam = datastore.get(key);
+          String name = (String) exam.getProperty("name");
+          examsCompletedMap.put(name, exam.getKey().getId());
+          dashboardData.put("examCompleted", examsCompletedMap);
+        }
+      }
+      logger.atInfo().log("Exams Completed, if any, were found for the user %s", email);
+    } catch (DatastoreFailureException e) {
+      logger.atSevere().log("Datastore error:%s" ,e);
+      return;
+    }
   }
   public void getTestsToDoByTheUser(String ownerID){
     //Returns the exams that the user still has to complete

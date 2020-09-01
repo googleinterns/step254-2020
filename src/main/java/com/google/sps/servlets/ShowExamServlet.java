@@ -90,10 +90,13 @@ public class ShowExamServlet extends HttpServlet{
     String ownerID = userService.getCurrentUser().getEmail(); 
     String examID = UtilityClass.getParameter(request, "examID", "");
     //grab exams user owns
-    try{
+    try {
       getExam(ownerID, Long.parseLong(examID));
     } catch (EntityNotFoundException e){
-
+      logger.atWarning().log("Exam entity was not found: %s",e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your exam");
+      return;
     }
     // run to freemarker template
     try {
