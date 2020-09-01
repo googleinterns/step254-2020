@@ -46,12 +46,11 @@ public class GroupsServlet extends HttpServlet {
    * @param request  provides request information from the HTTP servlet
    * @param response response object where servlet will write information to
    */
-  @SuppressWarnings("checkstyle:LineLength")
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn() 
+    if (!userService.isUserLoggedIn()
         || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendRedirect("/");
@@ -68,7 +67,7 @@ public class GroupsServlet extends HttpServlet {
         + " rel=\"stylesheet\">");
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
-    out.println("<title>Create a group</title>");
+    out.println("<title>Groups</title>");
     out.println("</head>");
     out.println("<body>");
     out.println("<header>");
@@ -99,9 +98,9 @@ public class GroupsServlet extends HttpServlet {
         String name = (String) groupEntity.getProperty("name");
         String description = (String) groupEntity.getProperty("description");
         final String ownerID = (String) groupEntity.getProperty("ownerID");
-        List<Long> members = null;
+        List<String> members = null;
         try {
-          members = (List<Long>) groupEntity.getProperty("members");
+          members = (List<String>) groupEntity.getProperty("members");
         } catch (Exception e) {
           logger.atWarning().log("There was an error getting the members list: %s", e);
         }
@@ -118,12 +117,15 @@ public class GroupsServlet extends HttpServlet {
               // For each member display their email and a button to remove
               out.println("<tr><td>" + members.get(i) + "</td><td>");
               out.println("<form action=\"/editGroup\" method=\"POST\">");
-              out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" " 
+              out.println("<input type=\"hidden\" id=\"groupID\" name=\"groupID\" "
+                  + "value=" + groupID + ">");
+              out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" "
                   + "value=\"remove\">");
-              out.println("<input type=\"hidden\" id=\"name\" name=\"name\" " 
+              out.println("<input type=\"hidden\" id=\"email\" name=\"email\" "
                   + "value=" + members.get(i) + ">");
-              out.println("<input type=\"submit\" id=\"removeMember\" name=\"removeMember\"" 
+              out.println("<input type=\"submit\" id=\"removeMember\" name=\"removeMember\""
                   + "value=\"Remove\"> </td></tr>");
+              out.println("</form>");
             }
           } else {
             out.println("<p>There are no members in this group yet</p>");
@@ -131,14 +133,19 @@ public class GroupsServlet extends HttpServlet {
           out.println("</table><br>");
           out.println("<h2>Add Member</h2>");
           out.println("<form action=\"/editGroup\" method=\"POST\">");
+          out.println("<input type=\"hidden\" id=\"groupID\" name=\"groupID\" "
+              + "value=" + groupID + ">");
           out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"add\">");
-          out.println("<input type=\"text\" id=\"name\" name=\"name\" required>");
-          out.println("<input type=\"submit\" id=\"addMember\" name=\"addMember\" value=\"Add Member\">");
+          out.println("<label for=\"email\">Enter User's Email:</label><br>");
+          out.println("<input type=\"text\" id=\"email\" name=\"email\" required>");
+          out.println("<input type=\"submit\" id=\"addMember\" name=\"addMember\" "
+              + "value=\"Add Member\">");
+          out.println("</form>");
 
         } else {
           if (members != null) {
             out.println("<p>Number of members: " + members.size() + "</p>");
-          }else{
+          } else {
             out.println("<p>There are no members in this group yet</p>");
           }
         }
@@ -156,5 +163,15 @@ public class GroupsServlet extends HttpServlet {
     out.println("<input type=\"text\" id=\"description\" name=\"description\"><br>");
     out.println("<input type=\"submit\" value=\"Submit\">");
     out.println("</form>");
+
+    out.println("<h2>Your groups</h2>");
+    out.println("<table>");
+    out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"create\">");
+    out.println("<label for=\"name\">Enter Group Name:</label><br>");
+    out.println("<input type=\"text\" id=\"name\" name=\"name\" required><br>");
+    out.println("<label for=\"name\">Enter Group Description:</label><br>");
+    out.println("<input type=\"text\" id=\"description\" name=\"description\"><br>");
+    out.println("<input type=\"submit\" value=\"Submit\">");
+    out.println("</table>");
   }
 }
