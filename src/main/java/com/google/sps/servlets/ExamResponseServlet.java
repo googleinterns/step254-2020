@@ -65,6 +65,9 @@ public class ExamResponseServlet extends HttpServlet {
         String[] questionAnswer = request.getParameterValues(questionID);
         Entity examResponseEntity = new Entity(questionID, email);
         examResponseEntity.setProperty("email", email);
+        // Remove all html tags and trim the spaces in the answers.
+        questionAnswer[0] = questionAnswer[0].replaceAll("\\<.*?\\>", "");
+        questionAnswer[0] = questionAnswer[0].trim();
         examResponseEntity.setProperty("answer", questionAnswer[0]);
         // This is where I can correct questions with pre-defined answers
         examResponseEntity.setProperty("marks", null);

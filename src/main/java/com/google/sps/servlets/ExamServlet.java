@@ -82,11 +82,14 @@ public class ExamServlet extends HttpServlet {
     out.println("</div>");
     out.println("</header>");
     out.println("<main>");
+
     String examID = UtilityClass.getParameter(request, "examID", null);
     Entity examEntity = null;
 
     if (examID != null) {
-      // If an exam has been selected
+      // If an exam has been selected remove html tags and trim the ID
+      examID = examID.replaceAll("\\<.*?\\>", "");
+      examID = examID.trim();
       try {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key key = KeyFactory.createKey("Exam", Long.parseLong(examID));
