@@ -87,28 +87,15 @@ public class QuestionFormServlet extends HttpServlet {
     }
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    DatastoreService datastore = null;
     
     //create Map with all the tests the user own
     Map testsData = new HashMap();
-    Map<Long,String> testMap = new LinkedHashMap<Long,String>();
-    try {
-      Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
-          "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
-          SortDirection.DESCENDING);
-      PreparedQuery listExams = datastore.prepare(queryExams);
-      
-      for (Entity entity : listExams.asIterable()) {
-        long examID = entity.getKey().getId();
-        String name = (String) entity.getProperty("name");
-        testMap.put(examID,name);
-        testsData.put("tests", testMap);
-      }
-    } catch (DatastoreFailureException e) {
-      logger.atWarning().log("There was a problem with retrieving the exams %s",
-          e);
+    boolean crashed = false;
+    crashed = findExamsUserOwns(ownerID, datastore, testsData);
+    if(crashed) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to find your tests");
+          "Internal Error occurred when trying to retrieve the exams that you own");
       return;
     }
     // run to freemarker template
@@ -123,6 +110,34 @@ public class QuestionFormServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           "Internal Error occurred when trying to display the Question Form");
       return;
+    }
+  }
+  public boolean findExamsUserOwns(String ownerID, DatastoreService datastore, Map data) {
+    /* Finds all exams a user owns and saves them in the data map.
+    * Arguments :
+    * - ownerID - email of the user.
+    * - datastore - datastore for retrieving entities
+    * - data - map to store the questions user owns.
+    */
+    try {
+      Map<Long,String> testMap = new LinkedHashMap<Long,String>();
+      datastore = DatastoreServiceFactory.getDatastoreService();
+      Query queryExams = new Query("Exam")
+          .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
+          ownerID)).addSort("date", SortDirection.DESCENDING);
+      PreparedQuery listExams = datastore.prepare(queryExams);
+
+      for (Entity entity : listExams.asIterable()) {
+        long examID = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        testMap.put(examID, name);
+        data.put("tests", testMap);
+      }
+      return false;
+    } catch (DatastoreFailureException e) {
+      logger.atWarning().log("There was an error when retrieving the tests: %s",
+          e);
+      return true;
     }
   }
 }
