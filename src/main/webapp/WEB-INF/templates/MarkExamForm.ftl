@@ -20,23 +20,30 @@
       </div>
     </header>
     <main>
-     <h3> Grading Form </h3>
+     <section class="form">
+       <h3> Grading Form </h3>
        <form id="markExam" action="/updateExamResponse" method="POST">
-          <input type="hidden" id="examName" name="examName" value="${exam}">
-          <input type="hidden" id="studentEmail" name="studentEmail" value="${student}">
-          <#list responses as response>
-           <output>Question: </output><br>
-            <output class="questionValue"> ${response.questionValue}</output><br>
-            <output>Answer: </output><br>
-            <output class="questionValue">${response.answer}</output><br>
-            <label for="marks">Marks:</label><br>
-            <input type="number" id=${response.questionID} name=${response.questionID} style="width:4em" value=${response.givenMarks} required>
-            <output> /${response.possibleMarks}</output><br>
-            <hr>
-          </#list>
-          <button>Submit</button><br>
-          <br>
-      </form>
+         <input type="hidden" id="examName" name="examName" value="${exam}">
+         <input type="hidden" id="studentEmail" name="studentEmail" value="${student}">
+         <#list responses as response>
+           <div class="formElement">
+             <output class="questionOutput">Question: </output><br>
+             <output class="questionValue"> ${response.questionValue}</output><br>
+           </div>
+           <div class="formElement">
+             <output class="answerOutput">Answer: </output><br>
+             <output class="answerValue">${response.answer}</output><br>
+           </div>
+           <div class="formElement">
+             <label for="marks">Marks:</label><br>
+             <input type="number" id=${response.questionID} name=${response.questionID} style="width:4em" value=${response.givenMarks} required>
+             <output> /${response.possibleMarks}</output><br>
+           </div>
+           <hr>
+         </#list>
+         <button>Submit</button><br><br>
+        </form>
+     </section>
     </main>
     <footer>
     </footer>

@@ -20,22 +20,28 @@
       </div>
     </header>
     <main>
-     <h3> Grade an Exam </h3>
-     <form id="getExam" action="/markExam" method="POST">
-        <h3> Select which test you want to grade</h3>
-        <select name="testName">
-          <#list tests as key, value>
-            <option class="exam">${value}</option>
-          </#list>
-        </select>
-        <h3> Select which student you want to grade</h3>
-        <select name="studentName">
-          <#list students as student>
-            <option class="students">${student}</option>
-          </#list>
-        </select>
-        <button>Submit</button>
-      </form>
+     <section class="form">
+       <h3> Grade an Exam </h3>
+       <form id="getExam" action="/markExam" method="POST">
+         <div class="formElement">
+           <h4> Select which test you want to grade</h4>
+           <select name="testName">
+             <#list tests as key, value>
+               <option class="exam">${value}</option>
+             </#list>
+            </select>
+         </div>
+         <div class="formElement">
+           <h4> Select which student you want to grade</h4>
+           <select name="studentName">
+             <#list students as student>
+               <option class="students">${student}</option>
+             </#list>
+           </select>
+         </div>
+         <button>Submit</button>
+       </form>
+     </section>
     </main>
     <footer>
     </footer>

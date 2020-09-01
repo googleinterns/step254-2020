@@ -17,24 +17,30 @@
     </header>
     <main>
     <#if questions??>
-      <h1>Check the questions you would like to reuse</h1>
-      <form action="/saveQuestionsFromBank" method="POST">
-        <#list questions as key, v>
-          <input onclick="getCheckBox()" id="checkbox" type="checkbox" name="question" value="${key}">${v} <br>
-        </#list>
-        <h3> Select which test you want the questions added to</h1>
-        <select name="testName">
-          <#list tests as key, value>
-            <option>${value}</option>
+      <section class="form">
+        <h1>Check the questions you would like to reuse</h1>
+        <form action="/saveQuestionsFromBank" method="POST">
+          <#list questions as key, v>
+            <input onclick="getCheckBox()" id="checkbox" type="checkbox" name="question" value="${key}">${v} <br>
           </#list>
-        </select>
-        <button style="display: none;" id="checkBoxSubmit">Submit</button>
-      </form>
-      <h3>If you do not want to add any of these questions press Go Back to return to previous page </h3>
-      <button onclick="location.href='/questionForm'" type="button"> Go Back </button>
+          <h3> Select which test you want the questions added to</h1>
+          <select name="testName">
+            <#list tests as key, value>
+              <option>${value}</option>
+            </#list>
+          </select>
+          <button style="display: none;" id="checkBoxSubmit">Submit</button>
+        </form>
+      </section>
+      <section class="return">
+        <h3>If you do not want to add any of these questions press Go Back to return to previous page </h3>
+        <button onclick="location.href='/questionForm'" type="button"> Go Back </button>
+      </section>
     <#else>
-      <h1>You have not created any questions yet! </h1>
-      <button onclick="location.href='/questionForm'" type="button"> Go Back </button>
+      <section class="return">
+        <h1>You have not created any questions yet! </h1>
+        <button onclick="location.href='/questionForm'" type="button"> Go Back </button>
+      </section>
     </#if>
     </main>
     <footer>

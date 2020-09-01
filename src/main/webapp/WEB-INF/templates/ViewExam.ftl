@@ -20,16 +20,24 @@
       </div>
     </header>
     <main>
-     <h3> Review: ${exam} </h3>
-       <#list responses as response>
-         <output>Question:</output><br>
-         <output class="questionValue"> ${response.questionValue}</output><br>
-         <output>Answer:</output><br>
-         <output class="questionValue">${response.answer}</output><br>
-         <output>Marks:</output><br>
-         <output> ${response.givenMarks}/${response.possibleMarks}</output><br>
-         <hr>
-      </#list>
+      <section id="examReview">
+        <h3> Review: ${exam} </h3>
+          <#list responses as response>
+            <div class="reviewElement">
+              <output class="questionOutput">Question:</output><br>
+              <output class="questionValue"> ${response.questionValue}</output><br>
+            </div>
+            <div class="reviewElement">
+              <output class="answerOutput">Answer:</output><br>
+              <output class="answerValue">${response.answer}</output><br>
+            </div>
+            <div class="reviewElement">
+              <output>Marks:</output><br>
+              <output> ${response.givenMarks}/${response.possibleMarks}</output><br>
+            </div>
+            <hr>
+         </#list>
+      </section>
     </main>
     <footer>
     </footer>
