@@ -15,15 +15,22 @@
 package com.google.sps.servlets;
 
 import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.PrintWriter;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
@@ -164,14 +171,87 @@ public class GroupsServlet extends HttpServlet {
     out.println("<input type=\"submit\" value=\"Submit\">");
     out.println("</form>");
 
-    out.println("<h2>Your groups</h2>");
-    out.println("<table>");
-    out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"create\">");
-    out.println("<label for=\"name\">Enter Group Name:</label><br>");
-    out.println("<input type=\"text\" id=\"name\" name=\"name\" required><br>");
-    out.println("<label for=\"name\">Enter Group Description:</label><br>");
-    out.println("<input type=\"text\" id=\"description\" name=\"description\"><br>");
-    out.println("<input type=\"submit\" value=\"Submit\">");
-    out.println("</table>");
+    try {
+      Query getUserGroups = new Query("UserGroup").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, userService.getCurrentUser().getEmail()));
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      PreparedQuery pq = datastore.prepare(getUserGroups);
+      Entity userGroupEntity = pq.asSingleEntity();
+      List<Long> owner = null;
+      List<Long> member = null;
+      if (userGroupEntity != null) {
+        owner = (List<Long>) userGroupEntity.getProperty("owner");
+        if (owner == null) {
+          owner = new ArrayList<Long>();
+        }
+        member = (List<Long>) userGroupEntity.getProperty("member");
+        if (member == null) {
+          member = new ArrayList<Long>();
+        }
+      }
+      out.println("<h3>Owned groups</h3>");
+      if(owner == null){
+        out.println("<p>You do not own any groups.</p>");
+      } else {
+        out.println("<table><tr><th>Group name</th><th>Members</th></tr>");
+        for (int i = 0; i < owner.size(); i++) {
+          try {
+            Key key = KeyFactory.createKey("Group", owner.get(i));
+            Entity gs = datastore.get(key);
+            long id = gs.getKey().getId();
+            String groupName = (String) gs.getProperty("name");
+            List<String> members = (List<String>) gs.getProperty("members");
+            if (members == null) {
+              members = new ArrayList<String>();
+            }
+            out.println("<tr>");
+            out.println("<td>" + groupName + "</td>");
+            out.println("<td>" + members.size() + "</td>");
+            out.println("<td><a href=\"/groups?groupID=" + id + "\">View/Edit</a></td>");
+            out.println("</tr>");
+          } catch (Exception e) {
+            logger.atWarning().log("Problem while searching groups user owns: %s", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Problem while searching groups user owns");
+            return;
+          }
+        }
+        out.println("</table>");
+      }
+      out.println("<h3>Groups you are a member of</h3>");
+      if(member == null){
+        out.println("<p>You are not a member of any group.</p>");
+      }else{
+        out.println("<table><tr><th>Group name</th><th>Members</th></tr>");
+        for (int i = 0; i < member.size(); i++) {
+          try {
+            Key key = KeyFactory.createKey("Group", member.get(i));
+            Entity gs = datastore.get(key);
+            long id = gs.getKey().getId();
+            String groupName = (String) gs.getProperty("name");
+            List<String> members = (List<String>) gs.getProperty("members");
+            if (members == null) {
+              members = new ArrayList<String>();
+            }
+            out.println("<tr>");
+            out.println("<td>" + groupName + "</td>");
+            out.println("<td>" + members.size() + "</td>");
+            out.println("<td><a href=\"/groups?groupID=" + id + "\">View</a></td>");
+            out.println("</tr>");
+          } catch (Exception e) {
+            logger.atWarning().log("Problem while searching groups user is a member of: %s", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Problem while searching groups user is a member of");
+            return;
+          }
+        }
+        out.println("</table>");
+      }
+    } catch (Exception e) {
+      logger.atWarning().log("Problem while adding group to users groups: %s", e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Problem while adding group to users groups");
+      return;
+    }
   }
 }
