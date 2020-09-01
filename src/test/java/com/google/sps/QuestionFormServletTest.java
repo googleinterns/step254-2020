@@ -28,13 +28,13 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Date;
 import java.io.File;
+import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -71,8 +71,6 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     //status response.
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ServletConfig config = mock(ServletConfig.class);
-    ServletContext context = mock(ServletContext.class);
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
@@ -80,12 +78,16 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
     when(config.getServletContext()).thenReturn(context);
 
     //Get the path to the target files were templates are stored for tests
     String filePath = new File(".").getCanonicalPath();
     String endPath = "/target/portfolio-1/WEB-INF/templates";
     String path = filePath + endPath;
+    System.out.println(path);
+    
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
     
     setFakeTest();
@@ -111,12 +113,14 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
+
   private void helperLogin() {
     /* Login user with email "test@google.com" */
     helper.setEnvAuthDomain("google.com");
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
+  
   private void setFakeTest() {
     /*Set a fake test*/
     Long date = (new Date()).getTime(); 

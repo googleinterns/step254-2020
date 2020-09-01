@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -109,10 +109,10 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
 
     servlet.doPost(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Successfully added Question " +
-        questionEntity.getKey().getId()+" to the test Trial"));
-    Assert.assertTrue(result.contains("Successfully added Question " +
-        questionEntity.getKey().getId()+" to the test Trial"));
+    Assert.assertTrue(result.contains("Successfully added Question "
+        + questionEntity.getKey().getId()+" to the test Trial"));
+    Assert.assertTrue(result.contains("Successfully added Question "
+        + questionEntity.getKey().getId()+" to the test Trial"));
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
