@@ -57,7 +57,7 @@ public class CreateExamServlet extends HttpServlet {
       return;
     }
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
@@ -69,7 +69,7 @@ public class CreateExamServlet extends HttpServlet {
     Long id = rd.nextLong();
     //Set up the new Exam and save it in the datastore
     try {
-      Entity examEntity = new Entity("Exam", id);
+      Entity examEntity = new Entity("Exam",rd.nextLong());
       examEntity.setProperty("name", name);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);

@@ -26,12 +26,15 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.io.IOException;
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
@@ -65,13 +68,11 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
   }
 
   @Test
-  public void testdoGetFunction() throws IOException, ServletException{
+  public void testdoGetFunction() throws IOException, ServletException {
     /*Tests the doGet function to see if the questions that the
     * user owns get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ServletConfig config = mock(ServletConfig.class);
-    ServletContext context = mock(ServletContext.class);
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
@@ -80,6 +81,8 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
     when(config.getServletContext()).thenReturn(context);
 
     //Get the path to the target files were templates are stored for tests
@@ -111,6 +114,7 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
+
   private void setFakeTest() {
     /*Set a fake test*/
     Long date = (new Date()).getTime(); 
@@ -123,6 +127,7 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(testEntity);
   }
+
   private void setFakeQuestions () {
     /*Set up two fake question entities for testing purposes */
     Long date = (new Date()).getTime(); 
@@ -130,29 +135,30 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
     questionEntity.setProperty("date", date);
-    questionEntity.setProperty("ownerID", "test@example.com");
+    questionEntity.setProperty("ownerID", "test@google.com");
 
     Entity anotherQuestionEntity = new Entity("Question");
     anotherQuestionEntity.setProperty("question", "What year is it?");
     anotherQuestionEntity.setProperty("marks", "10");
     anotherQuestionEntity.setProperty("date", date);
-    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    anotherQuestionEntity.setProperty("ownerID", "test@google.com");
     
     Entity questionByDifferentUser = new Entity("Question");
     questionByDifferentUser.setProperty("question", "How many pets do you have?");
     questionByDifferentUser.setProperty("marks", "15");
     questionByDifferentUser.setProperty("date", date);
-    questionByDifferentUser.setProperty("ownerID", "person@example.com");
+    questionByDifferentUser.setProperty("ownerID", "person@google.com");
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(questionEntity);
     datastore.put(anotherQuestionEntity);
     datastore.put(questionByDifferentUser);
   }
+  
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }

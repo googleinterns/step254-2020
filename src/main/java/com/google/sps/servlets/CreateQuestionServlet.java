@@ -81,7 +81,7 @@ public class CreateQuestionServlet extends HttpServlet {
     }
 
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
           "You are not authorised to view this page");
@@ -92,7 +92,7 @@ public class CreateQuestionServlet extends HttpServlet {
     Random rd = new Random();
     try {
       // Create a Question Entity with the parameters provided
-      Entity questionEntity = new Entity("Question", rd.nextLong());
+      Entity questionEntity = new Entity("Question",rd.nextLong());
       questionEntity.setProperty("question", question);
       questionEntity.setProperty("marks", marks);
       questionEntity.setProperty("date", date);

@@ -90,6 +90,7 @@ public class DashboardServlet extends HttpServlet{
       return;
     }
     String ownerID = userService.getCurrentUser().getEmail(); 
+    System.out.println(ownerID +"email");
     //grab exams user owns
     getExamsOwnedByUser(ownerID);
     //get exams completed by the user

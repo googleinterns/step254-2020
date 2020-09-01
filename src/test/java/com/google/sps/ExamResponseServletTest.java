@@ -75,10 +75,10 @@ public final class ExamResponseServletTest extends ExamResponseServlet {
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
-  /* Login user with email "test@example.com" */
+  /* Login user with email "test@google.com" */
   private void helperLogin() {
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 

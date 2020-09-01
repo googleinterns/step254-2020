@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +76,7 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     Entity testEntity = new Entity("Exam");
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID", "test@example.com");
+    testEntity.setProperty("ownerID", "test@google.com");
     testEntity.setProperty("date", date); 
     testEntity.setProperty("questionsList", new ArrayList<>());
 
@@ -84,13 +85,13 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
     questionEntity.setProperty("date", date);
-    questionEntity.setProperty("ownerID", "test@example.com");
+    questionEntity.setProperty("ownerID", "test@google.com");
 
     Entity anotherQuestionEntity = new Entity("Question");
     anotherQuestionEntity.setProperty("question", "What year is it?");
     anotherQuestionEntity.setProperty("marks", "10");
     anotherQuestionEntity.setProperty("date", date);
-    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    anotherQuestionEntity.setProperty("ownerID", "test@google.com");
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(testEntity);
@@ -109,10 +110,10 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
 
     servlet.doPost(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Successfully added Question " +
-        questionEntity.getKey().getId()+" to the test Trial"));
-    Assert.assertTrue(result.contains("Successfully added Question " +
-        questionEntity.getKey().getId()+" to the test Trial"));
+    Assert.assertTrue(result.contains("Successfully added Question "
+        + questionEntity.getKey().getId()+" to the test Trial"));
+    Assert.assertTrue(result.contains("Successfully added Question "
+        + questionEntity.getKey().getId()+" to the test Trial"));
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
@@ -130,9 +131,9 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
         "You are not authorised to view this page");
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }

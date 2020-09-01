@@ -71,11 +71,39 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
     Assert.assertTrue(result.contains("loginUrl\":\"/_ah/login?continue"));
   }
 
-  /* Login user with email "test@example.com" */
-  private void helperLogin() {
+  /* Login user with invalid email "test@example.com" */
+  private void helperInvalidLogin() {
     helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    helper.setEnvEmail("test@xample.com");
     helper.setEnvIsLoggedIn(true);
+  }
+
+  /* Login user with email "test@google.com" */
+  private void helperLogin() {
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
+    helper.setEnvIsLoggedIn(true);
+  }
+
+  /**
+   * When logged in with invalid email a logout link should be returned with
+   * a invalidLogin key set to true.
+   */
+  @Test
+  public void doGetTestInvalidLoggedIn() throws IOException {
+    helperInvalidLogin();
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    AuthenticationServlet servlet = new AuthenticationServlet();
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+
+    servlet.doGet(request, response);
+    String result = stringWriter.toString();
+    Assert.assertTrue(result.contains("\"logoutUrl\":\"/_ah/logout?continue"));
+    Assert.assertTrue(result.contains("\"invalidLogin\":\"true\""));
   }
 
   /**
@@ -95,7 +123,7 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"email\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"email\":\"test@google.com\""));
     Assert.assertTrue(result.contains("\"logoutUrl\":\"/_ah/logout?continue"));
     Assert.assertTrue(result.contains("\"updateInfoRequired\":\"true\""));
   }
@@ -103,7 +131,7 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
   /* Set up fake preferences for test user to test datastore */
   private void addPreference() {
     Entity userInfoEntity = new Entity("UserInfo");
-    userInfoEntity.setProperty("email", "test@example.com");
+    userInfoEntity.setProperty("email", "test@google.com");
     userInfoEntity.setProperty("name", "Test User");
     userInfoEntity.setProperty("font", "Arial");
     userInfoEntity.setProperty("font_size", "16");
@@ -131,7 +159,7 @@ public final class AuthenticationServletTest extends AuthenticationServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"email\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"email\":\"test@google.com\""));
     Assert.assertTrue(result.contains("\"logoutUrl\":\"/_ah/logout?continue"));
     Assert.assertTrue(result.contains("\"name\":\"Test User\""));
     Assert.assertTrue(result.contains("\"text_color\":\"black\""));
