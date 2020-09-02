@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.UUID;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -64,9 +63,7 @@ public class CreateExamServlet extends HttpServlet {
     }
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-    // Random rd = new Random();
-    // Long id = rd.nextLong();
-    Long id = generateUniqueId();
+    Long id = UtilityClass.generateUniqueId();
     //Set up the new Exam and save it in the datastore
     try {
       Entity examEntity = new Entity("Exam",id);
@@ -89,13 +86,5 @@ public class CreateExamServlet extends HttpServlet {
           "Internal Error occurred when trying to create your exam");
       return;
     }
-  }
-  private Long generateUniqueId() {
-    //Return random ID
-    long value = -1;
-    while(value < 0) {
-      value = UUID.randomUUID().getMostSignificantBits();
-    }
-    return value; 
   }
 }
