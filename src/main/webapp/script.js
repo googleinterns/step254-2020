@@ -31,8 +31,16 @@ async function authenticate() {
       >Logout</a>`;
       setPreference();
     } else {
-      userAuth = false;
-      logInOut.innerHTML = `<a href="${userDetails.loginUrl}">Login</a>`;
+      if (userDetails.invalidLogin) {
+        logInOut.innerHTML = `<a id= "login" href="${userDetails.logoutUrl}"
+        >Logout</a>`;
+        alert(`We can only allow @google.com users currently. Please logout 
+        and make sure you are logged in with your @google.com account before 
+        trying again.`);
+      } else {
+        userAuth = false;
+        logInOut.innerHTML = `<a href="${userDetails.loginUrl}">Login</a>`;
+      }
     }
   } catch (e) {
     console.log('Error: ', e.message);

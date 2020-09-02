@@ -52,7 +52,7 @@ public class ExamResponseServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
@@ -91,6 +91,9 @@ public class ExamResponseServlet extends HttpServlet {
         }
         Entity examResponseEntity = new Entity(questionID, email);
         examResponseEntity.setProperty("email", email);
+        // Remove all html tags and trim the spaces in the answers.
+        questionAnswer[0] = questionAnswer[0].replaceAll("\\<.*?\\>", "");
+        questionAnswer[0] = questionAnswer[0].trim();
         examResponseEntity.setProperty("answer", questionAnswer[0]);
         if(expected.equals(questionAnswer[0]) && type.equals("MCQ")){
           examResponseEntity.setProperty("marks", possibleMarks);

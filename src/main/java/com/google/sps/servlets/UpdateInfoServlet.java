@@ -46,7 +46,7 @@ public class UpdateInfoServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
@@ -59,22 +59,34 @@ public class UpdateInfoServlet extends HttpServlet {
     String bgColor;
     String textColor;
     String email;
-    name = font = fontSize = bgColor = textColor = email = null;
+    name = font = fontSize = bgColor = textColor = email = "";
 
     try {
+      // Get all values and remove all html tags and trim the spaces in the parameters.
       name = request.getParameter("name");
+      name = name.replaceAll("\\<.*?\\>", "");
+      name = name.trim();
       font = request.getParameter("font");
+      font = font.replaceAll("\\<.*?\\>", "");
+      font = font.trim();
       fontSize = request.getParameter("font_size");
+      fontSize = fontSize.replaceAll("\\<.*?\\>", "");
+      fontSize = fontSize.trim();
       bgColor = request.getParameter("bg_color");
+      bgColor = bgColor.replaceAll("\\<.*?\\>", "");
+      bgColor = bgColor.trim();
       textColor = request.getParameter("text_color");
+      textColor = textColor.replaceAll("\\<.*?\\>", "");
+      textColor = textColor.trim();
       email = userService.getCurrentUser().getEmail();
     } catch (Exception e) {
       logger.atSevere().log("One or more null parameters in try/catch");
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
 
-    if (font == null || fontSize == null || bgColor == null
-        || textColor == null || email == null) {
+    if (font == "" || fontSize == "" || bgColor == ""
+        || textColor == "" || email == "") {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       logger.atSevere().log("One or more null parameters");
       return;
