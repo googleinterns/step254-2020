@@ -75,7 +75,7 @@ public final class CreateExamServletTest extends CreateExamServlet {
     CreateExamServlet servlet = new CreateExamServlet();
     servlet.doPost(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"ownerID\":\"test@example.com\""));
+    Assert.assertTrue(result.contains("\"ownerID\":\"test@google.com\""));
     Assert.assertTrue(result.contains("\"duration\":\"30\""));
     Assert.assertTrue(result.contains("\"name\":\"Testing Exam\""));
   }
@@ -119,9 +119,9 @@ public final class CreateExamServletTest extends CreateExamServlet {
         "You are not authorised to view this page");
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    /* Login user with email "test@google.com" */
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }
