@@ -77,7 +77,7 @@ public class ExamServlet extends HttpServlet {
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<p><a href=\"index.html\">Homepage</a></p>");
-    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
+    out.println("<p><a href=\"dashboardServlet\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -120,6 +120,7 @@ public class ExamServlet extends HttpServlet {
           out.println("<section class=\"form\">");
           out.println("<form action=\"/examResponse\" method=\"POST\">");
           for (Long question : questionsList) {
+          out.println("<input type=\"hidden\" id=\"examID\" name=\"examID\" value=\""+examID+"\">"); 
             try {
               questionNumber++;
               Key key = KeyFactory.createKey("Question", question);

@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.UUID;
 
 public final class UtilityClass{
   /*Class that has all the methods that we constantly reuse and rewrite
@@ -72,6 +73,14 @@ public final class UtilityClass{
     Gson gson = new Gson();
     String json = gson.toJson(listOfInstances);
     return json;
+  }
+  public static Long generateUniqueId() {
+    /*Returns random ID that is created with UUID*/
+    long value = -1;
+    while(value < 0) {
+      value = UUID.randomUUID().getMostSignificantBits();
+    }
+    return value; 
   }
 } 
 

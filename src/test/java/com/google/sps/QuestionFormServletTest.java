@@ -35,9 +35,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -74,8 +71,6 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     //status response.
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ServletConfig config = mock(ServletConfig.class);
-    ServletContext context = mock(ServletContext.class);
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
@@ -83,6 +78,11 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+<<<<<<< HEAD
+=======
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
+>>>>>>> 8ac8e13c03f3cc2dda85e0e665866bf37ba154b3
     when(config.getServletContext()).thenReturn(context);
 
     //Get the path to the target files were templates are stored for tests
