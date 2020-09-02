@@ -12,7 +12,7 @@
     <header>
       <div class="navtop">
         <p><a  href="index.html">Homepage</a></p>
-        <p><a  href="dashboard.html">Dashboard</a></p>
+        <p><a  href="/dashboardServlet">Dashboard</a></p>
         <p id=logInOut></p>
       </div>
     </header>
@@ -33,13 +33,6 @@
         <h3 id="mcq" style="display: none;">Select which of the answers is the correct answer<h3>
         <select name ="mcqAnswer"  id="mcqAnswer" style="display: none;">
         </select/
-        <h3> Select which test you want the questions added to</h1>
-        <select name="testName">
-          <#list tests as key, value>
-            <option>${value}</option>
-          </#list>
-        </select>
-        <button >Submit</button>
         <h3> Select which test you want the questions added to</h1>
         <select name="testName">
         <#if tests??>

@@ -11,7 +11,7 @@
     <header>
       <div class="navtop">
         <p><a  href="index.html">Homepage</a></p>
-        <p><a  class="active" href="dashboard.html">Dashboard</a></p>
+        <p><a  class="active" href="/dashboardServlet">Dashboard</a></p>
         <p id=logInOut></p>
         <p><a href="/exam">Take Exam</a></p>
         <p><a href="createExam.html">Create Exam</a></p>
@@ -55,6 +55,8 @@
               </tr>
               <br>
             </#list>
+          <#else>
+            <h4>You have not created any exams yet </h4>
           </#if>
         </div>
       </div>
