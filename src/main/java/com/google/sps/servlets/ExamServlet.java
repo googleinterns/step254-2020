@@ -114,13 +114,13 @@ public class ExamServlet extends HttpServlet {
         if (questionsList != null) {
           int questionNumber = 0;
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+          out.println("<section class=\"form\">");
           out.println("<form action=\"/examResponse\" method=\"POST\">");
           for (Long question : questionsList) {
             try {
               questionNumber++;
               Key key = KeyFactory.createKey("Question", question);
               Entity qs = datastore.get(key);
-
               Long questionID = qs.getKey().getId();
               String questionValue = (String) qs.getProperty("question");
               String type = (String) qs.getProperty("type");
@@ -136,6 +136,7 @@ public class ExamServlet extends HttpServlet {
                     
                   }
               } else{
+                out.println("<input type=\"hidden\" id=\"type\" name=\"type\" value=type>");
                 out.println("<label for=\"" + questionID + "\">" + questionNumber + ") "
                     + questionValue + ": </label>");
                 out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
@@ -151,6 +152,7 @@ public class ExamServlet extends HttpServlet {
           out.println("<br><input type=\"submit\" value=\"Submit\"" 
               + "onclick=\"setExamSubmitting()\">");
           out.println("</form>");
+          out.println("<section>");
         } else {
           out.println("<p>There are no questions associated with this exam.</p>");
         }

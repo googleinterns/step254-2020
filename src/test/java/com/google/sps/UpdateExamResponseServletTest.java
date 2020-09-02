@@ -119,7 +119,6 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
     userResponseInfo.put("answer", (String) entity.getProperty("answer"));
     userResponseInfo.put("marks", (String) entity.getProperty("marks"));
     String result = UtilityClass.convertToJson(userResponseInfo);
-    System.out.println(result);
     Assert.assertTrue(result.contains("100"));
     Assert.assertTrue(result.contains("student@google.com"));
     Assert.assertTrue(result.contains("Tuesday"));

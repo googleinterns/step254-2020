@@ -29,10 +29,10 @@ import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +48,7 @@ import org.junit.runners.JUnit4;
  * Tests for Exam Response Servlet to see if users exam responses are stored correctly.
  *
  * @author Aidan Molloy
+ * @author Róisín O'Farrell
  */
 
 @RunWith(JUnit4.class)
@@ -75,16 +76,16 @@ public final class ExamResponseServletTest extends ExamResponseServlet {
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
-  /* Login user with email "test@example.com" */
+  /* Login user with email "test@google.com" */
   private void helperLogin() {
-    helper.setEnvAuthDomain("example.com");
-    helper.setEnvEmail("test@example.com");
+    helper.setEnvAuthDomain("google.com");
+    helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 
   /* Test Storing a users answers to an exam */
   @Test
-  public void doPostTest() throws IOException {
+  public void doPostTestNormal() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     final HttpServletResponse response = mock(HttpServletResponse.class);
     helperLogin();
@@ -96,6 +97,7 @@ public final class ExamResponseServletTest extends ExamResponseServlet {
 
     when(request.getParameterNames()).thenReturn(parameterNamesEnumerated);
     when(request.getParameterValues("1")).thenReturn(parameterValues);
+    setFakeQuestions();
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -114,5 +116,103 @@ public final class ExamResponseServletTest extends ExamResponseServlet {
     examResponse.put("answer", (String) entity.getProperty("answer"));
     String result = UtilityClass.convertToJson(examResponse);
     Assert.assertTrue(result.contains("\"answer\":\"Answer1\""));
+  }
+
+   /* Test Student gets full marks if mcq answer is right*/
+  @Test
+  public void doPostTestMcqRight() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    final HttpServletResponse response = mock(HttpServletResponse.class);
+    helperLogin();
+
+    List<String> parameterNames = new ArrayList<>();
+    parameterNames.add("2");
+    Enumeration<String> parameterNamesEnumerated = Collections.enumeration(parameterNames);
+    String[] parameterValues = {"Answer1"};
+
+    when(request.getParameterNames()).thenReturn(parameterNamesEnumerated);
+    when(request.getParameterValues("2")).thenReturn(parameterValues);
+    setFakeQuestions();
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+    ExamResponseServlet servlet = new ExamResponseServlet();
+    servlet.doPost(request, response);
+
+    // Make query to datastore to make sure it was stored correctly
+    Query query = new Query("2");
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    Entity entity = results.asSingleEntity();
+
+    // Convert the received entity into a json string to check content
+    Map<String, String> examResponse = new HashMap<>();
+    examResponse.put("answer", (String) entity.getProperty("answer"));
+    examResponse.put("marks", (String) entity.getProperty("marks"));
+    String result = UtilityClass.convertToJson(examResponse);
+    Assert.assertTrue(result.contains("\"answer\":\"Answer1\""));
+    Assert.assertTrue(result.contains("\"marks\":\"10\""));
+  }
+
+   /* Test Student gets no marks if mcq answer is wrong*/
+  @Test
+  public void doPostTestMcqWrong() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    final HttpServletResponse response = mock(HttpServletResponse.class);
+    helperLogin();
+
+    List<String> parameterNames = new ArrayList<>();
+    parameterNames.add("2");
+    Enumeration<String> parameterNamesEnumerated = Collections.enumeration(parameterNames);
+    String[] parameterValues = {"Answer2"};
+
+    when(request.getParameterNames()).thenReturn(parameterNamesEnumerated);
+    when(request.getParameterValues("2")).thenReturn(parameterValues);
+    setFakeQuestions();
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+    ExamResponseServlet servlet = new ExamResponseServlet();
+    servlet.doPost(request, response);
+
+    // Make query to datastore to make sure it was stored correctly
+    Query query = new Query("2");
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    Entity entity = results.asSingleEntity();
+
+    // Convert the received entity into a json string to check content
+    Map<String, String> examResponse = new HashMap<>();
+    examResponse.put("answer", (String) entity.getProperty("answer"));
+    examResponse.put("marks", (String) entity.getProperty("marks"));
+    String result = UtilityClass.convertToJson(examResponse);
+    System.out.println(result);
+    Assert.assertTrue(result.contains("\"answer\":\"Answer2\""));
+    Assert.assertTrue(result.contains("\"marks\":\"0\""));
+  }
+    private void setFakeQuestions () {
+    /*Set up two fake question entities for testing purposes */
+    Entity questionEntity = new Entity("Question", 1L);
+    questionEntity.setProperty("question", "What day is it?");
+    questionEntity.setProperty("marks", "5");
+    questionEntity.setProperty("ownerID", "test@example.com");
+    questionEntity.setProperty("type", "Normal");
+
+    List<String> mcqPossibleAnswers = new ArrayList<String>();
+    mcqPossibleAnswers.add("Answer1");
+    mcqPossibleAnswers.add("Answer2");
+    Entity anotherQuestionEntity = new Entity("Question", 2L);
+    anotherQuestionEntity.setProperty("question", "What year is it?");
+    anotherQuestionEntity.setProperty("marks", "10");
+    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    anotherQuestionEntity.setProperty("mcqAnswer", "1");
+    anotherQuestionEntity.setProperty("mcqPossibleAnswers", mcqPossibleAnswers);
+    anotherQuestionEntity.setProperty("type", "MCQ");
+    
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(questionEntity);
+    datastore.put(anotherQuestionEntity);
   }
 }

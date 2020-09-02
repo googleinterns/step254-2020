@@ -77,7 +77,7 @@ public final class MarkExamServletTest extends MarkExamServlet {
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-     when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("testName")).thenReturn("Trial");
     when(request.getParameter("studentName")).thenReturn("student@google.com");
     setFakeTest();
     setFakeQuestions();
@@ -92,7 +92,6 @@ public final class MarkExamServletTest extends MarkExamServlet {
     String endPath = "/target/portfolio-1/WEB-INF/templates";
     String path = filePath + endPath;
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
-    
     
     MarkExamServlet servlet= new MarkExamServlet();
     servlet.init(config);

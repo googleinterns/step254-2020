@@ -109,8 +109,8 @@ public class MarkExamServlet extends HttpServlet {
     Map<String,Object>  data = new HashMap<String, Object>();
     List<AnswerClass> answerList = new ArrayList();
 
-    String questionValue, answer, givenMark, possibleMark;
-    questionValue = answer = givenMark = possibleMark = null;
+    String questionValue, answer, givenMark, possibleMark, questionType, mcqAnswer;
+    questionValue = answer = givenMark = possibleMark = questionType = mcqAnswer = null;
 
     data.put("exam", examName);
     data.put("student", studentEmail);
