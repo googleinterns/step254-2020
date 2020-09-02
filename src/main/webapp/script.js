@@ -143,6 +143,7 @@ if (typeof exports !== 'undefined') {
     isChecked,
   };
 };
+/* eslint-disable no-unused-vars */
 /** Checks if the MCQ checkbox is checked */
 function getMcqChecked() {
   const mcqCheck = document.getElementById('mcqCheckBox');
@@ -200,3 +201,4 @@ function lessFields() {
     counter--;
   }
 };
+/* eslint-disable no-unused-vars */
