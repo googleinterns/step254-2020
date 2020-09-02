@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -29,12 +30,16 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -78,25 +83,6 @@ public final class DashboardServletTest extends DashboardServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
 
-    List<Long> list = new ArrayList<>();
-    /*Create two fake TestEntities */
-    Entity testEntity = new Entity("Exam");
-    testEntity.setProperty("name", "Trial");
-    testEntity.setProperty("duration", "30");
-    testEntity.setProperty("ownerID", "test@google.com");
-    testEntity.setProperty("date", date);
-    testEntity.setProperty("questionsList", list);
-
-    Entity anotherEntity= new Entity("Exam");
-    anotherEntity.setProperty("name", "AnotherExam");
-    anotherEntity.setProperty("duration", "45");
-    anotherEntity.setProperty("ownerID", "test@google.com");
-    anotherEntity.setProperty("date", date);
-    anotherEntity.setProperty("questionsList", list);
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(testEntity);
-    datastore.put(anotherEntity);
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
@@ -246,7 +232,7 @@ public final class DashboardServletTest extends DashboardServlet {
     taken.add(anotherEntity.getKey().getId());
     return taken;
   }
-  
+
   public void setUpUserForTakenExams(List<Long> taken) {
     // Set up UserExams to check if the taken exams get stored and retrieved correctly
     Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",

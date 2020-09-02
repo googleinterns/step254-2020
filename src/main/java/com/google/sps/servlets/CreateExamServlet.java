@@ -79,7 +79,6 @@ public class CreateExamServlet extends HttpServlet {
     try {
       Entity examEntity = new Entity("Exam", id);
       examEntity.setProperty("name", name);
-      System.out.println(id);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
       examEntity.setProperty("date", date);

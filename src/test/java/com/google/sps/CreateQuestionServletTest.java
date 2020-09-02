@@ -116,7 +116,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("\"question\":\"What day is it?\","
       + "\"mcqPossibleAnswers\":[\"Monday\",\"Tuesday\",\"Wednesday\"],"
-      + "\"marks\":\"10\",\"ownerID\":\"test@example.com\","
+      + "\"marks\":\"10\",\"ownerID\":\"test@google.com\","
       + "\"type\":\"MCQ\",\"mcqAnswer\":\"1\""));
   }
 
