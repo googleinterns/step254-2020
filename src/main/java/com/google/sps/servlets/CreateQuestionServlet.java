@@ -89,10 +89,10 @@ public class CreateQuestionServlet extends HttpServlet {
     }
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-    Random rd = new Random();
+    long id = UtilityClass.generateUniqueId();
     try {
       // Create a Question Entity with the parameters provided
-      Entity questionEntity = new Entity("Question",rd.nextLong());
+      Entity questionEntity = new Entity("Question", id);
       questionEntity.setProperty("question", question);
       questionEntity.setProperty("marks", marks);
       questionEntity.setProperty("date", date);

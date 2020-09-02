@@ -94,17 +94,17 @@ public class DashboardServlet extends HttpServlet{
     //grab exams user owns
     getExamsOwnedByUser(ownerID);
     //get exams completed by the user
-    try {
-      getExamsCompletedByTheUser(ownerID);
-    } catch (EntityNotFoundException e) {
-      logger.atWarning().log("The exams completed by the user %s were not found",ownerID);
-    }
+    // try {
+    //   getExamsCompletedByTheUser(ownerID);
+    // } catch (EntityNotFoundException e) {
+    //   logger.atWarning().log("The exams completed by the user %s were not found",ownerID);
+    // }
     //get exams to be completed by the user
-    try {
-        getExamsToDoByTheUser(ownerID);
-    } catch( EntityNotFoundException e) {
-        logger.atWarning().log("The exams to be taken by the user %s were not found",ownerID);
-    }
+    // try {
+    //     getExamsToDoByTheUser(ownerID);
+    // } catch( EntityNotFoundException e) {
+    //     logger.atWarning().log("The exams to be taken by the user %s were not found",ownerID);
+    // }
     // run to freemarker template
     try {
       Template template = cfg.getTemplate("Dashboard.ftl");
@@ -157,8 +157,8 @@ public class DashboardServlet extends HttpServlet{
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       PreparedQuery result = datastore.prepare(query);
       Entity user = result.asSingleEntity();
-      if(user.getProperty("examsTaken") != null) {
-        List<Long> examsTakenList = (List<Long>) user.getProperty("examsTaken");
+      if(user.getProperty("taken") != null) {
+        List<Long> examsTakenList = (List<Long>) user.getProperty("taken");
         for(int i=0; i<examsTakenList.size(); i++) {
           Key key = KeyFactory.createKey("Exam", examsTakenList.get(i));
           Entity exam = datastore.get(key);

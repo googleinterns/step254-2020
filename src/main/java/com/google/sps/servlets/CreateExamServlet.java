@@ -65,11 +65,10 @@ public class CreateExamServlet extends HttpServlet {
     }
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-    Random rd = new Random();
-    Long id = rd.nextLong();
+    Long id = UtilityClass.generateUniqueId();
     //Set up the new Exam and save it in the datastore
     try {
-      Entity examEntity = new Entity("Exam",rd.nextLong());
+      Entity examEntity = new Entity("Exam",id);
       examEntity.setProperty("name", name);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
