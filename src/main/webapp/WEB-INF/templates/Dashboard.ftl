@@ -12,10 +12,11 @@
       <div class="navtop">
         <p><a  href="index.html">Homepage</a></p>
         <p><a  class="active" href="/dashboardServlet">Dashboard</a></p>
-        <p id=logInOut></p>
+        <p><a href="/groups">Groups</a></p>
         <p><a href="/exam">Take Exam</a></p>
         <p><a href="createExam.html">Create Exam</a></p>
-        <p><a href="/getExamResponses">Set Preferences</a></p>
+        <p><a href="preference.html">Set Preferences</a></p>
+        <p id=logInOut></p>
       </div>
     </header>
     <main>
