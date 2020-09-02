@@ -14,13 +14,20 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Run check style main/java
+    - name: Run check style main/java/../servlets
       uses: nikitasavinov/checkstyle-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         reporter: 'github-pr-check'
         tool_name: 'testtool'
-        workdir: 'src/main/java'
+        workdir: 'src/main/java/com/google/sps/servlets'
+    - name: Run check style main/java/../data
+      uses: nikitasavinov/checkstyle-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        reporter: 'github-pr-check'
+        tool_name: 'testtool'
+        workdir: 'src/main/java/com/google/sps/data'
     - name: Run check style test/java
       uses: nikitasavinov/checkstyle-action@master
       with:
