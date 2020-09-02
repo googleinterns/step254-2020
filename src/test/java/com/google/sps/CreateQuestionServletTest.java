@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -60,8 +61,8 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
   }
 
   @Test
-  public void testdoPostFunction() throws IOException {
-    /*Tests the doPost function to see if the question gets stored correctly */
+  public void testdoPostNormalFunction() throws IOException {
+    /*Tests the doPost function to see if the normal question gets stored correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     helperLogin();
@@ -71,6 +72,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     when(request.getParameter("question")).thenReturn("What does the fox say?");
     when(request.getParameter("marks")).thenReturn("5");
     when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("type")).thenReturn(null);
     //create Fake Test
     createFakeTest();
 
@@ -82,7 +84,40 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     servlet.doPost(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("\"question\":\"What does the fox say?\","
-      +"\"marks\":\"5\",\"ownerID\":\"test@google.com\""));
+      + "\"mcqPossibleAnswers\":[],\"marks\":\"5\",\"ownerID\":\"test@google.com\","
+      + "\"type\":\"Normal\""));
+  }
+  @Test
+  public void testDoPostMcqFunction() throws IOException {
+    /*Tests the doPost function to see if the normal question gets stored correctly */
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    helperLogin();
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    //set the parameters that will be requested to test values
+    when(request.getParameter("question")).thenReturn("What day is it?");
+    when(request.getParameter("marks")).thenReturn("10");
+    when(request.getParameter("testName")).thenReturn("Trial");
+    String type[] = {"MCQ"};
+    when(request.getParameterValues("type")).thenReturn(type);
+    when(request.getParameter("mcqAnswer")).thenReturn("1");
+    String mcqAnswers[] = {"Monday", "Tuesday", "Wednesday"};
+    when(request.getParameterValues("mcqField")).thenReturn(mcqAnswers);
+    //create Fake Test
+    createFakeTest();
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+
+    CreateQuestionServlet servlet = new CreateQuestionServlet();
+    servlet.doPost(request, response);
+    String result = stringWriter.toString();
+    Assert.assertTrue(result.contains("\"question\":\"What day is it?\","
+      + "\"mcqPossibleAnswers\":[\"Monday\",\"Tuesday\",\"Wednesday\"],"
+      + "\"marks\":\"10\",\"ownerID\":\"test@google.com\","
+      + "\"type\":\"MCQ\",\"mcqAnswer\":\"1\""));
   }
 
   @Test
@@ -99,6 +134,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     when(request.getParameter("question")).thenReturn(null);
     when(request.getParameter("marks")).thenReturn("10");
     when(request.getParameter("testName")).thenReturn(null);
+    when(request.getParameter("type")).thenReturn(null);
     
     CreateQuestionServlet servlet = new CreateQuestionServlet();
     servlet.doPost(request, response);
@@ -120,6 +156,7 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     when(request.getParameter("question")).thenReturn("How are you?");
     when(request.getParameter("marks")).thenReturn("10");
     when(request.getParameter("testName")).thenReturn("Trial");
+    when(request.getParameter("type")).thenReturn(null);
     CreateQuestionServlet servlet = new CreateQuestionServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,

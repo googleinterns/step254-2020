@@ -47,8 +47,9 @@ public class CreateExamServlet extends HttpServlet {
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
-    //Servlet Receives information from the client about an exam they
-    //want to create and saves it in the datastore
+    /*Servlet Receives information from the client about an exam they
+    * want to create and saves it in the datastore
+    */
     Long date = (new Date()).getTime();
     String name = UtilityClass.getParameter(request, "name", "");
     // Remove all html tags and trim the spaces in the exam name.
@@ -62,7 +63,8 @@ public class CreateExamServlet extends HttpServlet {
     if (name == "" || duration == "") {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         "You have entered one or more null parameters");
-      logger.atWarning().log("One or more null parameters");
+      logger.atWarning().log("One or more null parameters, name:%s, duration:%s",
+          name, duration);
       return;
     }
     UserService userService = UserServiceFactory.getUserService();
@@ -76,16 +78,18 @@ public class CreateExamServlet extends HttpServlet {
     String ownerID = userService.getCurrentUser().getEmail();
     long examID = 0;
     Long id = UtilityClass.generateUniqueId();
+    Long examID = 0L;
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     //Set up the new Exam and save it in the datastore
     try {
-      Entity examEntity = new Entity("Exam",id);
+      Entity examEntity = new Entity("Exam", id);
       examEntity.setProperty("name", name);
       examEntity.setProperty("duration", duration);
       examEntity.setProperty("ownerID", ownerID);
       examEntity.setProperty("date", date);
       examEntity.setProperty("questionsList", new ArrayList<>());
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(examEntity);
+      examID = examEntity.getKey().getId();
       logger.atInfo().log("Exam: %s , was saved successfully in the datastore",
           examEntity.getKey().getId());
       examID = examEntity.getKey().getId();

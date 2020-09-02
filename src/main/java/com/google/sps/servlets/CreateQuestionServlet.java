@@ -48,9 +48,25 @@ public class CreateQuestionServlet extends HttpServlet {
       final HttpServletResponse response) throws IOException {
     /* Servlet Receives information from the client about the question
     * they want to save */
+
     Long date = (new Date()).getTime();
     String testName = UtilityClass.getParameter(request, "testName", "");
     String question = UtilityClass.getParameter(request, "question", "");
+    String checkbox[] = request.getParameterValues("type");
+    String type = "Normal";
+    String mcqAnswer = null;
+    List<String> mcqPossibleAnswers = new ArrayList<>();
+
+    if (checkbox != null) {
+      type = "MCQ";
+      mcqAnswer = request.getParameter("mcqAnswer");
+      String mcqAnswers[] = request.getParameterValues("mcqField");
+      for(int i=0; i<mcqAnswers.length; i++) {
+        String answer = mcqAnswers[i];
+        answer = answer.replaceAll("\\<.*?\\>", "");
+        mcqPossibleAnswers.add(answer);
+      }
+    } 
     //Remove all html tags and trim the spaces in the questions.
     question = question.replaceAll("\\<.*?\\>", "");
     question = question.trim();
@@ -59,7 +75,8 @@ public class CreateQuestionServlet extends HttpServlet {
     if (testName == "" || question == "" || marks == "") {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
           "You have entered one or more null parameters");
-      logger.atWarning().log("One or more null parameters");
+      logger.atWarning().log("One or more null parameters testName:%s, question:%s, marks:%s",
+          testName, question, marks);
       return;
     }
 
@@ -75,14 +92,17 @@ public class CreateQuestionServlet extends HttpServlet {
     long id = UtilityClass.generateUniqueId();
     try {
       // Create a Question Entity with the parameters provided
-
       Entity questionEntity = new Entity("Question", id);
       questionEntity.setProperty("question", question);
       questionEntity.setProperty("marks", marks);
       questionEntity.setProperty("date", date);
       questionEntity.setProperty("ownerID", ownerID);
+      questionEntity.setProperty("type", type);
+      questionEntity.setProperty("mcqAnswer", mcqAnswer);
+      questionEntity.setProperty("mcqPossibleAnswers", mcqPossibleAnswers);
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(questionEntity);
+      
       addQuestionToExamList(questionEntity.getKey().getId(), ownerID,
           testName);
 

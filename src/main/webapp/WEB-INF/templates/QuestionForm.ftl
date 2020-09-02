@@ -12,7 +12,7 @@
     <header>
       <div class="navtop">
         <p><a  href="index.html">Homepage</a></p>
-        <p><a  href="dashboard.html">Dashboard</a></p>
+        <p><a  href="/dashboardServlet">Dashboard</a></p>
         <p id=logInOut></p>
       </div>
     </header>
@@ -23,6 +23,16 @@
         <textarea name="question" rows="4" cols="50" maxlength="250" required></textarea><br>
         <label for="marks">Marks given for Question:</label><br>
         <input type="number" id="marks" name="marks" min="0" max="1000" step="0.01" required> 
+        <h3>Please mark if this Question is an MCQ</h3>
+        <input type="checkbox" id="mcqCheckBox" name="type" value="MCQ" onclick="getMcqChecked()">MCQ<br>
+        <div style="display:none;" id="fieldsList" name ="fieldsList">
+        </div>
+        <span id="popup" style="display: none;">You have reached the limit of MCQ options</span>
+        <button type="button" onclick="moreFields()"  id="addFields" style="display: none;" > Add Input Field </button>
+        <button type="button" onclick="lessFields()"  id="removeFields" style="display: none;" > Remove Input Field </button>
+        <h3 id="mcq" style="display: none;">Select which of the answers is the correct answer<h3>
+        <select name ="mcqAnswer"  id="mcqAnswer" style="display: none;">
+        </select/
         <h3> Select which test you want the questions added to</h1>
         <select name="testName">
         <#if tests??>
@@ -31,7 +41,7 @@
           </#list>
         </#if>
         </select>
-        <button>Submit</button>
+        <button >Submit</button>
       </form>
       <h3> Add Previously Used Questions</h3>
       <form id="addQuestions" action="/returnQuestionsUserOwns" method="GET">

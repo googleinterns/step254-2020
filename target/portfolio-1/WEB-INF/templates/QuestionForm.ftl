@@ -35,9 +35,11 @@
         </select/
         <h3> Select which test you want the questions added to</h1>
         <select name="testName">
+        <#if tests??>
           <#list tests as key, value>
             <option>${value}</option>
           </#list>
+        </#if>
         </select>
         <button >Submit</button>
       </form>
