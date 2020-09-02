@@ -39,8 +39,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for Authentication Servlet for logged out user, logged in user without preferences set
- * and logged in users with preferences set.
+ * Tests for Exam Servlet for when user is logged out, when no exam is requested, 
+ * invalid exam and real exams are requested.
  *
  * @author Aidan Molloy
  */

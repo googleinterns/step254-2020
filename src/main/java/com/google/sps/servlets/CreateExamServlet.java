@@ -38,8 +38,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that creates and stores exams in the datastore.
-* @author Klaudia Obieglo.
+/** Servlet that creates and stores exams in the datastore and assigns exams to users.
+* @author Klaudia Obieglo & Aidan Molloy.
 */
 @WebServlet("/createExam")
 public class CreateExamServlet extends HttpServlet {
