@@ -76,7 +76,6 @@ public class CreateExamServlet extends HttpServlet {
     }
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-    long examID = 0;
     Long id = UtilityClass.generateUniqueId();
     Long examID = 0L;
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -106,7 +105,6 @@ public class CreateExamServlet extends HttpServlet {
     // If a group is selected
     if (groupID != "") {
       Entity groupEntity = new Entity("Group");
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       try {
         Key key = KeyFactory.createKey("Group", Long.parseLong(groupID));
         groupEntity = datastore.get(key);
