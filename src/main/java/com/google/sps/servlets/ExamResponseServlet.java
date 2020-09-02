@@ -92,21 +92,29 @@ public class ExamResponseServlet extends HttpServlet {
     /*Marks what exam a user has taken by storing that exam id in their 
     * UserInfo.
     */
-    Query queryUser = new Query("UserInfo").setFilter(new FilterPredicate(
+    Query queryUser = new Query("UserExams").setFilter(new FilterPredicate(
           "email", FilterOperator.EQUAL, email));
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryUser);
     Entity user = pq.asSingleEntity();
-    if (user.getProperty("examsTaken") == null) {
+    //add to examsTaken list
+    if (user.getProperty("taken") == null) {
         List<Long> examsTakenList = new ArrayList<>();
         examsTakenList.add(examID);
-        user.setProperty("examsTaken", examsTakenList);
+        user.setProperty("taken", examsTakenList);
       } else {
         List<Long> examsTakenList =
-            (List<Long>) user.getProperty("examsTaken");
+            (List<Long>) user.getProperty("taken");
         examsTakenList.add(examID);
-        user.setProperty("examsTaken", examsTakenList);
+        user.setProperty("taken", examsTakenList);
       }
+    //remove examID from exams To Do list as exam has been taken
+    if(user.getProperty("available") != null) {
+      List<Long> availableExams =
+            (List<Long>) user.getProperty("available");
+      availableExams.remove(Long.valueOf(examID));
+    }
     datastore.put(user);
+
   }
 }
