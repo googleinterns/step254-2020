@@ -143,7 +143,7 @@ if (typeof exports !== 'undefined') {
     isChecked,
   };
 };
-//Checks if the MCQ checkbox is checked
+/** Checks if the MCQ checkbox is checked */
 function getMcqChecked() {
   const mcqCheck = document.getElementById('mcqCheckBox');
   const addFieldsButton = document.getElementById('addFields');
@@ -151,23 +151,23 @@ function getMcqChecked() {
   const fieldsList = document.getElementById('fieldsList');
   const mcqAnswer = document.getElementById('mcqAnswer');
   const mcqLine = document.getElementById('mcq');
-  if(mcqCheck.checked) {
+  if (mcqCheck.checked) {
     addFieldsButton.style.display = 'block';
     removeFieldsButton.style.display = 'block';
     fieldsList.style.display = 'block';
     mcqLine.style.display = 'block';
     mcqAnswer.style.display = 'block';
   } else {
-    addFieldsButton.style.display = 'none' ;
+    addFieldsButton.style.display = 'none';
     removeFieldsButton.style.display = 'none';
     mcqAnswer.style.display = 'none';
     mcqLine.style.display = 'none';
     fieldsList.style.display = 'none';
   }
 };
-// Add more input fields for the MCQ answers
+/** Add more input fields for the MCQ answers */
 function moreFields() {
-  if(counter >= 5) {
+  if (counter >= 5) {
     document.getElementById('popup').style.display = 'block';
   } else {
     const dropdown = document.createElement('OPTION');
@@ -178,11 +178,11 @@ function moreFields() {
     const number = document.createElement('SPAN');
     number.innerHTML = counter + '. ';
     const field = document.createElement('input');
-    field.type ="text";
-    field.name = "mcqField";
-    field.id = "mcqField";
-    field.cols="50";
-    field.rows ="3";
+    field.type ='text';
+    field.name = 'mcqField';
+    field.id = 'mcqField';
+    field.cols = '50';
+    field.rows = '3';
     field.style.display = 'block';
     field.required = true;
     number.append(field);
@@ -191,7 +191,7 @@ function moreFields() {
     counter++;
     }
 };
-// Remove the last field from the MCQ answers
+/** Remove the last field from the MCQ answers */
 function lessFields() {
   if (counter > 1) {
     const listOfFields = document.getElementById('fieldsList').lastChild;
