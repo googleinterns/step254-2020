@@ -16,7 +16,6 @@ package com.google.sps.servlets;
  
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.Version;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -35,22 +34,23 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
+import freemarker.template.Version;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.List;
 import java.util.LinkedHashMap;
-import java.io.File;
+import java.util.HashMap;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.ServletConfig;
 
 /** Servlet that shows the exam a user has created
 * @author Klaudia Obieglo
