@@ -30,13 +30,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-/** Servlet that creates and stores questions.
+/** Servlet that creates and stores questions in the datastore.
 * @author Klaudia Obieglo
 */
 @WebServlet("/createQuestion")
@@ -71,9 +72,11 @@ public class CreateQuestionServlet extends HttpServlet {
     }
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
+    long id = UtilityClass.generateUniqueId();
     try {
       // Create a Question Entity with the parameters provided
-      Entity questionEntity = new Entity("Question");
+
+      Entity questionEntity = new Entity("Question", id);
       questionEntity.setProperty("question", question);
       questionEntity.setProperty("marks", marks);
       questionEntity.setProperty("date", date);
