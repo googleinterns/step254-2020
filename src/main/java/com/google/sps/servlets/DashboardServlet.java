@@ -93,10 +93,16 @@ public class DashboardServlet extends HttpServlet{
     //grab exams user owns
     getExamsOwnedByUser(ownerID);
     //get exams completed by the user
-    try{
+    try {
       getExamsCompletedByTheUser(ownerID);
     } catch (EntityNotFoundException e) {
       logger.atWarning().log("The exams completed by the user %s were not found",ownerID);
+    }
+    //get exams to be completed by the user
+    try {
+        getExamsToDoByTheUser(ownerID);
+    } catch( EntityNotFoundException e) {
+        logger.atWarning().log("The exams to be taken by the user %s were not found",ownerID);
     }
     // run to freemarker template
     try {
@@ -145,13 +151,12 @@ public class DashboardServlet extends HttpServlet{
     */
     Map<String, Long> examsCompletedMap = new LinkedHashMap<String, Long>();
     try {
-      Query query = new Query("UserInfo").setFilter(new FilterPredicate("email",
+      Query query = new Query("UserExams").setFilter(new FilterPredicate("email",
           FilterOperator.EQUAL, email));
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       PreparedQuery result = datastore.prepare(query);
       Entity user = result.asSingleEntity();
       if(user.getProperty("examsTaken") != null) {
-        System.out.println("Here");
         List<Long> examsTakenList = (List<Long>) user.getProperty("examsTaken");
         for(int i=0; i<examsTakenList.size(); i++) {
           Key key = KeyFactory.createKey("Exam", examsTakenList.get(i));
@@ -167,7 +172,32 @@ public class DashboardServlet extends HttpServlet{
       return;
     }
   }
-  public void getTestsToDoByTheUser(String ownerID){
-    //Returns the exams that the user still has to complete
+  public void getExamsToDoByTheUser(String email) throws EntityNotFoundException {
+    /*Saves the exams that the user still has to complete in the dashboardData map
+    * Argument ownerID - email of the user who's exams we are looking for
+    */
+    Map<String, Long> examsToDoMap = new LinkedHashMap<String, Long>();
+    try {
+      Query query = new Query("UserExams").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, email));
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      PreparedQuery result = datastore.prepare(query);
+      Entity user = result.asSingleEntity();
+      if(user.getProperty("available") != null) {
+        List<Long> examsToTakeList = (List<Long>) user.getProperty("available");
+        for(int i=0; i<examsToTakeList.size(); i++) {
+          Key key = KeyFactory.createKey("Exam", examsToTakeList.get(i));
+          Entity exam = datastore.get(key);
+          String name = (String) exam.getProperty("name");
+          examsToDoMap.put(name, exam.getKey().getId());
+          dashboardData.put("examToComplete", examsToDoMap);
+        }
+      }
+      logger.atInfo().log("Exams To Do, if any, were found for the user %s", email);
+    } catch (DatastoreFailureException e) {
+      logger.atSevere().log("Datastore error:%s" ,e);
+      return;
+    }
+
   }
 }

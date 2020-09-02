@@ -40,7 +40,13 @@
         <div class="todo">
           <h2> Exam's To Do </h2>
           <#if examToComplete??>
-
+            <#list examToComplete as name, id>
+              <tr>
+              <td> ${name} </td>
+              <td><a href=/exam?examID=${id?c}>Look at Exam</a></td>
+              </tr>
+              <br>
+            </#list>
           <#else>
             <h4> You do not have any exams to take at the moment </h4>
           </#if>
