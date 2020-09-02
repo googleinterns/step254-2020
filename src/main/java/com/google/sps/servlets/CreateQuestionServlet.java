@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
+import java.util.UUID;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -72,11 +73,11 @@ public class CreateQuestionServlet extends HttpServlet {
     }
     logger.atInfo().log("user=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
-    Random rd = new Random();
+    long id = generateUniqueId();
     try {
       // Create a Question Entity with the parameters provided
 
-      Entity questionEntity = new Entity("Question",rd.nextLong());
+      Entity questionEntity = new Entity("Question", id);
       questionEntity.setProperty("question", question);
       questionEntity.setProperty("marks", marks);
       questionEntity.setProperty("date", date);
@@ -141,5 +142,13 @@ public class CreateQuestionServlet extends HttpServlet {
     PreparedQuery pq = datastore.prepare(queryExam);
     Entity result = pq.asSingleEntity();
     return result;
+  }
+  private Long generateUniqueId() {
+    //Return random ID
+    long value = -1;
+    while(value < 0) {
+      value = UUID.randomUUID().getMostSignificantBits();
+    }
+    return value; 
   }
 }
