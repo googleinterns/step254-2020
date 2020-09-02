@@ -21,6 +21,10 @@ import static org.mockito.Mockito.when;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -63,9 +67,9 @@ public final class DashboardServletTest extends DashboardServlet {
   }
 
   @Test
-  public void testdoGetFunction() throws IOException {
-    /*Tests the doGet function to see if all tests a user owns get
-    * retrieved correctly.
+  public void testExamsOwnedFunction() throws IOException, ServletException {
+    /*Tests get ExamsOwnedByUser to see if all tests a user has created
+    * get retrieved correctly
     */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -74,7 +78,6 @@ public final class DashboardServletTest extends DashboardServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
 
-<<<<<<< HEAD:src/test/java/com/google/sps/ExamsUserOwnsServletTest.java
     List<Long> list = new ArrayList<>();
     /*Create two fake TestEntities */
     Entity testEntity = new Entity("Exam");
@@ -97,14 +100,104 @@ public final class DashboardServletTest extends DashboardServlet {
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
-    
-    ExamsUserOwnsServlet servlet = new ExamsUserOwnsServlet();
+
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
+    when(config.getServletContext()).thenReturn(context);
+
+    //Get the path to the target files were templates are stored for tests
+    String filePath = new File(".").getCanonicalPath();
+    String endPath = "/target/portfolio-1/WEB-INF/templates";
+    String path = filePath + endPath;
+    when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
+
+    List<Long> examIDs = createTests();
+    DashboardServlet servlet = new DashboardServlet();
+    servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("\"name\":\"Trial\",\"examID\":1,"
-        + "\"duration\":30.0,\"ownerID\":\"test@google.com\""));
-    Assert.assertTrue(result.contains("\"name\":\"AnotherExam\",\"examID\":2,"
-        +"\"duration\":45.0,\"ownerID\":\"test@google.com\""));
+    Assert.assertTrue(result.contains("<td> Trial </td>"));
+    Assert.assertTrue(result.contains("<td><a href=/showExam?examID=" + examIDs.get(0)
+        + ">Look at Exam</a></td>"));
+    Assert.assertTrue(result.contains("<td> Another Exam </td>"));
+    Assert.assertTrue(result.contains("<td><a href=/showExam?examID=" + examIDs.get(1)
+        + ">Look at Exam</a></td>"));
+  }
+
+  @Test
+  public void testGetCompletedExamsFunction() throws IOException, ServletException {
+    /*Tests the getExamsCompletedByUser to see if all tests a user has taken
+    * get retrieved correctly
+    */
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    helperLogin();
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(true);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
+    when(config.getServletContext()).thenReturn(context);
+
+    //Get the path to the target files were templates are stored for tests
+    String filePath = new File(".").getCanonicalPath();
+    String endPath = "/target/portfolio-1/WEB-INF/templates";
+    String path = filePath + endPath;
+    when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
+
+    List<Long> examIDs = createTests();
+    List<Long> taken = new ArrayList<Long>();
+    taken.add(examIDs.get(0));
+    setUpUserForTakenExams(taken);
+    DashboardServlet servlet = new DashboardServlet();
+    servlet.init(config);
+    servlet.doGet(request, response);
+    String result = stringWriter.toString();
+    Assert.assertTrue(result.contains("<td> Trial </td>"));
+    Assert.assertTrue(result.contains("<td><a href=/examsTaken?examID=" + examIDs.get(0)
+        + ">Look at Exam</a></td>"));
+  }
+  
+  @Test
+  public void testExamsToDoFunction() throws IOException, ServletException {
+    /*Tests the getExamsToDoByUser to see if tests that are available for the
+    * user to take get retrieved correctly
+    */
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    helperLogin();
+    UserService userService = mock(UserService.class);
+    when(userService.isUserLoggedIn()).thenReturn(true);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
+    when(config.getServletContext()).thenReturn(context);
+
+    //Get the path to the target files were templates are stored for tests
+    String filePath = new File(".").getCanonicalPath();
+    String endPath = "/target/portfolio-1/WEB-INF/templates";
+    String path = filePath + endPath;
+    when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
+
+    List<Long> examIDs = createTests();
+    List<Long> available = new ArrayList<Long>();
+    available.add(examIDs.get(1));
+    setUpUserForAvailableExams(available);
+    DashboardServlet servlet = new DashboardServlet();
+    servlet.init(config);
+    servlet.doGet(request, response);
+    String result = stringWriter.toString();
+    Assert.assertTrue(result.contains("<td> Trial </td>"));
+    Assert.assertTrue(result.contains("<td><a href=/exam?examID=" + examIDs.get(1)
+        + ">Look at Exam</a></td>"));
   }
   @Test
   public void testNotLoggedInUser() throws IOException {
@@ -126,5 +219,57 @@ public final class DashboardServletTest extends DashboardServlet {
     helper.setEnvAuthDomain("google.com");
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
+  }
+
+  private List createTests() {
+    /*Create two fake TestEntities */
+    final Long date = (new Date()).getTime(); 
+    List<Long> list = new ArrayList<>();
+    Entity testEntity = new Entity("Exam");
+    testEntity.setProperty("name", "Trial");
+    testEntity.setProperty("duration", "30");
+    testEntity.setProperty("ownerID", "test@google.com");
+    testEntity.setProperty("date", date);
+    testEntity.setProperty("questionsList", list);
+
+    Entity anotherEntity= new Entity("Exam");
+    anotherEntity.setProperty("name", "Another Exam");
+    anotherEntity.setProperty("duration", "45");
+    anotherEntity.setProperty("ownerID", "test@google.com");
+    anotherEntity.setProperty("date", date);
+    anotherEntity.setProperty("questionsList", list);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(testEntity);
+    datastore.put(anotherEntity);
+    List<Long> taken = new ArrayList<Long>();
+    taken.add(testEntity.getKey().getId());
+    taken.add(anotherEntity.getKey().getId());
+    return taken;
+  }
+  
+  public void setUpUserForTakenExams(List<Long> taken) {
+    // Set up UserExams to check if the taken exams get stored and retrieved correctly
+    Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, "test@google.com"));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery pq = datastore.prepare(getUserExams);
+    Entity userExamsEntity = pq.asSingleEntity();
+    userExamsEntity = new Entity("UserExams", "test@google.com");
+    userExamsEntity.setProperty("email","test@google.com");
+    userExamsEntity.setProperty("taken", taken);
+    datastore.put(userExamsEntity);
+  }
+
+  public void setUpUserForAvailableExams(List<Long> available) {
+    // Set up UserExams to check if the available exams get stored and retrieved correctly
+    Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, "test@google.com"));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery pq = datastore.prepare(getUserExams);
+    Entity userExamsEntity = pq.asSingleEntity();
+    userExamsEntity = new Entity("UserExams", "test@google.com");
+    userExamsEntity.setProperty("email","test@google.com");
+    userExamsEntity.setProperty("available", available);
+    datastore.put(userExamsEntity);
   }
 }

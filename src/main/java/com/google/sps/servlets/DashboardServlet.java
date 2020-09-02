@@ -156,8 +156,11 @@ public class DashboardServlet extends HttpServlet{
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       PreparedQuery result = datastore.prepare(query);
       Entity user = result.asSingleEntity();
-      if(user.getProperty("examsTaken") != null) {
-        List<Long> examsTakenList = (List<Long>) user.getProperty("examsTaken");
+      if (user == null){
+        user = new Entity("UserExams", email);
+        user.setProperty("email", email);
+      } else if (user.getProperty("taken") != null) {
+        List<Long> examsTakenList = (List<Long>) user.getProperty("taken");
         for(int i=0; i<examsTakenList.size(); i++) {
           Key key = KeyFactory.createKey("Exam", examsTakenList.get(i));
           Entity exam = datastore.get(key);
@@ -183,7 +186,10 @@ public class DashboardServlet extends HttpServlet{
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       PreparedQuery result = datastore.prepare(query);
       Entity user = result.asSingleEntity();
-      if(user.getProperty("available") != null) {
+      if (user == null){
+        user = new Entity("UserExams", email);
+        user.setProperty("email", email);
+      } else if (user.getProperty("available") != null) {
         List<Long> examsToTakeList = (List<Long>) user.getProperty("available");
         for(int i=0; i<examsToTakeList.size(); i++) {
           Key key = KeyFactory.createKey("Exam", examsToTakeList.get(i));
