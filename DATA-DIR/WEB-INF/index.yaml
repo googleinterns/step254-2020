@@ -7,4 +7,4 @@ indexes:
   - name: ownerID
     direction: asc
   - name: date
-    direction: desc
+    direction: asc
