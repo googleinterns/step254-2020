@@ -14,22 +14,43 @@
 
 package com.google.sps.servlets;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.Version;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler; 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.DatastoreFailureException;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Random;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
+import freemarker.cache.*;
 
 /** Servlet that creates and stores exams in the datastore.
 * @author Klaudia Obieglo.
@@ -124,21 +145,25 @@ public class CreateExamServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     
     // create Map with all the groups the user owns 
+    Map data = new HashMap();
     Map<Long,String> groupMap = new LinkedHashMap<Long,String>();
 
     //Look up each Group owned by the user and add to map
     try {
       // Get all groups from owner using query as Group does not have a known ID/Name
       Query queryGroups = new Query("Group").setFilter(new FilterPredicate(
-          "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
-          SortDirection.DESCENDING);
+          "ownerID", FilterOperator.EQUAL, ownerID));
       PreparedQuery listGroups = datastore.prepare(queryGroups);
-      for (Entity entity : listGroups.asIterable()) {
+      if(listGroups == null){
+        data.put("groups", "No Groups");
+      }else{
+        for (Entity entity : listGroups.asIterable()) {
         long groupID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
-        testMap.put(groupID,name);
-        data.put("groups", testMap);
-        }
+        groupMap.put(groupID,name);
+        data.put("groups", groupMap);
+        }  
+      }
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was a problem with retrieving the exams %s",
           e);
