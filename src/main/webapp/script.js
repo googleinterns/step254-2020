@@ -190,7 +190,7 @@ function moreFields() {
     document.getElementById('fieldsList').append(number);
     document.getElementById('removeFields').style.display = 'block';
     counter++;
-    }
+  }
 };
 /** Remove the last field from the MCQ answers */
 function lessFields() {
