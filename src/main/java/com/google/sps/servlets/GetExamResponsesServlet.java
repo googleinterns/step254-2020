@@ -79,7 +79,7 @@ public class GetExamResponsesServlet extends HttpServlet {
   }
  
   /**
-   * doPost process the information from the exam form response and send it to the datastore.
+   * doGet process the information from the exam form response and send it to the datastore.
    *
    * @param request  provides request information from the HTTP servlet
    * @param response response object where servlet will write information to

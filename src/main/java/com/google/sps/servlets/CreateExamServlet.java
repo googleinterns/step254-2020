@@ -37,6 +37,25 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/createExam")
 public class CreateExamServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  Configuration cfg;
+  //set up the configuration once
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    cfg = new Configuration(Configuration.VERSION_2_3_30);
+    String path = getServletContext().getRealPath("/WEB-INF/templates/");
+    try {
+      cfg.setDirectoryForTemplateLoading(new File(path));
+    } catch (IOException e) {
+      logger.atWarning().log("Could not set directory for template loading: %s", e);
+    }
+    // Recommended settings for new projects:
+    cfg.setDefaultEncoding("UTF-8");
+    cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+    cfg.setLogTemplateExceptions(false);
+    cfg.setWrapUncheckedExceptions(true);
+    cfg.setFallbackOnNullLoopVariable(false);
+  }
+ 
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {
@@ -88,4 +107,57 @@ public class CreateExamServlet extends HttpServlet {
       return;
     }
   }
+
+  @Override
+  public void doGet(final HttpServletRequest request,
+       final HttpServletResponse response) throws IOException {
+    // Only logged in users should access this page.
+    UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
+      logger.atWarning().log("User is not logged in.");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+        "You are not authorised to view this page");
+      return;
+    }
+    logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
+    String ownerID = userService.getCurrentUser().getEmail();
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    
+    // create Map with all the groups the user owns 
+    Map<Long,String> groupMap = new LinkedHashMap<Long,String>();
+
+    //Look up each Group owned by the user and add to map
+    try {
+      // Get all groups from owner using query as Group does not have a known ID/Name
+      Query queryGroups = new Query("Group").setFilter(new FilterPredicate(
+          "ownerID", FilterOperator.EQUAL, ownerID)).addSort("date",
+          SortDirection.DESCENDING);
+      PreparedQuery listGroups = datastore.prepare(queryGroups);
+      for (Entity entity : listGroups.asIterable()) {
+        long groupID = entity.getKey().getId();
+        String name = (String) entity.getProperty("name");
+        testMap.put(groupID,name);
+        data.put("groups", testMap);
+        }
+    } catch (DatastoreFailureException e) {
+      logger.atWarning().log("There was a problem with retrieving the exams %s",
+          e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your tests");
+      return;
+    }
+    // run to freemarker template
+    try {
+      Template template = cfg.getTemplate("CreateExam.ftl");
+      PrintWriter out = response.getWriter();
+      template.process(data, out);
+      logger.atInfo().log("Question form was displayed correctly for the User:"
+          + "%s", userService.getCurrentUser());
+    } catch (TemplateException e) {
+      logger.atWarning().log("There was a problem with processing the template %s", e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to display the Question Form");
+      return;
+    } 
+ }
 }
