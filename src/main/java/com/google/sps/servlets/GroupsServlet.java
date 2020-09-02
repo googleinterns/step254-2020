@@ -80,7 +80,7 @@ public class GroupsServlet extends HttpServlet {
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<p><a href=\"index.html\">Homepage</a></p>");
-    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
+    out.println("<p><a href=\"dashboardServlet\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
