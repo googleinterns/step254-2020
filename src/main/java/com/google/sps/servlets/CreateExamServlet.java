@@ -17,14 +17,21 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
 import java.io.IOException;
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Date;
 import java.util.Random;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -66,6 +73,8 @@ public class CreateExamServlet extends HttpServlet {
     logger.atInfo().log("User =%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
     Long id = UtilityClass.generateUniqueId();
+    Long examID = 0L;
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     //Set up the new Exam and save it in the datastore
     try {
       Entity examEntity = new Entity("Exam",id);
@@ -74,8 +83,8 @@ public class CreateExamServlet extends HttpServlet {
       examEntity.setProperty("ownerID", ownerID);
       examEntity.setProperty("date", date);
       examEntity.setProperty("questionsList", new ArrayList<>());
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(examEntity);
+      examID = examEntity.getKey().getId();
       logger.atInfo().log("Exam: %s , was saved successfully in the datastore",
           examEntity.getKey().getId());
       response.sendRedirect("/questionForm");
@@ -86,6 +95,32 @@ public class CreateExamServlet extends HttpServlet {
       logger.atSevere().log("Error with datastore: %s", e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           "Internal Error occurred when trying to create your exam");
+      return;
+    }
+    try {
+      Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, ownerID));
+      PreparedQuery pq = datastore.prepare(getUserExams);
+      Entity userExamsEntity = pq.asSingleEntity();
+      List<Long> available = null;
+      if (userExamsEntity == null) {
+        userExamsEntity = new Entity("UserExams", ownerID);
+        userExamsEntity.setProperty("email", ownerID);
+        userExamsEntity.setProperty("taken", new ArrayList<Long>());
+        available = new ArrayList<Long>();
+      } else {
+        available = (List<Long>) userExamsEntity.getProperty("available");
+        if (available == null) {
+          available = new ArrayList<Long>();
+        }
+      }
+      available.add(examID);
+      userExamsEntity.setProperty("available", available);
+      datastore.put(userExamsEntity);
+    } catch (Exception e) {
+      logger.atWarning().log("Problem while giving exams to users: %s", e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+      "Problem while giving exams to users");
       return;
     }
   }
