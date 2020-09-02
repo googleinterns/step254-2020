@@ -69,7 +69,7 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
   }
 
   @Test
-  public void testdoGetFunction() throws IOException, ServletException {
+  public void testdoGetFunction() throws IOException, ServletException{
     /*Tests the doGet function to see if the questions that the
     * user owns get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
