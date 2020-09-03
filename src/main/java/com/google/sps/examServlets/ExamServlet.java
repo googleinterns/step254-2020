@@ -148,7 +148,7 @@ public class ExamServlet extends HttpServlet {
 
     // If exam is not selected or unavailable display list of available exams
     out.println("<h1>Choose an exam to take.</h1>");
-    out.println("<table><tr><th>ID</th><th>Name</th><th>Duration</th></tr>");
+    out.println("<table><tr><th>Name</th><th>Duration</th></tr>");
 
     try {
       Query query = new Query("Exam");
@@ -160,7 +160,6 @@ public class ExamServlet extends HttpServlet {
         String duration = (String) entity.getProperty("duration");
 
         out.println("<tr>");
-        out.println("<td>" + id + "</td>");
         out.println("<td>" + name + "</td>");
         out.println("<td>" + duration + "</td>");
         out.println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");
