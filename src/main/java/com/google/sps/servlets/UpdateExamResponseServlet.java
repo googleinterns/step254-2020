@@ -126,6 +126,6 @@ public class UpdateExamResponseServlet extends HttpServlet {
           "Internal Error occurred when trying to find your tests");
       return;
     }
-    response.sendRedirect("/dashboard.html");
+    response.sendRedirect("dashboardServlet");
   }
 }
