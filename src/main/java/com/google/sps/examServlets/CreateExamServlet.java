@@ -97,8 +97,8 @@ public class CreateExamServlet extends HttpServlet {
     String groupID = UtilityClass.getParameter(request, "groupID", "");
     groupID = groupID.replaceAll("\\<.*?\\>", "");
     groupID = groupID.trim();
+    logger.atInfo().log("Group =%s is selected", groupID);
     String duration = UtilityClass.getParameter(request, "duration", "");
-    logger.atInfo().log("group=%s", groupID);
     if (name.equals("") || duration.equals("")) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
           "You have entered one or more null parameters");
