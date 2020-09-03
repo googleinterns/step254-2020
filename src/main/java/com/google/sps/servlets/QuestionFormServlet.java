@@ -128,7 +128,6 @@ public class QuestionFormServlet extends HttpServlet {
 
       for (Entity entity : listExams.asIterable()) {
         long examID = entity.getKey().getId();
-        System.out.println(examID +"EXAM ID");
         String name = (String) entity.getProperty("name");
         testMap.put(examID, name);
         data.put("tests", testMap);
