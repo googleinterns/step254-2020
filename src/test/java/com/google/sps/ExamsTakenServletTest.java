@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+/*
 package com.google.sps.servlets;
 
 import static org.mockito.Mockito.mock;
@@ -51,7 +51,7 @@ import org.junit.runners.JUnit4;
  * if a user is not logged in check for an unauthorised error.
  *
  * @author Róisín O'Farrell
- */
+ *//*
 @RunWith(JUnit4.class)
 public final class ExamsTakenServletTest extends ExamsTakenServlet {
   private final LocalServiceTestHelper helper = 
@@ -70,7 +70,7 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
   @Test
   public void testdoPostFunction() throws IOException, ServletException{
     /*Tests the doPost function to see if the exam that the
-    * user took get retrieved correctly */
+    * user took get retrieved correctly *//*
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     ServletConfig config = mock(ServletConfig.class);
@@ -121,7 +121,7 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
         "You are not authorised to view this page");
   }
   private void setFakeTest() {
-    /*Set a fake test*/
+    /*Set a fake test*//*
     Long date = (new Date()).getTime(); 
     List<Long> fakeQuestionList = new ArrayList<Long>();
     fakeQuestionList.add(1L);
@@ -137,7 +137,7 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
   }
 
    private void setFakeResponeses () {
-    /*Set up two fake response entities for testing purposes */
+    /*Set up two fake response entities for testing purposes *//*
     Entity responseEntity = new Entity("1", "test@google.com");
     responseEntity.setProperty("answer", "Tuesday");
     responseEntity.setProperty("marks", "5");
@@ -160,7 +160,7 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
   }
 
    private void setFakeQuestions () {
-    /*Set up two fake question entities for testing purposes */
+    /*Set up two fake question entities for testing purposes *//*
     Long date = (new Date()).getTime(); 
     Entity questionEntity = new Entity("Question", 1L);
     questionEntity.setProperty("question", "What day is it?");
@@ -186,9 +186,10 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     datastore.put(questionByDifferentUser);
   }
   private void helperLogin() {
-    /* Login user with email "test@google.com" */
+    /* Login user with email "test@google.com" *//*
     helper.setEnvAuthDomain("google.com");
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }
+*/
