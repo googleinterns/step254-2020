@@ -17,6 +17,8 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -39,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet that processes users responses to exam questions and stores them in datastore.
  *
  * @author Aidan Molloy
+ * @author Róisín O'Farrell
  */
 @WebServlet("/examResponse")
 public class ExamResponseServlet extends HttpServlet {
@@ -65,21 +68,47 @@ public class ExamResponseServlet extends HttpServlet {
     String examID = request.getParameter("examID");
 
     Enumeration<String> parameterNames = request.getParameterNames();
+    parameterNames.nextElement();
+    String possibleMarks = null;
+    String expected = "none";
+    String type = null;
     try {
       String email = userService.getCurrentUser().getEmail();
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       while (parameterNames.hasMoreElements()) {
         String questionID = parameterNames.nextElement();
         String[] questionAnswer = request.getParameterValues(questionID);
+        // Correct mcq questions with pre-defined answers
+        try{
+          Long questionIDL = Long.parseLong(questionID); 
+          // Get questionType, mcqAnswer and possibleMarks using Key as Question has a known ID/Name
+          Key questionKey = KeyFactory.createKey("Question", questionIDL); 
+          Entity qs = datastore.get(questionKey);
+          type = (String) qs.getProperty("type");
+          if (type.equals("MCQ")){
+            String mcqAnswer = (String) qs.getProperty("mcqAnswer");
+            int questionNum = Integer.parseInt(mcqAnswer);
+            possibleMarks = (String) qs.getProperty("marks");
+            List<String> answerList = (List<String>) qs.getProperty("mcqPossibleAnswers");
+            expected = (String) answerList.get(questionNum-1);
+          }
+        } catch (Exception e) {
+          System.out.println("<h3>Cannot Find Question</h3>");
+          logger.atInfo().log("Cannot find question: %s", e);
+        }
         Entity examResponseEntity = new Entity(questionID, email);
         examResponseEntity.setProperty("email", email);
-        // Remove all html tags and trim the spaces in the answers.
-        questionAnswer[0] = questionAnswer[0].replaceAll("\\<.*?\\>", "");
-        questionAnswer[0] = questionAnswer[0].trim();
         examResponseEntity.setProperty("answer", questionAnswer[0]);
-        // This is where I can correct questions with pre-defined answers
-        examResponseEntity.setProperty("marks", null);
+        if(expected.equals(questionAnswer[0]) && type.equals("MCQ")){
+          examResponseEntity.setProperty("marks", possibleMarks);
+        } else if(!expected.equals(questionAnswer[0]) && type.equals("MCQ")){
+          examResponseEntity.setProperty("marks", "0");
+        } else{
+          examResponseEntity.setProperty("marks", null);
+        }
         datastore.put(examResponseEntity);
+        System.out.println("examID");
+        
       }
       examTaken(email, Long.parseLong(examID));
     } catch (Exception e) {
@@ -88,7 +117,7 @@ public class ExamResponseServlet extends HttpServlet {
       return;
     }
     out.println("<h2>Responses Saved.</h2>");
-    out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
+    out.println("<a href=\"/dashboardServlet\">Return to dashboard</a>");
   }
 
   public void examTaken(String email, Long examID) {
@@ -118,6 +147,6 @@ public class ExamResponseServlet extends HttpServlet {
       availableExams.remove(Long.valueOf(examID));
     }
     datastore.put(user);
-
   }
 }
+

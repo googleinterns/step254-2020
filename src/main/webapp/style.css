@@ -26,6 +26,10 @@ h3{
     font-size: 105%;
 }
 
+h4{
+    font-size: 102.5%;
+}
+
 #about-us, #about{
     background: #F6F4F5;
 }
@@ -38,7 +42,7 @@ h3{
     max-width: 800px;
     width: 85%;
     margin: 0 auto;
-    padding: 60px 0;
+    padding: 60px 20px;
 }
 
 .title{
@@ -119,3 +123,26 @@ h3{
   transition: max-height 0.2s ease-out;
 }
 
+/* Forms
+---------------*/
+.form{
+  padding: 20px;
+}
+.formElement, .reviewElement{
+  padding-bottom: 1.5em;
+}
+.form select{
+  font-size: 100%; 
+  width: 4em;
+  height: 2em;
+}
+
+/* Submitted Exam Display
+--------------------------*/
+.answerOutput, .questionOutput{
+  font-weight: bold;
+}
+
+.answerValue, .questionValue{
+  padding-left: 30px;
+}

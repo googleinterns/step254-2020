@@ -162,12 +162,14 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
+  
   private void helperLogin() {
     /* Login user with email "test@google.com" */
     helper.setEnvAuthDomain("google.com");
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
+
   private void createFakeTest() {
     /*Create a Fake test*/
     Long date = (new Date()).getTime();

@@ -6,6 +6,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
+    <style>
+      main {
+        padding: 20px;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -14,8 +19,9 @@
         <p><a  class="active" href="/dashboardServlet">Dashboard</a></p>
         <p><a href="/groups">Groups</a></p>
         <p><a href="/exam">Take Exam</a></p>
-        <p><a href="createExam.html">Create Exam</a></p>
+        <p><a href="/createExam">Create Exam</a></p>
         <p><a href="preference.html">Set Preferences</a></p>
+        <p><a href="/getExamResponses">Mark Exams</a></p>
         <p id=logInOut></p>
       </div>
     </header>
