@@ -72,6 +72,7 @@ public class ExamServlet extends HttpServlet {
     out.println("<script src=\"script.js\"></script>");
     out.println("<script src=\"examSubmission.js\"></script>");
     out.println("<title>Take Exam</title>");
+    out.println("<style>main {padding: 20px;}</style>");
     out.println("</head>");
     out.println("<body>");
     out.println("<header>");

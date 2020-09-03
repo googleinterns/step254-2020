@@ -75,6 +75,7 @@ public class GroupsServlet extends HttpServlet {
     out.println("<link rel=\"stylesheet\" href=\"style.css\">");
     out.println("<script src=\"script.js\"></script>");
     out.println("<title>Groups</title>");
+    out.println("<style>main {padding: 20px;}</style>");
     out.println("</head>");
     out.println("<body>");
     out.println("<header>");
