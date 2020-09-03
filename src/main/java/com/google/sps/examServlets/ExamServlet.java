@@ -77,7 +77,7 @@ public class ExamServlet extends HttpServlet {
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<p><a href=\"index.html\">Homepage</a></p>");
-    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
+    out.println("<p><a href=\"dashboardServlet\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -117,6 +117,7 @@ public class ExamServlet extends HttpServlet {
         if (questionsList != null) {
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<form action=\"/examResponse\" method=\"POST\">");
+          out.println("<input type=\"hidden\" id=\"examID\" name=\"examID\" value=\""+examID+"\">"); 
           for (int i = 0; i < questionsList.size(); i++) {
             try {
               Key key = KeyFactory.createKey("Question", questionsList.get(i));

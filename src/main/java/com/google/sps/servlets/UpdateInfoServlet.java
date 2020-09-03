@@ -107,6 +107,6 @@ public class UpdateInfoServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
-    response.sendRedirect("/dashboard.html");
+    response.sendRedirect("/dashboardServlet");
   }
 }
