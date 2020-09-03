@@ -23,11 +23,6 @@
           <input type="text" id="name" name="name" required><br>  
           <label for="duration">Enter Duration:</label><br>
           <input type="number" id="duration" name="duration" required><br>
-          <select name="groupName">
-            <#list tests as key, value>
-              <option class="group">${value}</option>
-            </#list>
-          </select>
           <input type="submit" value="Submit">
         </form>
       </section>

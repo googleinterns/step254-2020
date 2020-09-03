@@ -87,9 +87,7 @@ public class ExamServlet extends HttpServlet {
     Entity examEntity = null;
 
     if (examID != null) {
-      // If an exam has been selected remove html tags and trim the ID
-      examID = examID.replaceAll("\\<.*?\\>", "");
-      examID = examID.trim();
+      // If an exam has been selected
       try {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key key = KeyFactory.createKey("Exam", Long.parseLong(examID));
@@ -119,8 +117,8 @@ public class ExamServlet extends HttpServlet {
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<section class=\"form\">");
           out.println("<form action=\"/examResponse\" method=\"POST\">");
-          for (Long question : questionsList) {
           out.println("<input type=\"hidden\" id=\"examID\" name=\"examID\" value=\""+examID+"\">"); 
+          for (Long question : questionsList) {
             try {
               questionNumber++;
               Key key = KeyFactory.createKey("Question", question);

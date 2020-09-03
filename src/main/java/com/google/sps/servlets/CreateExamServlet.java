@@ -63,6 +63,27 @@ import freemarker.cache.*;
 @WebServlet("/createExam")
 public class CreateExamServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+   Configuration cfg;
+  
+  //set up the configuration once
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    cfg = new Configuration(Configuration.VERSION_2_3_30);
+    String path = getServletContext().getRealPath("/WEB-INF/templates/");
+    try {
+      cfg.setDirectoryForTemplateLoading(new File(path));
+    } catch (IOException e) {
+      logger.atWarning().log("Could not set directory for template loading: %s", e);
+    }
+    // Recommended settings for new projects:
+    cfg.setDefaultEncoding("UTF-8");
+    cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+    cfg.setLogTemplateExceptions(false);
+    cfg.setWrapUncheckedExceptions(true);
+    cfg.setFallbackOnNullLoopVariable(false);
+  
+  }
+  
   @Override
   public void doPost(final HttpServletRequest request,
       final HttpServletResponse response) throws IOException {

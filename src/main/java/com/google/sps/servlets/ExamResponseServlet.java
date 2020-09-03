@@ -66,6 +66,8 @@ public class ExamResponseServlet extends HttpServlet {
     PrintWriter out = response.getWriter();
     response.setContentType("text/html");
     String examID = request.getParameter("examID");
+    
+    System.out.println(examID);
 
     Enumeration<String> parameterNames = request.getParameterNames();
     String possibleMarks = null;
@@ -97,9 +99,6 @@ public class ExamResponseServlet extends HttpServlet {
         }
         Entity examResponseEntity = new Entity(questionID, email);
         examResponseEntity.setProperty("email", email);
-        // Remove all html tags and trim the spaces in the answers.
-        questionAnswer[0] = questionAnswer[0].replaceAll("\\<.*?\\>", "");
-        questionAnswer[0] = questionAnswer[0].trim();
         examResponseEntity.setProperty("answer", questionAnswer[0]);
         if(expected.equals(questionAnswer[0]) && type.equals("MCQ")){
           examResponseEntity.setProperty("marks", possibleMarks);
@@ -109,6 +108,8 @@ public class ExamResponseServlet extends HttpServlet {
           examResponseEntity.setProperty("marks", null);
         }
         datastore.put(examResponseEntity);
+        System.out.println("examID");
+        
       }
       examTaken(email, Long.parseLong(examID));
     } catch (Exception e) {
@@ -117,18 +118,22 @@ public class ExamResponseServlet extends HttpServlet {
       return;
     }
     out.println("<h2>Responses Saved.</h2>");
-    out.println("<a href=\"/dashboard.html\">Return to dashboard</a>");
+    out.println("<a href=\"/dashboardServlet\">Return to dashboard</a>");
   }
 
   public void examTaken(String email, Long examID) {
     /*Marks what exam a user has taken by storing that exam id in their 
     * UserInfo.
     */
+    System.out.println("here 1");
     Query queryUser = new Query("UserExams").setFilter(new FilterPredicate(
           "email", FilterOperator.EQUAL, email));
+          System.out.println("here 2");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryUser);
+    System.out.println("here 3");
     Entity user = pq.asSingleEntity();
+    System.out.println("here 4");
     //add to examsTaken list
     if (user.getProperty("taken") == null) {
         List<Long> examsTakenList = new ArrayList<>();
@@ -140,12 +145,14 @@ public class ExamResponseServlet extends HttpServlet {
         examsTakenList.add(examID);
         user.setProperty("taken", examsTakenList);
       }
+      System.out.println("here 5");
     //remove examID from exams To Do list as exam has been taken
     if(user.getProperty("available") != null) {
       List<Long> availableExams =
             (List<Long>) user.getProperty("available");
       availableExams.remove(Long.valueOf(examID));
     }
+    System.out.println("here 8");
     datastore.put(user);
 
   }

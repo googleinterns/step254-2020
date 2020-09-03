@@ -16,7 +16,7 @@
         <p><a href="/exam">Take Exam</a></p>
         <p><a href="/createExam">Create Exam</a></p>
         <p><a href="preference.html">Set Preferences</a></p>
-        <p><a href="/getExamResponses">Set Preferences</a></p>
+        <p><a href="/getExamResponses">Set Mark Exam</a></p>
       </div>
     </header>
     <main>

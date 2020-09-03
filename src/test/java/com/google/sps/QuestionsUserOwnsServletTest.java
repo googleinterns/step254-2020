@@ -29,10 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-<<<<<<< HEAD
-import java.io.File;
-=======
->>>>>>> 8ac8e13c03f3cc2dda85e0e665866bf37ba154b3
 import java.util.ArrayList;
 import java.util.Date;
 import javax.servlet.ServletConfig;
@@ -82,11 +78,8 @@ public final class QuestionsUserOwnsServletTest extends QuestionsUserOwnsServlet
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
-<<<<<<< HEAD
-=======
     ServletConfig config = mock(ServletConfig.class);
     ServletContext context = mock(ServletContext.class);
->>>>>>> 8ac8e13c03f3cc2dda85e0e665866bf37ba154b3
     when(config.getServletContext()).thenReturn(context);
 
     //Get the path to the target files were templates are stored for tests

@@ -110,18 +110,10 @@ public final class SaveQuestionsFromBankServletTest extends SaveQuestionsFromBan
 
     servlet.doPost(request, response);
     String result = stringWriter.toString();
-<<<<<<< HEAD
-
-    Assert.assertTrue(result.contains("Successfully added Question " +
-        questionEntity.getKey().getId()+" to the test Trial"));
-    Assert.assertTrue(result.contains("Successfully added Question " +
-        questionEntity.getKey().getId()+" to the test Trial"));
-=======
     Assert.assertTrue(result.contains("Successfully added Question "
         + questionEntity.getKey().getId() + " to the test Trial"));
     Assert.assertTrue(result.contains("Successfully added Question "
         + questionEntity.getKey().getId() + " to the test Trial"));
->>>>>>> 8ac8e13c03f3cc2dda85e0e665866bf37ba154b3
   }
   @Test
   public void testNotLoggedInUser() throws IOException {

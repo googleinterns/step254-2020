@@ -78,11 +78,8 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
-<<<<<<< HEAD
-=======
     ServletConfig config = mock(ServletConfig.class);
     ServletContext context = mock(ServletContext.class);
->>>>>>> 8ac8e13c03f3cc2dda85e0e665866bf37ba154b3
     when(config.getServletContext()).thenReturn(context);
 
     //Get the path to the target files were templates are stored for tests
