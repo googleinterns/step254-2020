@@ -39,13 +39,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for Exam Servlet for when user is logged out, when no exam is requested, 
- * invalid exam and real exams are requested.
+ * Tests for Groups servlet, for when no group is requested, invalid group and real group.
  *
  * @author Aidan Molloy
  */
 @RunWith(JUnit4.class)
-public final class ExamServletTest extends ExamServlet {
+public final class GroupsServletTest extends GroupsServlet {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
@@ -64,7 +63,7 @@ public final class ExamServletTest extends ExamServlet {
   public void doGetTestLoggedOut() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ExamServlet servlet = new ExamServlet();
+    GroupsServlet servlet = new GroupsServlet();
     servlet.doGet(request, response);
     verify(response).sendRedirect("/");
   }
@@ -76,26 +75,25 @@ public final class ExamServletTest extends ExamServlet {
     helper.setEnvIsLoggedIn(true);
   }
 
-  /* Set up fake exam */
-  private void addExam() {
+  /* Set up fake group */
+  private void addGroup() {
     helperLogin();
-    Entity examEntity = new Entity("Exam");
-    examEntity.setProperty("name", "Test Exam");
-    examEntity.setProperty("duration", "20");
-    examEntity.setProperty("ownerID", "test@google.com");
-    examEntity.setProperty("date", "20");
-    examEntity.setProperty("questionsList", new ArrayList<>());
+    Entity groupEntity = new Entity("Group");
+    groupEntity.setProperty("name", "Test Group");
+    groupEntity.setProperty("description", "Test Description");
+    groupEntity.setProperty("ownerID", "test@google.com");
+    groupEntity.setProperty("members", new ArrayList<>());
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(examEntity);
+    datastore.put(groupEntity);
   }
 
-  /* When no examID is provided. */
+  /* When no groupID is provided. */
   @Test
-  public void doGetTestNoExamID() throws IOException {
+  public void doGetTestNoGroupID() throws IOException {
     helperLogin();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ExamServlet servlet = new ExamServlet();
+    GroupsServlet servlet = new GroupsServlet();
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -103,17 +101,17 @@ public final class ExamServletTest extends ExamServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Choose an exam to take"));
+    Assert.assertTrue(result.contains("Create a Group"));
   }
 
-  /* When examID that does not exist is provided */
+  /* When groupID that does not exist is provided */
   @Test
-  public void doGetTestInvalidExamID() throws IOException {
+  public void doGetTestInvalidGroupID() throws IOException {
     helperLogin();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ExamServlet servlet = new ExamServlet();
-    when(request.getParameter("examID")).thenReturn("1");
+    GroupsServlet servlet = new GroupsServlet();
+    when(request.getParameter("groupID")).thenReturn("1");
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -121,15 +119,14 @@ public final class ExamServletTest extends ExamServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Selected exam is not available."));
-    Assert.assertTrue(result.contains("Choose an exam to take"));
+    Assert.assertTrue(result.contains("Selected group is not available."));
   }
 
   /**
-   *  Get the ExamID of existing exam.
+   *  Get the GroupID of existing group.
    */
-  public String getExamID() {
-    Query query = new Query("Exam");
+  public String getGroupID() {
+    Query query = new Query("Group");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     for (Entity entity : results.asIterable()) {
@@ -139,16 +136,16 @@ public final class ExamServletTest extends ExamServlet {
   }
 
   /**
-   * When a real exam is requested.
+   * When a real group is requested.
    */
   @Test
-  public void doGetTestExam() throws IOException {
+  public void doGetTestGroup() throws IOException {
     helperLogin();
-    addExam();
+    addGroup();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ExamServlet servlet = new ExamServlet();
-    when(request.getParameter("examID")).thenReturn(getExamID());
+    GroupsServlet servlet = new GroupsServlet();
+    when(request.getParameter("groupID")).thenReturn(getGroupID());
 
 
     StringWriter stringWriter = new StringWriter();
@@ -157,9 +154,9 @@ public final class ExamServletTest extends ExamServlet {
 
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("Exam Name: Test Exam"));
-    Assert.assertTrue(result.contains("Length: 20"));
-    Assert.assertTrue(result.contains("Created By: test@google.com"));
+    Assert.assertTrue(result.contains("Group Name: Test Group"));
+    Assert.assertTrue(result.contains("Description: Test Description"));
+    Assert.assertTrue(result.contains("Owner: test@google.com"));
   }
 
 }

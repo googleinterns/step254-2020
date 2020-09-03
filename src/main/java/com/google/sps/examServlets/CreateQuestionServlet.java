@@ -149,13 +149,13 @@ public class CreateQuestionServlet extends HttpServlet {
     }
 
   }
-  private Entity getExam(final String ownerId, final String testName) {
+  private Entity getExam(final String ownerID, final String testName) {
     /* Function that returns the exam created by the user
     *  Arguments: ownerId - email of the user who's test we want to find
     *  Return : Returns the entity of the test created by that user with
     *  that test name.*/
-    Query queryExam = new Query("Exam").setFilter(new FilterPredicate("ownerId",
-        FilterOperator.EQUAL, ownerId)).setFilter(new FilterPredicate("name",
+    Query queryExam = new Query("Exam").setFilter(new FilterPredicate("ownerID",
+        FilterOperator.EQUAL, ownerID)).setFilter(new FilterPredicate("name",
         FilterOperator.EQUAL, testName));
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryExam);

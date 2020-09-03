@@ -66,8 +66,6 @@ public class ExamResponseServlet extends HttpServlet {
     PrintWriter out = response.getWriter();
     response.setContentType("text/html");
     String examID = request.getParameter("examID");
-    
-    System.out.println(examID);
 
     Enumeration<String> parameterNames = request.getParameterNames();
     parameterNames.nextElement();
@@ -126,15 +124,11 @@ public class ExamResponseServlet extends HttpServlet {
     /*Marks what exam a user has taken by storing that exam id in their 
     * UserInfo.
     */
-    System.out.println("here 1");
     Query queryUser = new Query("UserExams").setFilter(new FilterPredicate(
           "email", FilterOperator.EQUAL, email));
-          System.out.println("here 2");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryUser);
-    System.out.println("here 3");
     Entity user = pq.asSingleEntity();
-    System.out.println("here 4");
     //add to examsTaken list
     if (user.getProperty("taken") == null) {
         List<Long> examsTakenList = new ArrayList<>();
@@ -146,15 +140,13 @@ public class ExamResponseServlet extends HttpServlet {
         examsTakenList.add(examID);
         user.setProperty("taken", examsTakenList);
       }
-      System.out.println("here 5");
     //remove examID from exams To Do list as exam has been taken
     if(user.getProperty("available") != null) {
       List<Long> availableExams =
             (List<Long>) user.getProperty("available");
       availableExams.remove(Long.valueOf(examID));
     }
-    System.out.println("here 8");
     datastore.put(user);
-
   }
 }
+

@@ -22,8 +22,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
@@ -79,7 +79,7 @@ public class EditGroupServlet extends HttpServlet {
       description = description.replaceAll("\\<.*?\\>", "");
       description = description.trim();
       logger.atInfo().log("description=%s", description);
-      if (name == "") {
+      if (name.equals("")) {
         logger.atWarning().log("Name is null");
         response.sendError(HttpServletResponse.SC_BAD_REQUEST,
             "Name cannot be null");
@@ -103,36 +103,34 @@ public class EditGroupServlet extends HttpServlet {
 
         // Add group to users owned groups
         try {
-            Query getUserGroups = new Query("UserGroup").setFilter(new FilterPredicate("email",
-                FilterOperator.EQUAL, userService.getCurrentUser().getEmail()));
-            PreparedQuery pq = datastore.prepare(getUserGroups);
-            Entity userGroupEntity = pq.asSingleEntity();
-            List<Long> owner = null;
-            if (userGroupEntity == null) {
-              userGroupEntity = new Entity("UserGroup", userService.getCurrentUser().getEmail());
-              userGroupEntity.setProperty("email", userService.getCurrentUser().getEmail());
-              userGroupEntity.setProperty("member", new ArrayList<Long>());
-              owner = new ArrayList<Long>();
-            } else {
-              owner = (List<Long>) userGroupEntity.getProperty("owner");
-              if (owner == null) {
-                owner = new ArrayList<Long>();
-              }
+          Query getUserGroups = new Query("UserGroup").setFilter(new FilterPredicate("email",
+              FilterOperator.EQUAL, userService.getCurrentUser().getEmail()));
+          PreparedQuery pq = datastore.prepare(getUserGroups);
+          Entity userGroupEntity = pq.asSingleEntity();
+          List<Long> owner;
+          if (userGroupEntity == null) {
+            userGroupEntity = new Entity("UserGroup", userService.getCurrentUser().getEmail());
+            userGroupEntity.setProperty("email", userService.getCurrentUser().getEmail());
+            userGroupEntity.setProperty("member", new ArrayList<Long>());
+            owner = new ArrayList<>();
+          } else {
+            owner = (List<Long>) userGroupEntity.getProperty("owner");
+            if (owner == null) {
+              owner = new ArrayList<>();
             }
-            owner.add(groupEntity.getKey().getId());
-            userGroupEntity.setProperty("owner", owner);
-            datastore.put(userGroupEntity);
-          } catch (Exception e) {
-            logger.atWarning().log("Problem while adding group to users groups: %s", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Problem while adding group to users groups");
-            return;
           }
+          owner.add(groupEntity.getKey().getId());
+          userGroupEntity.setProperty("owner", owner);
+          datastore.put(userGroupEntity);
+        } catch (Exception e) {
+          logger.atWarning().log("Problem while adding group to users groups: %s", e);
+          response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+              "Problem while adding group to users groups");
+        }
       } catch (DatastoreFailureException e) {
         logger.atSevere().log("Error with datastore: %s", e);
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             "Internal Error occurred when trying to create your group");
-        return;
       }
     } else if (editType.equals("add") || editType.equals("remove")) {
       // Add or remove a member to or from a group
@@ -167,7 +165,7 @@ public class EditGroupServlet extends HttpServlet {
       }
       try {
         if (members == null) {
-          members = new ArrayList<String>();
+          members = new ArrayList<>();
         }
 
         if (editType.equals("add")) {
@@ -189,16 +187,16 @@ public class EditGroupServlet extends HttpServlet {
                 FilterOperator.EQUAL, email));
             PreparedQuery pq = datastore.prepare(getUserGroups);
             Entity userGroupEntity = pq.asSingleEntity();
-            List<Long> member = null;
+            List<Long> member;
             if (userGroupEntity == null) {
               userGroupEntity = new Entity("UserGroup", email);
               userGroupEntity.setProperty("email", email);
               userGroupEntity.setProperty("owner", new ArrayList<Long>());
-              member = new ArrayList<Long>();
+              member = new ArrayList<>();
             } else {
               member = (List<Long>) userGroupEntity.getProperty("member");
               if (member == null) {
-                member = new ArrayList<Long>();
+                member = new ArrayList<>();
               }
             }
             member.add(Long.parseLong(groupID));
@@ -248,11 +246,7 @@ public class EditGroupServlet extends HttpServlet {
         logger.atWarning().log("There was an error editing the members lists: %s", e);
         response.sendError(HttpServletResponse.SC_BAD_REQUEST,
             "There was an error editing the members lists");
-        return;
       }
-
-    } else {
-      // Invalid Edit Type
     }
   }
 }

@@ -134,8 +134,9 @@ public class QuestionFormServlet extends HttpServlet {
       }
       return false;
     } catch (DatastoreFailureException e) {
-        logger.atWarning().log("There was an error when retrieving the tests: %s", e);
-        return true;
+      logger.atWarning().log("There was an error when retrieving the tests: %s",
+          e);
+      return true;
     }
   }
 }

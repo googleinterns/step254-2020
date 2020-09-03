@@ -232,6 +232,7 @@ public final class DashboardServletTest extends DashboardServlet {
     taken.add(anotherEntity.getKey().getId());
     return taken;
   }
+
   public void setUpUserForTakenExams(List<Long> taken) {
     // Set up UserExams to check if the taken exams get stored and retrieved correctly
     Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
@@ -244,6 +245,7 @@ public final class DashboardServletTest extends DashboardServlet {
     userExamsEntity.setProperty("taken", taken);
     datastore.put(userExamsEntity);
   }
+
   public void setUpUserForAvailableExams(List<Long> available) {
     // Set up UserExams to check if the available exams get stored and retrieved correctly
     Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",

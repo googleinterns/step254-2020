@@ -125,8 +125,6 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
     * - datastore - datastore for retrieving entities
     * - data - map to store the questions user owns.
     */
-
-    //Find all questions a user owns
     try {
       Map<Long,String> questionsMap = new LinkedHashMap<Long,String>();
       datastore = DatastoreServiceFactory.getDatastoreService();

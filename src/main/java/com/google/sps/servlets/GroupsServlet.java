@@ -15,23 +15,21 @@
 package com.google.sps.servlets;
 
 import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -48,7 +46,9 @@ public class GroupsServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * Display the form for creating a group.
+   * Display groups you own and are a member of,
+   * Display form for creating groups,
+   * If groupID is provided display specific group details.
    *
    * @param request  provides request information from the HTTP servlet
    * @param response response object where servlet will write information to
@@ -80,7 +80,7 @@ public class GroupsServlet extends HttpServlet {
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<p><a href=\"index.html\">Homepage</a></p>");
-    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
+    out.println("<p><a href=\"dashboardServlet\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
@@ -120,16 +120,16 @@ public class GroupsServlet extends HttpServlet {
           if (members != null) {
             out.println("<table>");
             out.println("<tr><th>User Email</th><th>Remove</th></tr>");
-            for (int i = 0; i < members.size(); i++) {
+            for (String member : members) {
               // For each member display their email and a button to remove
-              out.println("<tr><td>" + members.get(i) + "</td><td>");
+              out.println("<tr><td>" + member + "</td><td>");
               out.println("<form action=\"/editGroup\" method=\"POST\">");
               out.println("<input type=\"hidden\" id=\"groupID\" name=\"groupID\" "
                   + "value=" + groupID + ">");
               out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" "
                   + "value=\"remove\">");
               out.println("<input type=\"hidden\" id=\"email\" name=\"email\" "
-                  + "value=" + members.get(i) + ">");
+                  + "value=" + member + ">");
               out.println("<input type=\"submit\" id=\"removeMember\" name=\"removeMember\""
                   + "value=\"Remove\"> </td></tr>");
               out.println("</form>");
@@ -182,28 +182,28 @@ public class GroupsServlet extends HttpServlet {
       if (userGroupEntity != null) {
         owner = (List<Long>) userGroupEntity.getProperty("owner");
         if (owner == null) {
-          owner = new ArrayList<Long>();
+          owner = new ArrayList<>();
         }
         member = (List<Long>) userGroupEntity.getProperty("member");
         if (member == null) {
-          member = new ArrayList<Long>();
+          member = new ArrayList<>();
         }
       }
       out.println("<h3>Owned groups</h3>");
-      if(owner == null){
+      if (owner == null) {
         out.println("<p>You do not own any groups.</p>");
       } else {
         out.println("<table><tr><th>Group name</th><th>Members</th></tr>");
-        for (int i = 0; i < owner.size(); i++) {
+        for (Long ownerIndex : owner) {
           try {
-            Key key = KeyFactory.createKey("Group", owner.get(i));
+            Key key = KeyFactory.createKey("Group", ownerIndex);
             Entity gs = datastore.get(key);
-            long id = gs.getKey().getId();
             String groupName = (String) gs.getProperty("name");
             List<String> members = (List<String>) gs.getProperty("members");
             if (members == null) {
               members = new ArrayList<String>();
             }
+            long id = gs.getKey().getId();
             out.println("<tr>");
             out.println("<td>" + groupName + "</td>");
             out.println("<td>" + members.size() + "</td>");
@@ -219,20 +219,20 @@ public class GroupsServlet extends HttpServlet {
         out.println("</table>");
       }
       out.println("<h3>Groups you are a member of</h3>");
-      if(member == null){
+      if (member == null) {
         out.println("<p>You are not a member of any group.</p>");
-      }else{
+      } else {
         out.println("<table><tr><th>Group name</th><th>Members</th></tr>");
-        for (int i = 0; i < member.size(); i++) {
+        for (Long memberIndex : member) {
           try {
-            Key key = KeyFactory.createKey("Group", member.get(i));
+            Key key = KeyFactory.createKey("Group", memberIndex);
             Entity gs = datastore.get(key);
-            long id = gs.getKey().getId();
             String groupName = (String) gs.getProperty("name");
             List<String> members = (List<String>) gs.getProperty("members");
             if (members == null) {
-              members = new ArrayList<String>();
+              members = new ArrayList<>();
             }
+            long id = gs.getKey().getId();
             out.println("<tr>");
             out.println("<td>" + groupName + "</td>");
             out.println("<td>" + members.size() + "</td>");
@@ -251,7 +251,6 @@ public class GroupsServlet extends HttpServlet {
       logger.atWarning().log("Problem while adding group to users groups: %s", e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           "Problem while adding group to users groups");
-      return;
     }
   }
 }
