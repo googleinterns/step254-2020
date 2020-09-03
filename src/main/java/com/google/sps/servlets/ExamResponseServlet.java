@@ -70,6 +70,7 @@ public class ExamResponseServlet extends HttpServlet {
     System.out.println(examID);
 
     Enumeration<String> parameterNames = request.getParameterNames();
+    parameterNames.nextElement();
     String possibleMarks = null;
     String expected = "none";
     String type = null;
