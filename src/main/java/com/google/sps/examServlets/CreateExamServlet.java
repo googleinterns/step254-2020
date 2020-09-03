@@ -223,7 +223,7 @@ public class CreateExamServlet extends HttpServlet {
     
     // create Map with all the groups the user owns 
     Map data = new HashMap();
-    Map<Long,String> groupMap = new LinkedHashMap<Long,String>();
+    Map<String,Long> groupMap = new LinkedHashMap<String,Long>();
 
     //Look up each Group owned by the user and add to map
     try {
