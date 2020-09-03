@@ -113,7 +113,7 @@ public class ShowExamServlet extends HttpServlet{
       return;
     }
   }
-  public void getExam(String ownerID, Long examID) throws EntityNotFoundException{
+  public synchronized void getExam(String ownerID, Long examID) throws EntityNotFoundException{
     //Gets the requests exam and all the data needed to display on the Show Exam's
     //created page.
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

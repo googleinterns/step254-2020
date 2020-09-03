@@ -89,7 +89,7 @@ public class ExamsTakenServlet extends HttpServlet {
    * @param response response object where servlet will write information to
    */
   @Override
-  public void doPost(final HttpServletRequest request,
+  public void doGet(final HttpServletRequest request,
        final HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
@@ -102,7 +102,7 @@ public class ExamsTakenServlet extends HttpServlet {
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
      logger.atInfo().log(ownerID);
-    String examName =UtilityClass.getParameter(request, "examID", null);
+    String examName = UtilityClass.getParameter(request, "examID", "");
     logger.atInfo().log(examName);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     

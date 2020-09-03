@@ -7,6 +7,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
+    <style>
+      main {
+        padding: 20px;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -41,7 +46,7 @@
           </#list>
         </#if>
         </select>
-        <button>Submit</button>
+        <button >Submit</button>
       </form>
       <h3> Add Previously Used Questions</h3>
       <form id="addQuestions" action="/returnQuestionsUserOwns" method="GET">
