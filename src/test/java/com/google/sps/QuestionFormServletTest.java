@@ -86,8 +86,6 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     String filePath = new File(".").getCanonicalPath();
     String endPath = "/target/portfolio-1/WEB-INF/templates";
     String path = filePath + endPath;
-    System.out.println(path);
-    
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
     
     setFakeTest();
@@ -120,7 +118,7 @@ public final class QuestionFormServletTest extends QuestionFormServlet {
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
-  
+
   private void setFakeTest() {
     /*Set a fake test*/
     Long date = (new Date()).getTime(); 

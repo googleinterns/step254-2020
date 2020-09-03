@@ -11,34 +11,28 @@
     <header>
       <div class="navtop">
         <p><a  href="index.html">Homepage</a></p>
-        <p><a  href="/dashboardServlet">Dashboard</a></p>
+        <p><a  href="dashboard.html">Dashboard</a></p>
         <p id=logInOut></p>
       </div>
     </header>
     <main>
-<<<<<<< HEAD
       <section class="form">
         <h2>Create Exam</h2>
         <form id="makeExam" action="/createExam" method="POST">
           <label for="name">Enter Exam Name:</label><br>
           <input type="text" id="name" name="name" required><br>  
           <label for="duration">Enter Duration:</label><br>
-          <input type="number" id="duration" name="duration" required>
+          <input type="number" id="duration" name="duration" required><br>
+          <select name="groupName">
+          <#if groups??>
+            <#list groups as key, value>
+              <option>${value}</option>
+            </#list>
+          </#if>
+          </select>
           <input type="submit" value="Submit">
         </form>
       </section>
-=======
-      <h2>Create Exam</h2>
-      <form id="makeExam" action="/createExam" method="POST">
-        <label for="name">Enter Exam Name:</label><br>
-        <input type="text" id="name" name="name" required><br>  
-        <label for="duration">Enter Duration:</label><br>
-        <input type="number" id="duration" name="duration" required><br>
-        <label for="duration">Enter Group:</label><br>
-        <input type="text" id="groupID" name="groupID">
-        <input type="submit" value="Submit">
-      </form>
->>>>>>> 3890db86a476ff7373aaed5fa7a853b599235517
     </main>
     <footer>
     </footer>

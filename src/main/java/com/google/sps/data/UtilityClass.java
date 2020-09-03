@@ -75,7 +75,7 @@ public final class UtilityClass{
     return json;
   }
   public static Long generateUniqueId() {
-    //Return random ID
+    /*Returns random ID that is created with UUID*/
     long value = -1;
     while(value < 0) {
       value = UUID.randomUUID().getMostSignificantBits();
