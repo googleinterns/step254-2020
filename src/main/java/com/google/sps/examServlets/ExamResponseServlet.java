@@ -110,7 +110,9 @@ public class ExamResponseServlet extends HttpServlet {
         System.out.println("examID");
         
       }
-      examTaken(email, Long.parseLong(examID));
+      if(email != null && examID != null){
+        examTaken(email, Long.parseLong(examID));
+      }
     } catch (Exception e) {
       logger.atSevere().log("There was an error: %s", e);
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);

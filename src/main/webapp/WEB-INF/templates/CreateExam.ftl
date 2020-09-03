@@ -28,7 +28,7 @@
           <input type="text" id="name" name="name" required><br>  
           <label for="duration">Enter Duration:</label><br>
           <input type="number" id="duration" name="duration" required><br>
-          <select name="groupName">
+          <select name="groupID">
           <#if groups??>
             <#list groups as key, value>
               <option>${value}</option>

@@ -40,7 +40,7 @@
             </#list>
 
           <#else>
-            <h3>You have not completed any exams yet </h3>
+            <h3>You have not completed any exams yet </h3><br>
           </#if>
 
         </div>
@@ -55,7 +55,7 @@
               <br>
             </#list>
           <#else>
-            <h4> You do not have any exams to take at the moment </h4>
+            <h4> You do not have any exams to take at the moment </h4><br>
           </#if>
         </div>
         <div class="created">
@@ -69,7 +69,7 @@
               <br>
             </#list>
           <#else>
-            <h4>You have not created any exams yet </h4>
+            <h4>You have not created any exams yet </h4><br>
           </#if>
         </div>
       </div>
