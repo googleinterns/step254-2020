@@ -166,9 +166,9 @@ public class GroupsServlet extends HttpServlet {
     out.println("<form id=\"createGroup\" action=\"/editGroup\" method=\"POST\">");
     out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"create\">");
     out.println("<label for=\"name\">Enter Group Name:</label><br>");
-    out.println("<input type=\"text\" id=\"name\" name=\"name\" required><br>");
+    out.println("<input type=\"text\" id=\"name\" name=\"name\" onclick=\"startDictation(this.id)\" required><br>");
     out.println("<label for=\"name\">Enter Group Description:</label><br>");
-    out.println("<input type=\"text\" id=\"description\" name=\"description\"><br>");
+    out.println("<input type=\"text\" id=\"description\" name=\"description\" onclick=\"startDictation(this.id)\"><br>");
     out.println("<input type=\"submit\" value=\"Submit\">");
     out.println("</form>");
 

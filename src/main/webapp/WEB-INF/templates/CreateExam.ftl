@@ -25,7 +25,7 @@
         <h2>Create Exam</h2>
         <form id="makeExam" action="/createExam" method="POST">
           <label for="name">Enter Exam Name:</label><br>
-          <input type="text" id="name" name="name" required><br>  
+          <input type="text" id="name"name="name" onclick="startDictation(this.id)"  required><br>  
           <label for="duration">Enter Duration:</label><br>
           <input type="number" id="duration" name="duration" required><br>
           <select name="groupID">

@@ -181,7 +181,8 @@ function moreFields() {
     const field = document.createElement('input');
     field.type ='text';
     field.name = 'mcqField';
-    field.id = 'mcqField';
+    field.id = 'mcqField'+counter;
+    field.onClick= startDictation(field.id);
     field.cols = '50';
     field.rows = '3';
     field.style.display = 'block';
@@ -199,6 +200,26 @@ function lessFields() {
     listOfFields.parentNode.removeChild(listOfFields);
     document.getElementById('popup').style.display = 'none';
     counter--;
+  }
+};
+function startDictation(id) {
+  if (window.hasOwnProperty('webkitSpeechRecognition')) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.lang = "en-GB";
+    recognition.start();
+
+    recognition.onresult = function(e) {
+      document.getElementById(id).value += " " + e.results[0][0].transcript;
+      recognition.stop();
+    };
+
+    recognition.onerror = function(e) {
+      recognition.stop();
+    };
+
   }
 };
 /* eslint-disable no-unused-vars */
