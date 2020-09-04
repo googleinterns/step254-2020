@@ -42,9 +42,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Collections;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
@@ -60,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 public class DashboardServlet extends HttpServlet{
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   Configuration cfg;
-  Map dashboardData = new HashMap();
   //set up the configuration once
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -82,7 +83,7 @@ public class DashboardServlet extends HttpServlet{
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     /*Returns exams created, to be completed and completed by the user */
     UserService userService = UserServiceFactory.getUserService();
-
+    Map dashboardData = new ConcurrentHashMap();
     if (!userService.isUserLoggedIn() 
       || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
@@ -91,19 +92,11 @@ public class DashboardServlet extends HttpServlet{
       return;
     }
     String ownerID = userService.getCurrentUser().getEmail(); 
-    //grab exams user owns
-    getExamsOwnedByUser(ownerID);
-    //get exams completed by the user
-    try {
-      getExamsCompletedByTheUser(ownerID);
-    } catch (EntityNotFoundException e) {
-      logger.atWarning().log("The exams completed by the user %s were not found",ownerID);
-    }
-    //get exams to be completed by the user
-    try {
-        getExamsToDoByTheUser(ownerID);
-    } catch( EntityNotFoundException e) {
-        logger.atWarning().log("The exams to be taken by the user %s were not found",ownerID);
+    synchronized(dashboardData) {
+      //grab exams
+      getExamsOwnedByUser(ownerID, dashboardData);
+      getExamsCompletedByTheUser(ownerID , dashboardData);
+      getExamsToDoByTheUser(ownerID , dashboardData);
     }
     // run to freemarker template
     try {
@@ -111,6 +104,7 @@ public class DashboardServlet extends HttpServlet{
       PrintWriter out = response.getWriter();
 
       template.process(dashboardData, out);
+      logger.atInfo().log("This what is being sent %s to user %s", dashboardData.toString(),ownerID);
       logger.atInfo().log("Dashboard was displayed correctly for the User:"
           + "%s", userService.getCurrentUser());
     } catch (TemplateException e) {
@@ -120,38 +114,48 @@ public class DashboardServlet extends HttpServlet{
       return;
     }
   }
-  public synchronized void getExamsOwnedByUser(String ownerID) {
+  public void getExamsOwnedByUser(String email, Map dashboardData) {
     /* Saves the exams owned by the user in the Dashboard Data Map
-    * Argument: OwnerID- email of the user that we are trying to find 
+    * Argument: email- email of the user that we are trying to find 
     *    the exams for.
     */
-    Map<String,Long> examsOwnedMap = new LinkedHashMap<String, Long>();
+    Map<String,Long> examsOwnedMap = Collections.synchronizedMap(new LinkedHashMap<String, Long>());
     try {
-      Query query = new Query("Exam").setFilter(new FilterPredicate("ownerID",
-          FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
+      Query query = new Query("UserExams").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, email));
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       PreparedQuery results = datastore.prepare(query);
-
-      for (Entity entity : results.asIterable()) {
-        long id = entity.getKey().getId();
-        String name = (String) entity.getProperty("name");
-        logger.atInfo().log("Exam owned by the user %s that was added was called %s, id %s",ownerID,name, id);
-        examsOwnedMap.put(name, id);
-        dashboardData.put("examOwned", examsOwnedMap);
+      Entity user = results.asSingleEntity();
+      if(user!= null) {
+        if(user.getProperty("created") != null){
+          List<Long> examsCreatedList = (List<Long>) user.getProperty("created");
+          for(int i=0; i<examsCreatedList.size(); i++) {
+            Key key = KeyFactory.createKey("Exam", examsCreatedList.get(i));
+            Entity exam = null;
+            try {
+              exam = datastore.get(key);
+            } catch (EntityNotFoundException e) {
+              logger.atInfo().log("Entity was not found %s", e);
+            }
+            String name = (String) exam.getProperty("name");
+            logger.atInfo().log("Exam created by user %s that was added was called %s, id %s",email,name, exam.getKey().getId());
+            examsOwnedMap.put(name, exam.getKey().getId());
+            dashboardData.put("examOwned", examsOwnedMap);
+          }  
+        }
       }
-      logger.atInfo().log("Exams, if any, were found for the user %s", ownerID);
     } catch (DatastoreFailureException e) {
       logger.atSevere().log("Datastore error:%s" ,e);
       return;
     }
   }
 
-  public synchronized void getExamsCompletedByTheUser(String email) throws EntityNotFoundException{
+  public void getExamsCompletedByTheUser(String email, Map dashboardData){
     /*Saves the exams that have been completed by the user in the Dashboard Data map
     * Argument: email - email of the user that we want to check for completion
     * of any exams.
     */
-    Map<String, Long> examsCompletedMap = new LinkedHashMap<String, Long>();
+    Map<String, Long> examsCompletedMap = Collections.synchronizedMap(new LinkedHashMap<String, Long>());
     try {
       Query query = new Query("UserExams").setFilter(new FilterPredicate("email",
           FilterOperator.EQUAL, email));
@@ -165,24 +169,28 @@ public class DashboardServlet extends HttpServlet{
         List<Long> examsTakenList = (List<Long>) user.getProperty("taken");
         for(int i=0; i<examsTakenList.size(); i++) {
           Key key = KeyFactory.createKey("Exam", examsTakenList.get(i));
-          Entity exam = datastore.get(key);
+          Entity exam = null ;
+          try {
+            exam = datastore.get(key);
+          } catch (EntityNotFoundException e) {
+            logger.atInfo().log("Entity was not found %s", e);
+          }
           String name = (String) exam.getProperty("name");
           logger.atInfo().log("Exam completed by user %s that was added was called %s, id %s",email,name, exam.getKey().getId());
           examsCompletedMap.put(name, exam.getKey().getId());
           dashboardData.put("examCompleted", examsCompletedMap);
         }
       }
-      logger.atInfo().log("Exams Completed, if any, were found for the user %s", email);
     } catch (DatastoreFailureException e) {
       logger.atSevere().log("Datastore error:%s" ,e);
       return;
     }
   }
-  public synchronized void getExamsToDoByTheUser(String email) throws EntityNotFoundException {
+  public void getExamsToDoByTheUser(String email, Map dashboardData) {
     /*Saves the exams that the user still has to complete in the dashboardData map
     * Argument ownerID - email of the user who's exams we are looking for
     */
-    Map<String, Long> examsToDoMap = new LinkedHashMap<String, Long>();
+    Map<String, Long> examsToDoMap = Collections.synchronizedMap(new LinkedHashMap<String, Long>());
     try {
       Query query = new Query("UserExams").setFilter(new FilterPredicate("email",
           FilterOperator.EQUAL, email));
@@ -198,14 +206,18 @@ public class DashboardServlet extends HttpServlet{
         List<Long> examsToTakeList = (List<Long>) user.getProperty("available");
         for(int i=0; i<examsToTakeList.size(); i++) {
           Key key = KeyFactory.createKey("Exam", examsToTakeList.get(i));
-          Entity exam = datastore.get(key);
+          Entity exam = null;
+          try {
+            exam = datastore.get(key);
+          } catch (EntityNotFoundException e) {
+            logger.atInfo().log("Entity was not found %s", e);
+          }
           String name = (String) exam.getProperty("name");
           logger.atInfo().log("Exam to dothat user %s need to do was added was called %s, id %s",email,name, exam.getKey().getId());
           examsToDoMap.put(name, exam.getKey().getId());
           dashboardData.put("examToComplete", examsToDoMap);
         }
       }
-      logger.atInfo().log("Exams To Do, if any, were found for the user %s", email);
     } catch (DatastoreFailureException e) {
       logger.atSevere().log("Datastore error:%s" ,e);
       return;

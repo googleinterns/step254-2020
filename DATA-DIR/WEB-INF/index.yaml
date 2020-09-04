@@ -8,3 +8,21 @@ indexes:
     direction: asc
   - name: date
     direction: asc
+
+- kind: UserExams
+  ancestor: no
+  properties:
+  - name: email
+    direction: asc
+  - name: date
+    direction: asc
+
+- kind: Exam
+  ancestor: no
+  properties:
+  - name: name
+    direction: asc
+  - name: date
+    direction: desc
+
+

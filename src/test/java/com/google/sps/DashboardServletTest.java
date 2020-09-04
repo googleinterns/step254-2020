@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-/*
+
 package com.google.sps.servlets;
 
 import static org.mockito.Mockito.mock;
@@ -54,7 +54,7 @@ import org.junit.runners.JUnit4;
  *
  * @author Klaudia Obieglo
  */
-/*
+
 @RunWith(JUnit4.class)
 public final class DashboardServletTest extends DashboardServlet {
   private final LocalServiceTestHelper helper = 
@@ -74,13 +74,12 @@ public final class DashboardServletTest extends DashboardServlet {
   public void testExamsOwnedFunction() throws IOException, ServletException {
     /*Tests get ExamsOwnedByUser to see if all tests a user has created
     * get retrieved correctly
-    *//*
+    */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-    createTests();
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -97,6 +96,7 @@ public final class DashboardServletTest extends DashboardServlet {
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
 
     List<Long> examIDs = createTests();
+    setUpUserForCreatedExams(examIDs);
     DashboardServlet servlet = new DashboardServlet();
     servlet.init(config);
     servlet.doGet(request, response);
@@ -113,7 +113,7 @@ public final class DashboardServletTest extends DashboardServlet {
   public void testGetCompletedExamsFunction() throws IOException, ServletException {
     /*Tests the getExamsCompletedByUser to see if all tests a user has taken
     * get retrieved correctly
-    *//*
+    */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     helperLogin();
@@ -151,7 +151,7 @@ public final class DashboardServletTest extends DashboardServlet {
   public void testExamsToDoFunction() throws IOException, ServletException {
     /*Tests the getExamsToDoByUser to see if tests that are available for the
     * user to take get retrieved correctly
-    *//*
+    */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     helperLogin();
@@ -180,7 +180,7 @@ public final class DashboardServletTest extends DashboardServlet {
     servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    Assert.assertTrue(result.contains("<td> Trial </td>"));
+    Assert.assertTrue(result.contains("<td> Another Exam </td>"));
     Assert.assertTrue(result.contains("<td><a href=/exam?examID=" + examIDs.get(1)
         + ">Look at Exam</a></td>"));
   }
@@ -201,14 +201,14 @@ public final class DashboardServletTest extends DashboardServlet {
   }
 
   private void helperLogin() {
-    /* Login user with email "test@google.com" *//*
+    /* Login user with email "test@google.com" */
     helper.setEnvAuthDomain("google.com");
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 
   private List createTests() {
-    /*Create two fake TestEntities *//*
+    /*Create two fake TestEntities */
     final Long date = (new Date()).getTime(); 
     List<Long> list = new ArrayList<>();
     Entity testEntity = new Entity("Exam");
@@ -232,6 +232,18 @@ public final class DashboardServletTest extends DashboardServlet {
     taken.add(anotherEntity.getKey().getId());
     return taken;
   }
+  public void setUpUserForCreatedExams(List<Long> created) {
+    // Set up UserExams to check if the taken created get stored and retrieved correctly
+    Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
+          FilterOperator.EQUAL, "test@google.com"));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery pq = datastore.prepare(getUserExams);
+    Entity userExamsEntity = pq.asSingleEntity();
+    userExamsEntity = new Entity("UserExams", "test@google.com");
+    userExamsEntity.setProperty("email", "test@google.com");
+    userExamsEntity.setProperty("created", created);
+    datastore.put(userExamsEntity);
+  }
 
   public void setUpUserForTakenExams(List<Long> taken) {
     // Set up UserExams to check if the taken exams get stored and retrieved correctly
@@ -241,7 +253,7 @@ public final class DashboardServletTest extends DashboardServlet {
     PreparedQuery pq = datastore.prepare(getUserExams);
     Entity userExamsEntity = pq.asSingleEntity();
     userExamsEntity = new Entity("UserExams", "test@google.com");
-    userExamsEntity.setProperty("email","test@google.com");
+    userExamsEntity.setProperty("email", "test@google.com");
     userExamsEntity.setProperty("taken", taken);
     datastore.put(userExamsEntity);
   }
@@ -254,9 +266,8 @@ public final class DashboardServletTest extends DashboardServlet {
     PreparedQuery pq = datastore.prepare(getUserExams);
     Entity userExamsEntity = pq.asSingleEntity();
     userExamsEntity = new Entity("UserExams", "test@google.com");
-    userExamsEntity.setProperty("email","test@google.com");
+    userExamsEntity.setProperty("email", "test@google.com");
     userExamsEntity.setProperty("available", available);
     datastore.put(userExamsEntity);
   }
 }
-*/
