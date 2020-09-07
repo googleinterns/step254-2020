@@ -204,7 +204,7 @@ function lessFields() {
 };
 /**
 *  Starts the speech to text ability
-*  @param {string} id id of the element that called startDictation
+*  @param {string} Id id of the element that called startDictation
 *
  */
 function startDictation(Id) {
@@ -215,10 +215,10 @@ function startDictation(Id) {
     recognition.lang = 'en-GB';
     recognition.start();
     recognition.onresult = function(e) {
-      if(document.getElementById(Id).value == null) {
+      if (document.getElementById(Id).value == null) {
         document.getElementById(Id).value = e.results[0][0].transcript;
       } else {
-        document.getElementById(Id).value +=  ' ' + e.results[0][0].transcript;
+        document.getElementById(Id).value +=' ' + e.results[0][0].transcript;
       }
       recognition.stop();
     };
