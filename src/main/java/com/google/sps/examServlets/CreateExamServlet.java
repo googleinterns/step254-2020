@@ -83,7 +83,7 @@ public class CreateExamServlet extends HttpServlet {
     cfg.setFallbackOnNullLoopVariable(false);
   
   }
-  @Override
+    @Override
   public void doPost(final HttpServletRequest request,
                      final HttpServletResponse response) throws IOException {
     /*Servlet Receives information from the client about an exam they
@@ -253,7 +253,7 @@ public class CreateExamServlet extends HttpServlet {
     
     // create Map with all the groups the user owns 
     Map data = new HashMap();
-    Map<String,Long> groupMap = new LinkedHashMap<String,Long>();
+    Map<Long,String> groupMap = new LinkedHashMap<Long,String>();
 
     //Look up each Group owned by the user and add to map
     try {

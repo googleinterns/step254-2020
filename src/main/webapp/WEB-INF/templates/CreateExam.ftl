@@ -28,10 +28,11 @@
           <input type="text" id="name"name="name" onclick="startDictation(this.id)"  required><br>  
           <label for="duration">Enter Duration:</label><br>
           <input type="number" id="duration" name="duration" required><br>
-          <select name="groupID">
+          <select id ="groupID" name="groupID">
           <#if groups??>
             <#list groups as key, value>
-              <option value=${key}>${value?c}</option>
+              <output class="questionOutput">${key}</output><br>
+              <option value=${key?c}>${value}</option>
             </#list>
           </#if>
           </select>
