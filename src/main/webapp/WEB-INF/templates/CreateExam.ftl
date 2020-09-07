@@ -16,7 +16,7 @@
     <header>
       <div class="navtop">
         <p><a  href="index.html">Homepage</a></p>
-        <p><a  href="dashboardServlet">Dashboard</a></p>
+        <p><a  href="/dashboardServlet">Dashboard</a></p>
         <p id=logInOut></p>
       </div>
     </header>

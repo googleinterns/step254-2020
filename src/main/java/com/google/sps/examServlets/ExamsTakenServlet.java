@@ -102,62 +102,63 @@ public class ExamsTakenServlet extends HttpServlet {
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
     logger.atInfo().log(ownerID);
-    String examName = UtilityClass.getParameter(request, "examID", "");
-    logger.atInfo().log(examName);
+    String examID = UtilityClass.getParameter(request, "examID", "");
+    logger.atInfo().log(examID);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     
     // Create Map with all the test information needed to mark exam
     Map<String,Object>  data = new HashMap<String, Object>();
     List<AnswerClass> answerList = new ArrayList();
 
-    String questionValue, answer, givenMark, possibleMark;
-    questionValue = answer = givenMark = possibleMark = null;
+    String questionValue, answer, givenMark, possibleMark, examName;
+    questionValue = answer = givenMark = possibleMark = examName = null;
+    List<Long> questionsList = null;
 
-    data.put("exam", examName);
+    
     // Look up each response servlet for exam question list and get needed information
     try {
-      // Get all exams from owner using query as Exam does not have a known ID/Name
-      Query queryExams = new Query("Exam").setFilter(new FilterPredicate(
-          "name", FilterOperator.EQUAL, examName));
-      PreparedQuery listExams = datastore.prepare(queryExams);
-      
-      for (Entity entity : listExams.asIterable()) {
-        List<Long> questionsList = null;
+      try{
+        Key key = KeyFactory.createKey("Exam", Long.parseLong(examID));
+        Entity exam = datastore.get(key);
+        examName = (String) exam.getProperty("name");
+        data.put("exam", examName);
         try {
-          questionsList = (List<Long>) entity.getProperty("questionsList");
+          questionsList = (List<Long>) exam.getProperty("questionsList");
         } catch (Exception e) {
           logger.atWarning().log("There was an error getting the questions list: %s", e);
         }
-        if(questionsList != null){
-          for(Long questionID: questionsList){
-            try{
-              // Get questionValue and possibleMarks using Key as Question has a known ID/Name
-              Key questionKey = KeyFactory.createKey("Question", questionID);
-              Entity qs = datastore.get(questionKey); 
-              questionValue = (String) qs.getProperty("question");
-              possibleMark = (String) qs.getProperty("marks");
-            } catch (Exception e) {
-              System.out.println("<h3>Question unavailable.</h3>");
-              logger.atInfo().log("Cannot find question: %s", e);
-            }
-            String responseName = Long.toString(questionID);
-            try{
-              // Get answer and givenMarks using Key as each question response servlet has a known ID/Name
-              Key responseKey = KeyFactory.createKey(responseName, ownerID);
-              Entity res = datastore.get(responseKey);
-              answer = (String) res.getProperty("answer");
-              givenMark = (String) res.getProperty("marks");
-              if (givenMark == null){
-                givenMark = "Not Marked Yet";
-              }
-            } catch (Exception e) {
-              System.out.println("<h3>Response unavailable.</h3>");
-              logger.atInfo().log("Cannot find student response: %s", e);
-            }
-            //Add Answer object to answerList and add that to Map to be used in freemaker template
-            answerList.add(new AnswerClass(responseName, answer, givenMark, questionValue, possibleMark));
-            data.put("responses", answerList);
+      } catch (Exception e) {
+          logger.atWarning().log("There was an error getting the exam: %s", e);
+      }
+      if(questionsList != null){
+        for(Long questionID: questionsList){
+          try{
+            // Get questionValue and possibleMarks using Key as Question has a known ID/Name
+            Key questionKey = KeyFactory.createKey("Question", questionID);
+            Entity qs = datastore.get(questionKey); 
+            questionValue = (String) qs.getProperty("question");
+            possibleMark = (String) qs.getProperty("marks");
+          } catch (Exception e) {
+            System.out.println("Question unavailable.");
+            logger.atInfo().log("Cannot find question: %s", e);
           }
+          String responseName = Long.toString(questionID);
+          try{
+            // Get answer and givenMarks using Key as each question response servlet has a known ID/Name
+            Key responseKey = KeyFactory.createKey(responseName, ownerID);
+            Entity res = datastore.get(responseKey);
+            answer = (String) res.getProperty("answer");
+            givenMark = (String) res.getProperty("marks");
+            if (givenMark == null){
+              givenMark = "Not Marked Yet ";
+            }
+          } catch (Exception e) {
+            System.out.println("Response unavailable");
+            logger.atInfo().log("Cannot find student response: %s", e);
+          }
+          //Add Answer object to answerList and add that to Map to be used in freemaker template
+          answerList.add(new AnswerClass(responseName, answer, givenMark, questionValue, possibleMark));
+          data.put("responses", answerList);
         }
       }
     } catch (DatastoreFailureException e) {
