@@ -72,19 +72,20 @@ public class ExamServlet extends HttpServlet {
     out.println("<script src=\"script.js\"></script>");
     out.println("<script src=\"examSubmission.js\"></script>");
     out.println("<title>Take Exam</title>");
+    out.println("<style>main {padding: 20px;}</style>");
     out.println("</head>");
     out.println("<body>");
     out.println("<header>");
     out.println("<div class=\"navtop\">");
     out.println("<p><a href=\"index.html\">Homepage</a></p>");
-    out.println("<p><a href=\"dashboard.html\">Dashboard</a></p>");
+    out.println("<p><a href=\"dashboardServlet\">Dashboard</a></p>");
     out.println("<p id=logInOut></p>");
     out.println("</div>");
     out.println("</header>");
     out.println("<main>");
+
     String examID = UtilityClass.getParameter(request, "examID", null);
     Entity examEntity = null;
-
     if (examID != null) {
       // If an exam has been selected
       try {
@@ -112,19 +113,38 @@ public class ExamServlet extends HttpServlet {
 
         // If there are questions
         if (questionsList != null) {
+          int questionNumber = 0;
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+          out.println("<section class=\"form\">");
           out.println("<form action=\"/examResponse\" method=\"POST\">");
-          for (int i = 0; i < questionsList.size(); i++) {
+          out.println("<input type=\"hidden\" id=\"examID\" name=\"examID\" value=\""+examID+"\">"); 
+          for (Long question : questionsList) {
             try {
-              Key key = KeyFactory.createKey("Question", questionsList.get(i));
+              questionNumber++;
+              Key key = KeyFactory.createKey("Question", question);
               Entity qs = datastore.get(key);
+              Long questionID = qs.getKey().getId();
+              String questionValue = (String) qs.getProperty("question");
+              String type = (String) qs.getProperty("type");
 
-              long questionID = qs.getKey().getId();
-              String question = (String) qs.getProperty("question");
-              out.println("<label for=\"" + questionID + "\">" + (i + 1) + ") "
-                  + question + ": </label>");
-              out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
-                  + questionID + "\" onchange=\"setDirty()\"><br><br>");
+              if (type.equals("MCQ")){
+                 List<String> answerList = (List<String>) qs.getProperty("mcqPossibleAnswers");
+                 out.println("<output>" + questionNumber + ") "
+                     + questionValue + ": </output><br>");
+                  for(String answer : answerList){
+                    out.println("<input type=\"radio\" id=\"" + answer + "\" name=\""
+                        + questionID + "\" value=\"" + answer + "\"onchange=\"setDirty()\">");
+                    out.println("<label for=\"" + answer + "\">" + answer +"</label><br><br>");
+                    
+                  }
+              } else{
+                out.println("<input type=\"hidden\" id=\"type\" name=\"type\" value=type>");
+                out.println("<label for=\"" + questionID + "\">" + questionNumber + ") "
+                    + questionValue + ": </label>");
+                out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
+                    + questionID + "\" onclick=\"startDictation(this.id)\" onchange=\"setDirty()\"><br><br>");
+              }
+
 
             } catch (Exception e) {
               out.println("<p>Question was not found</p><br>");
@@ -134,6 +154,7 @@ public class ExamServlet extends HttpServlet {
           out.println("<br><input type=\"submit\" value=\"Submit\"" 
               + "onclick=\"setExamSubmitting()\">");
           out.println("</form>");
+          out.println("<section>");
         } else {
           out.println("<p>There are no questions associated with this exam.</p>");
         }
@@ -144,7 +165,7 @@ public class ExamServlet extends HttpServlet {
 
     // If exam is not selected or unavailable display list of available exams
     out.println("<h1>Choose an exam to take.</h1>");
-    out.println("<table><tr><th>ID</th><th>Name</th><th>Duration</th></tr>");
+    out.println("<table><tr><th>Name</th><th>Duration</th></tr>");
 
     try {
       Query query = new Query("Exam");
@@ -156,7 +177,6 @@ public class ExamServlet extends HttpServlet {
         String duration = (String) entity.getProperty("duration");
 
         out.println("<tr>");
-        out.println("<td>" + id + "</td>");
         out.println("<td>" + name + "</td>");
         out.println("<td>" + duration + "</td>");
         out.println("<td><a href=\"/exam?examID=" + id + "\">Take Exam</a></td>");

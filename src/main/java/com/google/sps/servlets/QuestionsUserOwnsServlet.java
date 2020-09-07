@@ -16,9 +16,7 @@ package com.google.sps.servlets;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.Version;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -31,20 +29,22 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.Version;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.ServletConfig;
 
 /** Servlet that returns a checkbox form of all the questions owned by the user
 * A user can then select the questions they want to reuse by clicking on the
@@ -88,11 +88,45 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
 
     DatastoreService datastore = null;
     Map data = new HashMap();
-    Map<Long,String> testMap = new LinkedHashMap<Long,String>();
-    Map<Long,String> questionsMap = new LinkedHashMap<Long,String>();
 
+    boolean exceptions = false;
     //Find all questions a user owns
+    exceptions = findQuestionsUserOwns(ownerID, datastore, data);
+    if(exceptions) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your questions");
+      return;
+    }
+    //Find all the Exams a user owns
+    exceptions = findExamsUserOwns(ownerID, datastore, data);
+    if(exceptions) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your exams");
+      return;
+    }
+    // run the freemarker template
     try {
+      Template template = cfg.getTemplate("QuestionsUsersOwn.ftl");
+      PrintWriter out = response.getWriter();
+      template.process(data, out);
+      logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
+        + " and displayed correctly", userService.getCurrentUser());
+    } catch (TemplateException e) {
+      logger.atWarning().log("There was a problem with processing the template %s", e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to display the questions you own");
+      return;
+    }
+  }
+  public boolean findQuestionsUserOwns(String ownerID, DatastoreService datastore, Map data) {
+    /* Finds all questions a user owns and saves them in the data map.
+    * Arguments :
+    * - ownerID - email of the user.
+    * - datastore - datastore for retrieving entities
+    * - data - map to store the questions user owns.
+    */
+    try {
+      Map<Long,String> questionsMap = new LinkedHashMap<Long,String>();
       datastore = DatastoreServiceFactory.getDatastoreService();
       Query query = new Query("Question").setFilter(new FilterPredicate("ownerID",
           FilterOperator.EQUAL, ownerID)).addSort("date", SortDirection.ASCENDING);
@@ -106,15 +140,22 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
         questionsMap.put(questionId, qs);
         data.put("questions", questionsMap);
       }
+      return false;
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error with retrieving the questions: %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to retrieve your questions");
-      return;
+      return true;
     }
-    //Find all the Exams a user owns
+  }
+  public boolean findExamsUserOwns(String ownerID, DatastoreService datastore, Map data) {
+    /* Finds all exams a user owns and saves them in the data map.
+    * Arguments :
+    * - ownerID - email of the user.
+    * - datastore - datastore for retrieving entities
+    * - data - map to store the questions user owns.
+    */
     try {
+      Map<Long,String> testMap = new LinkedHashMap<Long,String>();
       datastore = DatastoreServiceFactory.getDatastoreService();
       Query queryExams = new Query("Exam")
           .setFilter(new FilterPredicate("ownerID", FilterOperator.EQUAL,
@@ -127,25 +168,11 @@ public class QuestionsUserOwnsServlet extends HttpServlet {
         testMap.put(examID, name);
         data.put("tests", testMap);
       }
+      return false;
     } catch (DatastoreFailureException e) {
       logger.atWarning().log("There was an error when retrieving the tests: %s",
           e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to retrieve your Tests");
-      return;
-    }
-    // run the freemarker template
-    try {
-      Template template = cfg.getTemplate("QuestionsUsersOwn.ftl");
-      PrintWriter out = response.getWriter();
-      template.process(data, out);
-      logger.atInfo().log("Questions and Tests that the User: %s , owns were found"
-        + " and displayed correctly", userService.getCurrentUser());
-    } catch (TemplateException e) {
-      logger.atWarning().log("There was a problem with processing the template %s", e);
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Internal Error occurred when trying to find your tests");
-      return;
+      return true;
     }
   }
 }

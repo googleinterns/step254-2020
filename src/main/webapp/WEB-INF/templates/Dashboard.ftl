@@ -9,7 +9,7 @@
     <style>
       main {
         padding: 20px;
-      } 
+      }
     </style>
   </head>
   <body>

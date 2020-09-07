@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Preferneces</title>
+    <title>Preferences</title>
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
@@ -12,41 +12,53 @@
     <header>
       <div class="navtop">
         <p><a  href="index.html">Homepage</a></p>
-        <p><a  href="dashboard.html">Dashboard</a></p>
+        <p><a  href="/dashboardServlet">Dashboard</a></p>
         <p id=logInOut></p>
       </div>
     </header>
     <main>
-      <h2>Change Preferneces</h2>
-      <form id="setPreference" action="/updateInfo" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name"><br>
-        <label for="font">Select your prefered font:</label>
-        <select name="font" id="font">
-          <option value="arial">Arial</option>
-          <option value="helvetica">Helvetica</option>
-          <option value="times new roman">Times New Roman</option>
-          <option value="courier">Courier</option>
-        </select><br>
-        <label for="font_size">Select your prefered font size:</label>
-        <select name="font_size" id="font_size">
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-          <option value="14">14</option>
-          <option value="18">18</option>
-          <option value="24">24</option>
-          <option value="30">30</option>
-          <option value="36">36</option>
-        </select><br>
-        <label for="text_color">Select your prefered text color:</label>
-        <input type="color" id="text_color" name="text_color" value="$#000000"><br>
-        <label for="bg_color">Select your prefered background color:</label>
-        <input type="color" id="bg_color" name="bg_color" value="#ffffff"><br>
-        <input type="submit" value="Save" onclick="setPreference()">    
-      </form>
+      <section class="form">
+        <h2>Change Preferences</h2>
+        <form id="setPreference" action="/updateInfo" method="POST">
+          <div class="formElement">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name"><br>
+          </div>
+          <div class="formElement">
+            <label for="font">Select your prefered font:</label>
+            <select name="font" id="font">
+              <option value="arial">Arial</option>
+              <option value="helvetica">Helvetica</option>
+              <option value="times new roman">Times New Roman</option>
+              <option value="courier">Courier</option>
+            </select><br>
+          </div>
+          <div class="formElement">
+            <label for="font_size">Select your prefered font size:</label>
+            <select name="font_size" id="font_size">
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="14">14</option>
+              <option value="18">18</option>
+              <option value="24">24</option>
+              <option value="30">30</option>
+              <option value="36">36</option>
+            </select><br>
+          </div>
+          <div class="formElement">
+            <label for="text_color">Select your prefered text color:</label>
+            <input type="color" id="text_color" name="text_color" value="$#000000"><br>
+          </div>
+          <div class="formElement">
+            <label for="bg_color">Select your prefered background color:</label>
+            <input type="color" id="bg_color" name="bg_color" value="#ffffff"><br>
+          </div>
+          <input type="submit" value="Save" onclick="setPreference()">  
+        </form>
+      </section>
     </main>
     <footer>
     </footer>
