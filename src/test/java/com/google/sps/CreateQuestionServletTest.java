@@ -28,8 +28,8 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -45,6 +45,7 @@ import org.junit.runners.JUnit4;
  *
  * @author Klaudia Obieglo
  */
+
 @RunWith(JUnit4.class)
 public final class CreateQuestionServletTest extends CreateQuestionServlet {
   private final LocalServiceTestHelper helper = 
@@ -115,9 +116,9 @@ public final class CreateQuestionServletTest extends CreateQuestionServlet {
     servlet.doPost(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("\"question\":\"What day is it?\","
-      + "\"mcqPossibleAnswers\":[\"Monday\",\"Tuesday\",\"Wednesday\"],"
-      + "\"marks\":\"10\",\"ownerID\":\"test@google.com\","
-      + "\"type\":\"MCQ\",\"mcqAnswer\":\"1\""));
+        + "\"mcqPossibleAnswers\":[\"Monday\",\"Tuesday\",\"Wednesday\"],"
+        + "\"marks\":\"10\",\"ownerID\":\"test@google.com\","
+        + "\"type\":\"MCQ\",\"mcqAnswer\":\"1\""));
   }
 
   @Test

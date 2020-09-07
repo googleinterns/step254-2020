@@ -23,8 +23,8 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -95,17 +95,17 @@ public final class DashboardServletTest extends DashboardServlet {
     String path = filePath + endPath;
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
 
-    List<Long> examIDs = createTests();
-    setUpUserForCreatedExams(examIDs);
+    List<Long> examIds = createTests();
+    setUpUserForCreatedExams(examIds);
     DashboardServlet servlet = new DashboardServlet();
     servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("<td> Trial </td>"));
-    Assert.assertTrue(result.contains("<td><a href=/showExam?examID=" + examIDs.get(0)
+    Assert.assertTrue(result.contains("<td><a href=/showExam?examID=" + examIds.get(0)
         + ">Look at Exam</a></td>"));
     Assert.assertTrue(result.contains("<td> Another Exam </td>"));
-    Assert.assertTrue(result.contains("<td><a href=/showExam?examID=" + examIDs.get(1)
+    Assert.assertTrue(result.contains("<td><a href=/showExam?examID=" + examIds.get(1)
         + ">Look at Exam</a></td>"));
   }
 
@@ -134,16 +134,16 @@ public final class DashboardServletTest extends DashboardServlet {
     String path = filePath + endPath;
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
 
-    List<Long> examIDs = createTests();
+    List<Long> examIds = createTests();
     List<Long> taken = new ArrayList<Long>();
-    taken.add(examIDs.get(0));
+    taken.add(examIds.get(0));
     setUpUserForTakenExams(taken);
     DashboardServlet servlet = new DashboardServlet();
     servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("<td> Trial </td>"));
-    Assert.assertTrue(result.contains("<td><a href=/examsTaken?examID=" + examIDs.get(0)
+    Assert.assertTrue(result.contains("<td><a href=/examsTaken?examID=" + examIds.get(0)
         + ">Look at Exam</a></td>"));
   }
   
@@ -172,29 +172,31 @@ public final class DashboardServletTest extends DashboardServlet {
     String path = filePath + endPath;
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
 
-    List<Long> examIDs = createTests();
+    List<Long> examIds = createTests();
     List<Long> available = new ArrayList<Long>();
-    available.add(examIDs.get(1));
+    available.add(examIds.get(1));
     setUpUserForAvailableExams(available);
     DashboardServlet servlet = new DashboardServlet();
     servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("<td> Another Exam </td>"));
-    Assert.assertTrue(result.contains("<td><a href=/exam?examID=" + examIDs.get(1)
+    Assert.assertTrue(result.contains("<td><a href=/exam?examID=" + examIds.get(1)
         + ">Look at Exam</a></td>"));
   }
+
   @Test
   public void testNotLoggedInUser() throws IOException {
-    // test to see if a not logged in user will be able to
-    // look at tests a user has created
+    /* test to see if a not logged in user will be able to
+    * look at tests a user has created 
+    */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
 
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
-    DashboardServlet servlet= new DashboardServlet();
+    DashboardServlet servlet = new DashboardServlet();
     servlet.doGet(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
@@ -218,7 +220,7 @@ public final class DashboardServletTest extends DashboardServlet {
     testEntity.setProperty("date", date);
     testEntity.setProperty("questionsList", list);
 
-    Entity anotherEntity= new Entity("Exam");
+    Entity anotherEntity = new Entity("Exam");
     anotherEntity.setProperty("name", "Another Exam");
     anotherEntity.setProperty("duration", "45");
     anotherEntity.setProperty("ownerID", "test@google.com");
@@ -232,8 +234,10 @@ public final class DashboardServletTest extends DashboardServlet {
     taken.add(anotherEntity.getKey().getId());
     return taken;
   }
+
   public void setUpUserForCreatedExams(List<Long> created) {
-    // Set up UserExams to check if the taken created get stored and retrieved correctly
+    /* Set up UserExams to check if the taken created get stored and retrieved correctly 
+    */
     Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
           FilterOperator.EQUAL, "test@google.com"));
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -246,7 +250,7 @@ public final class DashboardServletTest extends DashboardServlet {
   }
 
   public void setUpUserForTakenExams(List<Long> taken) {
-    // Set up UserExams to check if the taken exams get stored and retrieved correctly
+    /* Set up UserExams to check if the taken exams get stored and retrieved correctly*/
     Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
           FilterOperator.EQUAL, "test@google.com"));
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -259,7 +263,7 @@ public final class DashboardServletTest extends DashboardServlet {
   }
 
   public void setUpUserForAvailableExams(List<Long> available) {
-    // Set up UserExams to check if the available exams get stored and retrieved correctly
+    /* Set up UserExams to check if the available exams get stored and retrieved correctly*/
     Query getUserExams = new Query("UserExams").setFilter(new FilterPredicate("email",
           FilterOperator.EQUAL, "test@google.com"));
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

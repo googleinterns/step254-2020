@@ -32,16 +32,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Map;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
+import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -72,13 +72,11 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
   }
 
   @Test
-  public void testdoPostFunction() throws IOException, ServletException{
+  public void testdoPostFunction() throws IOException, ServletException {
     /*Tests the doGet function to see if the questions that the
     * user owns get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-    ServletConfig config = mock(ServletConfig.class);
-    ServletContext context = mock(ServletContext.class);
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
@@ -91,6 +89,8 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
     when(config.getServletContext()).thenReturn(context);
 
     //Get the path to the target files were templates are stored for tests
@@ -100,7 +100,7 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
     
     
-    UpdateExamResponseServlet servlet= new UpdateExamResponseServlet();
+    UpdateExamResponseServlet servlet = new UpdateExamResponseServlet();
     servlet.init(config);
     servlet.doPost(request, response);
 
@@ -133,14 +133,14 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
-    UpdateExamResponseServlet servlet= new UpdateExamResponseServlet();
+    UpdateExamResponseServlet servlet = new UpdateExamResponseServlet();
     servlet.doPost(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
+
   private void setFakeTest() {
     /*Set a fake test*/
-    Long date = (new Date()).getTime(); 
     List<Long> fakeQuestionList = new ArrayList<Long>();
     fakeQuestionList.add(1L);
     fakeQuestionList.add(2L);
@@ -148,13 +148,14 @@ public final class UpdateExamResponseServletTest extends UpdateExamResponseServl
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
     testEntity.setProperty("ownerID", "test@google.com");
+    Long date = (new Date()).getTime(); 
     testEntity.setProperty("date", date); 
     testEntity.setProperty("questionsList", fakeQuestionList);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(testEntity);
   }
 
-   private void setFakeResponeses () {
+   private void setFakeResponeses() {
     /*Set up two fake response entities for testing purposes */
     Entity responseEntity = new Entity("1", "student@google.com");
     responseEntity.setProperty("answer", "Tuesday");

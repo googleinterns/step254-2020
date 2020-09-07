@@ -27,13 +27,12 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.data.UtilityClass;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -192,7 +191,7 @@ public final class EditGroupServletTest extends EditGroupServlet {
     Assert.assertTrue(members.contains("test2@google.com"));
   }
 
-    /* When removing a member from a group. */
+  /* When removing a member from a group. */
   @Test
   public void doPostTestRemoveMember() throws IOException {
     helperLogin();
