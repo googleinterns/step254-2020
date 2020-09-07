@@ -97,9 +97,8 @@ public class CreateExamServlet extends HttpServlet {
     String groupID = UtilityClass.getParameter(request, "groupID", "");
     groupID = groupID.replaceAll("\\<.*?\\>", "");
     groupID = groupID.trim();
-    Long groupIDL = Long.parseLong(groupID); 
+    logger.atInfo().log("Group =%s is selected", groupID);
     String duration = UtilityClass.getParameter(request, "duration", "");
-    logger.atInfo().log("group=%s", groupID);
     if (name.equals("") || duration.equals("")) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
           "You have entered one or more null parameters");
@@ -141,6 +140,35 @@ public class CreateExamServlet extends HttpServlet {
           "Internal Error occurred when trying to create your exam");
       return;
     }
+    try{
+      Query userEnti = new Query("UserExams").setFilter(new FilterPredicate("email",
+            FilterOperator.EQUAL, ownerID));
+      PreparedQuery pq = datastore.prepare(userEnti);
+      Entity userEnt = pq.asSingleEntity();
+      if(userEnt == null ){
+        userEnt = new Entity("UserExams", ownerID);
+        userEnt.setProperty("email", ownerID);
+        userEnt.setProperty("taken", new ArrayList<Long>());
+        userEnt.setProperty("available", new ArrayList<Long>());
+        List<Long> created = new ArrayList<Long>();
+        created.add(examID);
+        userEnt.setProperty("created", created);
+      }
+      else if (userEnt.getProperty("created") != null ){
+        List<Long> created = (List<Long>) userEnt.getProperty("created");
+        created.add(examID);
+        userEnt.setProperty("created", created);
+      }
+      else {
+        List<Long> created = new ArrayList<Long>();
+        created.add(examID);
+        userEnt.setProperty("created", created);       
+      }
+      datastore.put(userEnt);
+    } catch( DatastoreFailureException e) {
+        logger.atWarning().log("DataStorFailure %s, ",e);
+    }
+
 
     // If a group is selected
     if (!groupID.equals("")) {
@@ -179,6 +207,7 @@ public class CreateExamServlet extends HttpServlet {
                 userExamsEntity = new Entity("UserExams", email);
                 userExamsEntity.setProperty("email", email);
                 userExamsEntity.setProperty("taken", new ArrayList<Long>());
+                userExamsEntity.setProperty("created", new ArrayList<Long>());
                 available = new ArrayList<Long>();
               } else {
                 available = (List<Long>) userExamsEntity.getProperty("available");

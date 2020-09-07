@@ -86,7 +86,6 @@ public class ExamServlet extends HttpServlet {
 
     String examID = UtilityClass.getParameter(request, "examID", null);
     Entity examEntity = null;
-
     if (examID != null) {
       // If an exam has been selected
       try {
@@ -143,7 +142,7 @@ public class ExamServlet extends HttpServlet {
                 out.println("<label for=\"" + questionID + "\">" + questionNumber + ") "
                     + questionValue + ": </label>");
                 out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
-                    + questionID + "\" onchange=\"setDirty()\"><br><br>");
+                    + questionID + "\" onclick=\"startDictation(this.id)\" onchange=\"setDirty()\"><br><br>");
               }
 
 

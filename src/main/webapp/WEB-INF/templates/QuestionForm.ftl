@@ -25,7 +25,7 @@
       <h3> Create New Question</h3>
       <form id="createQuestion" action="/createQuestion" method="POST">
         <label for="question">Enter Question:</label><br>
-        <textarea name="question" rows="4" cols="50" maxlength="250" required></textarea><br>
+        <input type="text" id="question" name="question" onclick="startDictation(this.id)" rows="4" cols="50" maxlength="250" required ><br>
         <label for="marks">Marks given for Question:</label><br>
         <input type="number" id="marks" name="marks" min="0" max="1000" step="0.01" required> 
         <h3>Please mark if this Question is an MCQ</h3>
