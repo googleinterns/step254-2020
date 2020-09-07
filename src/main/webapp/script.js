@@ -202,24 +202,29 @@ function lessFields() {
     counter--;
   }
 };
-function startDictation(id) {
+/**
+*  Starts the speech to text ability
+*  @param {string} id id of the element that called startDictation
+*
+ */
+function startDictation(Id) {
   if (window.hasOwnProperty('webkitSpeechRecognition')) {
     const recognition = new webkitSpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-
-    recognition.lang = "en-GB";
+    recognition.lang = 'en-GB';
     recognition.start();
-
     recognition.onresult = function(e) {
-      document.getElementById(id).value += " " + e.results[0][0].transcript;
+      if(document.getElementById(Id).value == null) {
+        document.getElementById(Id).value = e.results[0][0].transcript;
+      } else {
+        document.getElementById(Id).value +=  ' ' + e.results[0][0].transcript;
+      }
       recognition.stop();
     };
-
     recognition.onerror = function(e) {
       recognition.stop();
     };
-
   }
 };
 /* eslint-disable no-unused-vars */
