@@ -31,7 +31,7 @@
           <select name="groupName">
           <#if groups??>
             <#list groups as key, value>
-              <option>${value}</option>
+              <option value=${key}>${value}</option>
             </#list>
           </#if>
           </select>

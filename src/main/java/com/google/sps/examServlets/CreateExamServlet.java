@@ -97,6 +97,7 @@ public class CreateExamServlet extends HttpServlet {
     String groupID = UtilityClass.getParameter(request, "groupID", "");
     groupID = groupID.replaceAll("\\<.*?\\>", "");
     groupID = groupID.trim();
+    Long groupIDL = Long.parseLong(groupID); 
     String duration = UtilityClass.getParameter(request, "duration", "");
     logger.atInfo().log("group=%s", groupID);
     if (name.equals("") || duration.equals("")) {
@@ -235,7 +236,7 @@ public class CreateExamServlet extends HttpServlet {
            
         long groupID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
-        groupMap.put(name, groupID);
+        groupMap.put(groupID, name);
         data.put("groups", groupMap);
         }  
     } catch (DatastoreFailureException e) {

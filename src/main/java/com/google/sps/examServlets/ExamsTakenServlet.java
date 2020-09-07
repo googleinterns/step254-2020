@@ -102,7 +102,7 @@ public class ExamsTakenServlet extends HttpServlet {
     logger.atInfo().log("User=%s is logged in", userService.getCurrentUser());
     String ownerID = userService.getCurrentUser().getEmail();
      logger.atInfo().log(ownerID);
-    String examName =UtilityClass.getParameter(request, "examID", null);
+    String examName =UtilityClass.getParameter(request, "examID", "");
     logger.atInfo().log(examName);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     
