@@ -17,7 +17,6 @@ package com.google.sps.servlets;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -34,34 +33,36 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
+import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Collections;
-import javax.servlet.annotation.WebServlet;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns the users created exams, to-do exams and completed exams to the
-* users dashboard
+/** Servlet that returns the users created exams, to-do exams and completed exams to the dashboard.
+*
 * @author Klaudia Obieglo
 */
 @WebServlet("/dashboardServlet")
-public class DashboardServlet extends HttpServlet{
+public class DashboardServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   Configuration cfg;
+  
   //set up the configuration once
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -79,6 +80,7 @@ public class DashboardServlet extends HttpServlet{
     cfg.setWrapUncheckedExceptions(true);
     cfg.setFallbackOnNullLoopVariable(false);
   }
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     /*Returns exams created, to be completed and completed by the user */
@@ -114,6 +116,7 @@ public class DashboardServlet extends HttpServlet{
       return;
     }
   }
+
   public void getExamsOwnedByUser(String email, Map dashboardData) {
     /* Saves the exams owned by the user in the Dashboard Data Map
     * Argument: email- email of the user that we are trying to find 
@@ -186,6 +189,7 @@ public class DashboardServlet extends HttpServlet{
       return;
     }
   }
+
   public void getExamsToDoByTheUser(String email, Map dashboardData) {
     /*Saves the exams that the user still has to complete in the dashboardData map
     * Argument ownerID - email of the user who's exams we are looking for
