@@ -209,7 +209,8 @@ function lessFields() {
  */
 function startDictation(Id) {
   if (window.hasOwnProperty('webkitSpeechRecognition')) {
-    const recognition = new webkitSpeechRecognition();
+    const WebkitSpeechRecognition = webkitSpeechRecognition;
+    const recognition = new WebkitSpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-GB';
