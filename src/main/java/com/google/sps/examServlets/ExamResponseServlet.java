@@ -28,6 +28,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.PrintWriter;
@@ -68,7 +69,6 @@ public class ExamResponseServlet extends HttpServlet {
     String examID = request.getParameter("examID");
 
     Enumeration<String> parameterNames = request.getParameterNames();
-    parameterNames.nextElement();
     String possibleMarks = null;
     String expected = "none";
     String type = null;
@@ -77,6 +77,9 @@ public class ExamResponseServlet extends HttpServlet {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       while (parameterNames.hasMoreElements()) {
         String questionID = parameterNames.nextElement();
+        if(questionID.equals("examID")){
+            questionID = parameterNames.nextElement();
+        }
         String[] questionAnswer = request.getParameterValues(questionID);
         // Correct mcq questions with pre-defined answers
         try{
@@ -93,7 +96,7 @@ public class ExamResponseServlet extends HttpServlet {
             expected = (String) answerList.get(questionNum-1);
           }
         } catch (Exception e) {
-          System.out.println("<h3>Cannot Find Question</h3>");
+          System.out.println("Cannot Find Question");
           logger.atInfo().log("Cannot find question: %s", e);
         }
         Entity examResponseEntity = new Entity(questionID, email);
@@ -106,9 +109,7 @@ public class ExamResponseServlet extends HttpServlet {
         } else{
           examResponseEntity.setProperty("marks", null);
         }
-        datastore.put(examResponseEntity);
-        System.out.println("examID");
-        
+        datastore.put(examResponseEntity); 
       }
       if(email != null && examID != null){
         examTaken(email, Long.parseLong(examID));

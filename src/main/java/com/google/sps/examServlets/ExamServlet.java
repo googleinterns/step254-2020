@@ -85,6 +85,7 @@ public class ExamServlet extends HttpServlet {
     out.println("<main>");
 
     String examID = UtilityClass.getParameter(request, "examID", null);
+    String test = examID;
     Entity examEntity = null;
     if (examID != null) {
       // If an exam has been selected
@@ -117,7 +118,7 @@ public class ExamServlet extends HttpServlet {
           DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
           out.println("<section class=\"form\">");
           out.println("<form action=\"/examResponse\" method=\"POST\">");
-          out.println("<input type=\"hidden\" id=\"examID\" name=\"examID\" value=\""+examID+"\">"); 
+          out.println("<input type=\"hidden\" name=\"examID\" value=\""+test+"\">"); 
           for (Long question : questionsList) {
             try {
               questionNumber++;
@@ -138,7 +139,6 @@ public class ExamServlet extends HttpServlet {
                     
                   }
               } else{
-                out.println("<input type=\"hidden\" id=\"type\" name=\"type\" value=type>");
                 out.println("<label for=\"" + questionID + "\">" + questionNumber + ") "
                     + questionValue + ": </label>");
                 out.println("<input type=\"text\" id=\"" + questionID + "\" name=\""
