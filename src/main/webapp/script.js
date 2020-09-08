@@ -252,6 +252,6 @@ function drawResults() {
         const chart = new google.visualization.PieChart(
             document.getElementById('results-chart'));
         chart.draw(data, resultChart);
-  });
+      });
 };
 /* eslint-disable no-unused-vars */
