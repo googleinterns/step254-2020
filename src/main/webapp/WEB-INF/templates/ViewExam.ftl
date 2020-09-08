@@ -5,6 +5,7 @@
     <title>Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="script.js"></script>
     <style>
       main {
@@ -40,6 +41,8 @@
             <hr>
           </#list>
          </#if>
+         <div id="results-chart">
+         </div>
       </section>
     </main>
     <footer>
