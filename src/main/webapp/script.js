@@ -244,8 +244,9 @@ function drawResults() {
     });
     const resultChart = {
       'title': 'Your Results',
-      'width':500,
-      'height':400
+      'width': 500,
+      'height': 400,
+      'colors': ['#d6add9', '#eda274']
     };
     const chart = new google.visualization.PieChart(
         document.getElementById('results-chart'));
