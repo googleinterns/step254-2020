@@ -78,7 +78,7 @@ public class ExamResponseServlet extends HttpServlet {
       while (parameterNames.hasMoreElements()) {
         String questionID = parameterNames.nextElement();
         if(questionID.equals("examID")){
-            questionID = parameterNames.nextElement();
+          continue;
         }
         String[] questionAnswer = request.getParameterValues(questionID);
         // Correct mcq questions with pre-defined answers
