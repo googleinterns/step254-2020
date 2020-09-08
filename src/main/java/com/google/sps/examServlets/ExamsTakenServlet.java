@@ -35,6 +35,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
 import com.google.sps.data.AnswerClass;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -110,6 +111,10 @@ public class ExamsTakenServlet extends HttpServlet {
     Map<String,Object>  data = new HashMap<String, Object>();
     List<AnswerClass> answerList = new ArrayList();
 
+    // Create Map with all the results for the results chart
+    Map<String,Integer> resultsData = new HashMap<String,Integer>();
+    int totalGivenMarks=0;
+    int totalPossibleMArks=0;
     String questionValue, answer, givenMark, possibleMark, examName;
     questionValue = answer = givenMark = possibleMark = examName = null;
     List<Long> questionsList = null;
@@ -159,6 +164,13 @@ public class ExamsTakenServlet extends HttpServlet {
           //Add Answer object to answerList and add that to Map to be used in freemaker template
           answerList.add(new AnswerClass(responseName, answer, givenMark, questionValue, possibleMark));
           data.put("responses", answerList);
+          if(!"Not Marked Yet ".equals(givenMark)) {
+            // resultsData.put(Integer.parseInt(givenMark),Integer.parseInt(possibleMark));
+            totalGivenMarks +=Integer.parseInt(givenMark);
+            totalPossibleMArks +=Integer.parseInt(possibleMark);
+          } else {
+            resultsData = null;
+          }
         }
       }
     } catch (DatastoreFailureException e) {
@@ -167,6 +179,12 @@ public class ExamsTakenServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           "Internal Error occurred when trying to find your tests");
       return;
+    }
+    // If the exam has been marked create a pie chart with the results.
+    if(resultsData != null){
+      resultsData.put("Correct",totalGivenMarks);
+      resultsData.put("Incorrect",totalPossibleMArks- totalGivenMarks);
+      ChartsServlet.charts(resultsData);
     }
     
     // run to freemarker template
