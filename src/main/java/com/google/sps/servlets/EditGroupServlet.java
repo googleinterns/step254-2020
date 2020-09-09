@@ -64,20 +64,17 @@ public class EditGroupServlet extends HttpServlet {
     logger.atInfo().log("user=%s", userService.getCurrentUser());
     String editType = UtilityClass.getParameter(request, "editType", "");
     // Remove all html tags and trim the spaces in the parameter.
-    editType = editType.replaceAll("\\<.*?\\>", "");
-    editType = editType.trim();
+    editType = UtilityClass.processExternalText(editType);
     logger.atInfo().log("edit type=%s", editType);
 
     // Check to see if it is create, add member or remove member edit
     if (editType.equals("create")) {
       // Create a group
       String name = UtilityClass.getParameter(request, "name", "");
-      name = name.replaceAll("\\<.*?\\>", "");
-      name = name.trim();
+      name = UtilityClass.processExternalText(name);
       logger.atInfo().log("name=%s", name);
       String description = UtilityClass.getParameter(request, "description", "");
-      description = description.replaceAll("\\<.*?\\>", "");
-      description = description.trim();
+      description = UtilityClass.processExternalText(description);
       logger.atInfo().log("description=%s", description);
       if (name.equals("")) {
         logger.atWarning().log("Name is null");
@@ -136,14 +133,12 @@ public class EditGroupServlet extends HttpServlet {
       // Add or remove a member to or from a group
       // Get the groupID
       String groupID = UtilityClass.getParameter(request, "groupID", "");
-      groupID = groupID.replaceAll("\\<.*?\\>", "");
-      groupID = groupID.trim();
+      groupID = UtilityClass.processExternalText(groupID);
       logger.atInfo().log("group=%s", groupID);
 
       // Get the user to be removed/added
       String email = UtilityClass.getParameter(request, "email", "");
-      email = email.replaceAll("\\<.*?\\>", "");
-      email = email.trim();
+      email = UtilityClass.processExternalText(email);
       logger.atInfo().log("email=%s", email);
 
       Entity groupEntity = new Entity("Group");

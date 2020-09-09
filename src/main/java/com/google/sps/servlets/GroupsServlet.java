@@ -102,8 +102,7 @@ public class GroupsServlet extends HttpServlet {
 
     if (groupID != null) {
       // If an exam has been selected remove html tags and trim the ID
-      groupID = groupID.replaceAll("\\<.*?\\>", "");
-      groupID = groupID.trim();
+      groupID = UtilityClass.processExternalText(groupID);
       try {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key key = KeyFactory.createKey("Group", Long.parseLong(groupID));

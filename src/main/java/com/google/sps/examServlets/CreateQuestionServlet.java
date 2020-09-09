@@ -63,13 +63,12 @@ public class CreateQuestionServlet extends HttpServlet {
       String mcqAnswers[] = request.getParameterValues("mcqField");
       for(int i=0; i<mcqAnswers.length; i++) {
         String answer = mcqAnswers[i];
-        answer = answer.replaceAll("\\<.*?\\>", "");
+        answer = UtilityClass.processExternalText(answer);
         mcqPossibleAnswers.add(answer);
       }
     } 
     //Remove all html tags and trim the spaces in the questions.
-    question = question.replaceAll("\\<.*?\\>", "");
-    question = question.trim();
+    question = UtilityClass.processExternalText(question);
     String marks = UtilityClass.getParameter(request, "marks", "");
 
     if (testName == "" || question == "" || marks == "") {
