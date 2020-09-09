@@ -96,6 +96,7 @@ public class ShowExamServlet extends HttpServlet{
     //grab exams user owns
     try {
       getExam(ownerID, Long.parseLong(examID));
+      System.out.println("got exam");
     } catch (EntityNotFoundException e){
       logger.atWarning().log("Exam entity was not found: %s",e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,

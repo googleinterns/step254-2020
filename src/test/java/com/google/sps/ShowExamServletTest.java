@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.data.UtilityClass;
@@ -28,6 +29,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.File;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
@@ -43,13 +47,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 /**
- * Tests for Exams Taken Servlet. Test are all exam taken by the user retrieved,
- * if a user is not logged in check for an unauthorised error.
+ * Tests for Show Exam Servlet. Test exam displayed as expected,
+ * if student results are gathered as expected.
  *
  * @author Róisín O'Farrell
  */
 @RunWith(JUnit4.class)
-public final class ExamsTakenServletTest extends ExamsTakenServlet {
+public final class ShowExamServletTest extends ShowExamServlet {
   private final LocalServiceTestHelper helper = 
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
@@ -61,10 +65,10 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
   public void tearDown() {
     helper.tearDown();
   }
+
+   /*Tests the doGet function to see if the exam is retrieved correctly */
   @Test
   public void testdoGetFunction() throws IOException, ServletException{
-    /*Tests the doGet function to see if the exam that the
-    * user took get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     ServletConfig config = mock(ServletConfig.class);
@@ -87,16 +91,52 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
     
     
-    ExamsTakenServlet servlet= new ExamsTakenServlet();
+    ShowExamServlet servlet= new ShowExamServlet();
     servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
+    System.out.println(result);
     Assert.assertTrue(result.contains("Trial"));
     Assert.assertTrue(result.contains("What day is it?"));
-    Assert.assertTrue(result.contains("Tuesday"));
-    Assert.assertFalse(result.contains("person@example.com"));
+    Assert.assertTrue(result.contains("chart-container"));
     Assert.assertFalse(result.contains("How many pets do you have?"));
   }
+
+  /*Tests the doGet function to see if the exam is retrieved correctly */
+  @Test
+  public void testGetResponsesFunction() throws IOException, ServletException, EntityNotFoundException{
+    Map<String,Integer> testExamMarks = new LinkedHashMap<String, Integer>();
+    testExamMarks.put("10", 1);
+    setFakeTest();
+    setFakeQuestions();
+    setFakeResponeses();
+    
+    ShowExamServlet servlet= new ShowExamServlet();
+    servlet.getResponses("test@google.com", 7L);
+    Assert.assertTrue(testExamMarks.equals(servlet.examMarks)); 
+  }
+
+   /*Tests the doGet function to see if the exam is retrieved correctly */
+  @Test
+  public void testGetExamFunction() throws IOException, ServletException, EntityNotFoundException{
+    Map testData = new HashMap();
+    Map<String,String> testExamQuestions = new LinkedHashMap<String, String>();
+    Map<String,String> testExamMap = new LinkedHashMap<String, String>();
+   
+    testExamMap.put("Trial", "30");
+    testData.put("exam", testExamMap);
+    testExamQuestions.put("What day is it?", "5");
+    testExamQuestions.put("What year is it?", "10");
+    testData.put("question", testExamQuestions);
+    setFakeTest();
+    setFakeQuestions();
+    setFakeResponeses();
+    
+    ShowExamServlet servlet= new ShowExamServlet();
+    servlet.getExam("test@google.com", 7L);
+    Assert.assertTrue(testData.equals(servlet.data)); 
+  }
+
   @Test
   public void testNotLoggedInUser() throws IOException {
     // test to see if a not logged in user will be able to
@@ -106,7 +146,7 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
-    ExamsTakenServlet servlet= new ExamsTakenServlet();
+    ShowExamServlet servlet= new ShowExamServlet();
     servlet.doGet(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
@@ -153,16 +193,19 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     Entity questionEntity = new Entity("Question", 1L);
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
+    questionEntity.setProperty("type", "Normal");
     questionEntity.setProperty("date", date);
     questionEntity.setProperty("ownerID", "test@google.com");
     Entity anotherQuestionEntity = new Entity("Question", 2L);
     anotherQuestionEntity.setProperty("question", "What year is it?");
+    anotherQuestionEntity.setProperty("type", "Normal");
     anotherQuestionEntity.setProperty("marks", "10");
     anotherQuestionEntity.setProperty("date", date);
     anotherQuestionEntity.setProperty("ownerID", "test@google.com");
     
     Entity questionByDifferentUser = new Entity("Question", 4L);
     questionByDifferentUser.setProperty("question", "How many pets do you have?");
+    questionByDifferentUser.setProperty("type", "Normal");
     questionByDifferentUser.setProperty("marks", "15");
     questionByDifferentUser.setProperty("date", date);
     questionByDifferentUser.setProperty("ownerID", "person@example.com");
