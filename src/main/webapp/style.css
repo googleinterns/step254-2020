@@ -146,3 +146,12 @@ h4{
 .answerValue, .questionValue{
   padding-left: 30px;
 }
+
+/* Dashboard */
+.done, .todo, .created {
+  margin: 20px;
+  border: 2px solid ;
+  border-radius: 5px;
+  padding-left: 20px;
+  padding-bottom: 10px;
+}
