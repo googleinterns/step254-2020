@@ -105,7 +105,6 @@ public class GetExamResponsesServlet extends HttpServlet {
     Map<Long,String> testMap = new LinkedHashMap<Long,String>();
     //Map<Long, String> studentMap = new LinkedHashMap<Long,String>();
     List<String> studentList = new ArrayList();
-    //int responseNumber = 0;
     /*Look up each Exam to get the question list and look up students who have 
       answered those questions*/
     try {
