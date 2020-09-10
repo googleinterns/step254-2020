@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -58,6 +59,7 @@ import freemarker.cache.*;
  * outputs the reponses in a format so that the exam can be marked 
  *
  * @author Róisín O'Farrell
+ * @author Klaudia Obieglo
  */
 @WebServlet("/examsTaken")
 public class ExamsTakenServlet extends HttpServlet {
@@ -112,14 +114,16 @@ public class ExamsTakenServlet extends HttpServlet {
     List<AnswerClass> answerList = new ArrayList();
 
     // Create Map with all the results for the results chart
-    Map<String,Integer> resultsData = new HashMap<String,Integer>();
+    Map<String,Integer> resultsData = new ConcurrentHashMap();
+    resultsData.clear();
+    // resultsData = null;
     int totalGivenMarks=0;
     int totalPossibleMArks=0;
     String questionValue, answer, givenMark, possibleMark, examName;
     questionValue = answer = givenMark = possibleMark = examName = null;
     List<Long> questionsList = null;
 
-    
+    synchronized(resultsData) {
     // Look up each response servlet for exam question list and get needed information
     try {
       try{
@@ -179,11 +183,15 @@ public class ExamsTakenServlet extends HttpServlet {
           "Internal Error occurred when trying to find your tests");
       return;
     }
-    // If the exam has been marked create a pie chart with the results.
-    if(resultsData != null){
+    }
+    // Send results data to charts servlet to create a chart
+    if (resultsData != null) {
       resultsData.put("Correct",totalGivenMarks);
       resultsData.put("Incorrect",totalPossibleMArks- totalGivenMarks);
+      logger.atInfo().log("Results were sent off to the pie chart for user");
       ChartsServlet.charts(resultsData);
+    } else {
+      ChartsServlet.charts(null);
     }
     
     // run to freemarker template

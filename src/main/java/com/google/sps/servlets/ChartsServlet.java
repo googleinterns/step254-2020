@@ -38,8 +38,10 @@ public class ChartsServlet extends HttpServlet {
     /* Convert the results map to json and return it */
     response.setContentType("application/json");
     Gson gson = new Gson();
-    String json = gson.toJson(results);
-    response.getWriter().println(json);
+    if (results!=null) {
+      String json = gson.toJson(results);
+      response.getWriter().println(json);
+    }
   } 
   public static void charts(Map<String,Integer> chart) {
     /* Set the results map to equal the chart */
