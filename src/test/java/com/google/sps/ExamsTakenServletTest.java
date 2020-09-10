@@ -91,7 +91,7 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-
+    
     Assert.assertTrue(result.contains("Trial"));
     Assert.assertTrue(result.contains("What day is it?"));
     Assert.assertTrue(result.contains("Tuesday"));

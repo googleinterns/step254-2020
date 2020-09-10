@@ -22,10 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.UUID;
 
-public final class UtilityClass{
-  /*Class that has all the methods that we constantly reuse and rewrite
+/* Class that has all the methods that we reuse and rewrite
   * @author Klaudia Obieglo
-  */  
+  * @author Aidan Molloy
+  */ 
+public final class UtilityClass{ 
   
   public static String getParameter(HttpServletRequest request, String name, String defaultValue){
     /* Gets Parameters from the Users Page
@@ -39,6 +40,17 @@ public final class UtilityClass{
     }
     return value;
   }
+
+  public static String processExternalText(String text){
+    /* Sanitise user input
+    *
+    * Return: Returns the text with all special characters removed.
+    */
+    text = text.replaceAll("\\<.*?\\>", "");
+    text = text.trim();
+    return text;
+  }
+  
   public static String convertToJson(Entity entity) {
     /* Converts the entity to a json string using Gson
     *

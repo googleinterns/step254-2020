@@ -94,11 +94,9 @@ public class CreateExamServlet extends HttpServlet {
     Long date = (new Date()).getTime();
     String name = UtilityClass.getParameter(request, "name", "");
     // Remove all html tags and trim the spaces in the exam name.
-    name = name.replaceAll("\\<.*?\\>", "");
-    name = name.trim();
+    name = UtilityClass.processExternalText(name);
     String groupID = UtilityClass.getParameter(request, "groupID", "");
-    groupID = groupID.replaceAll("\\<.*?\\>", "");
-    groupID = groupID.trim();
+    groupID = UtilityClass.processExternalText(groupID);
     logger.atInfo().log("Group =%s is selected", groupID);
     String duration = UtilityClass.getParameter(request, "duration", "");
     if (name.equals("") || duration.equals("")) {

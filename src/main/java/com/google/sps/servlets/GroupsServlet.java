@@ -27,10 +27,20 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
 import com.google.sps.data.UtilityClass;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +54,27 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/groups")
 public class GroupsServlet extends HttpServlet {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  Configuration cfg;
+
+  /**
+   * Set up the configuration once.
+   */
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    cfg = new Configuration(Configuration.VERSION_2_3_30);
+    String path = getServletContext().getRealPath("/WEB-INF/templates/");
+    try {
+      cfg.setDirectoryForTemplateLoading(new File(path));
+    } catch (IOException e) {
+      logger.atWarning().log("Could not set directory for template loading: %s", e);
+    }
+    // Recommended settings for new projects:
+    cfg.setDefaultEncoding("UTF-8");
+    cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+    cfg.setLogTemplateExceptions(false);
+    cfg.setWrapUncheckedExceptions(true);
+    cfg.setFallbackOnNullLoopVariable(false);
+  }
 
   /**
    * Display groups you own and are a member of,
@@ -64,41 +95,20 @@ public class GroupsServlet extends HttpServlet {
       return;
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
-    response.setContentType("text/html;");
-    PrintWriter out = response.getWriter();
-    out.println("<!DOCTYPE html>");
-    out.println("<html>");
-    out.println("<head>");
-    out.println("<link href=\"https://fonts.googleapis.com/css2?family=Domine:wght@400;"
-        + "700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap\""
-        + " rel=\"stylesheet\">");
-    out.println("<link rel=\"stylesheet\" href=\"style.css\">");
-    out.println("<script src=\"script.js\"></script>");
-    out.println("<title>Groups</title>");
-    out.println("<style>main {padding: 20px;}</style>");
-    out.println("</head>");
-    out.println("<body>");
-    out.println("<header>");
-    out.println("<div class=\"navtop\">");
-    out.println("<p><a href=\"index.html\">Homepage</a></p>");
-    out.println("<p><a href=\"dashboardServlet\">Dashboard</a></p>");
-    out.println("<p id=logInOut></p>");
-    out.println("</div>");
-    out.println("</header>");
-    out.println("<main>");
+    Map data = new HashMap();
     String groupID = UtilityClass.getParameter(request, "groupID", null);
     Entity groupEntity = null;
+    String groupContent = "";
 
     if (groupID != null) {
       // If an exam has been selected remove html tags and trim the ID
-      groupID = groupID.replaceAll("\\<.*?\\>", "");
-      groupID = groupID.trim();
+      groupID = UtilityClass.processExternalText(groupID);
       try {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key key = KeyFactory.createKey("Group", Long.parseLong(groupID));
         groupEntity = datastore.get(key);
       } catch (Exception e) {
-        out.println("<h3>Selected group is not available.</h3>");
+        groupContent += ("<h3>Selected group is not available.</h3>");
         logger.atInfo().log("Group ID does not exist: %s", e);
       }
       if (groupEntity != null) {
@@ -112,146 +122,160 @@ public class GroupsServlet extends HttpServlet {
         } catch (Exception e) {
           logger.atWarning().log("There was an error getting the members list: %s", e);
         }
-        out.println("<h1>Group Name: " + name + "</h1>");
-        out.println("<h3>Description: " + description + "</h3>");
-        out.println("<h3>Owner: " + ownerID + "</h3>");
+        groupContent += ("<h1>Group Name: " + name + "</h1>");
+        groupContent += ("<h3>Description: " + description + "</h3>");
+        groupContent += ("<h3>Owner: " + ownerID + "</h3>");
 
         // If the current user is the owner they can add and remove members
         if (ownerID.equals(userService.getCurrentUser().getEmail())) {
           if (members != null) {
-            out.println("<table>");
-            out.println("<tr><th>User Email</th><th>Remove</th></tr>");
+            groupContent += ("<table>");
+            groupContent += ("<tr><th>User Email</th><th>Remove</th></tr>");
             for (String member : members) {
               // For each member display their email and a button to remove
-              out.println("<tr><td>" + member + "</td><td>");
-              out.println("<form action=\"/editGroup\" method=\"POST\">");
-              out.println("<input type=\"hidden\" id=\"groupID\" name=\"groupID\" "
+              groupContent += ("<tr><td>" + member + "</td><td>");
+              groupContent += ("<form action=\"/editGroup\" method=\"POST\">");
+              groupContent += ("<input type=\"hidden\" id=\"groupID\" name=\"groupID\" "
                   + "value=" + groupID + ">");
-              out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" "
+              groupContent += ("<input type=\"hidden\" id=\"editType\" name=\"editType\" "
                   + "value=\"remove\">");
-              out.println("<input type=\"hidden\" id=\"email\" name=\"email\" "
+              groupContent += ("<input type=\"hidden\" id=\"email\" name=\"email\" "
                   + "value=" + member + ">");
-              out.println("<input type=\"submit\" id=\"removeMember\" name=\"removeMember\""
+              groupContent += ("<input type=\"submit\" id=\"removeMember\" name=\"removeMember\""
                   + "value=\"Remove\"> </td></tr>");
-              out.println("</form>");
+              groupContent += ("</form>");
             }
           } else {
-            out.println("<p>There are no members in this group yet</p>");
+            groupContent += ("<p>There are no members in this group yet</p>");
           }
-          out.println("</table><br>");
-          out.println("<h2>Add Member</h2>");
-          out.println("<form action=\"/editGroup\" method=\"POST\">");
-          out.println("<input type=\"hidden\" id=\"groupID\" name=\"groupID\" "
+          groupContent += ("</table><br>");
+          groupContent += ("<h2>Add Member</h2>");
+          groupContent += ("<form action=\"/editGroup\" method=\"POST\">");
+          groupContent += ("<input type=\"hidden\" id=\"groupID\" name=\"groupID\" "
               + "value=" + groupID + ">");
-          out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"add\">");
-          out.println("<label for=\"email\">Enter User's Email:</label><br>");
-          out.println("<input type=\"text\" id=\"email\" name=\"email\" required>");
-          out.println("<input type=\"submit\" id=\"addMember\" name=\"addMember\" "
+          groupContent += ("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"add\">");
+          groupContent += ("<label for=\"email\">Enter User's Email:</label><br>");
+          groupContent += ("<input type=\"text\" id=\"email\" name=\"email\" required>");
+          groupContent += ("<input type=\"submit\" id=\"addMember\" name=\"addMember\" "
               + "value=\"Add Member\">");
-          out.println("</form>");
+          groupContent += ("</form>");
 
         } else {
           if (members != null) {
-            out.println("<p>Number of members: " + members.size() + "</p>");
+            groupContent += ("<p>Number of members: " + members.size() + "</p>");
           } else {
-            out.println("<p>There are no members in this group yet</p>");
+            groupContent += ("<p>There are no members in this group yet</p>");
           }
         }
-        out.println("</main></body>");
-        return;
+        groupContent += ("</main></body>");
       }
     }
 
-    out.println("<h2>Create a Group</h2>");
-    out.println("<form id=\"createGroup\" action=\"/editGroup\" method=\"POST\">");
-    out.println("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"create\">");
-    out.println("<label for=\"name\">Enter Group Name:</label><br>");
-    out.println("<input type=\"text\" id=\"name\" name=\"name\" onclick=\"startDictation(this.id)\" required><br>");
-    out.println("<label for=\"name\">Enter Group Description:</label><br>");
-    out.println("<input type=\"text\" id=\"description\" name=\"description\" onclick=\"startDictation(this.id)\"><br>");
-    out.println("<input type=\"submit\" value=\"Submit\">");
-    out.println("</form>");
+    if (groupID == null || groupEntity == null) {
+      groupContent += ("<h2>Create a Group</h2>");
+      groupContent += ("<form id=\"createGroup\" action=\"/editGroup\" method=\"POST\">");
+      groupContent += ("<input type=\"hidden\" id=\"editType\" name=\"editType\" value=\"create\">");
+      groupContent += ("<label for=\"name\">Enter Group Name:</label><br>");
+      groupContent += ("<input type=\"text\" id=\"name\" name=\"name\" onclick=\"startDictation(this.id)\" required><br>");
+      groupContent += ("<label for=\"name\">Enter Group Description:</label><br>");
+      groupContent += ("<input type=\"text\" id=\"description\" name=\"description\" onclick=\"startDictation(this.id)\"><br>");
+      groupContent += ("<input type=\"submit\" value=\"Submit\">");
+      groupContent += ("</form>");
 
-    try {
-      Query getUserGroups = new Query("UserGroup").setFilter(new FilterPredicate("email",
-          FilterOperator.EQUAL, userService.getCurrentUser().getEmail()));
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      PreparedQuery pq = datastore.prepare(getUserGroups);
-      Entity userGroupEntity = pq.asSingleEntity();
-      List<Long> owner = null;
-      List<Long> member = null;
-      if (userGroupEntity != null) {
-        owner = (List<Long>) userGroupEntity.getProperty("owner");
+      try {
+        Query getUserGroups = new Query("UserGroup").setFilter(new FilterPredicate("email",
+            FilterOperator.EQUAL, userService.getCurrentUser().getEmail()));
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        PreparedQuery pq = datastore.prepare(getUserGroups);
+        Entity userGroupEntity = pq.asSingleEntity();
+        List<Long> owner = null;
+        List<Long> member = null;
+        if (userGroupEntity != null) {
+          owner = (List<Long>) userGroupEntity.getProperty("owner");
+          if (owner == null) {
+            owner = new ArrayList<>();
+          }
+          member = (List<Long>) userGroupEntity.getProperty("member");
+          if (member == null) {
+            member = new ArrayList<>();
+          }
+        }
+        groupContent += ("<h3>Owned groups</h3>");
         if (owner == null) {
-          owner = new ArrayList<>();
+          groupContent += ("<p>You do not own any groups.</p>");
+        } else {
+          groupContent += ("<table><tr><th>Group name</th><th>Members</th></tr>");
+          for (Long ownerIndex : owner) {
+            try {
+              Key key = KeyFactory.createKey("Group", ownerIndex);
+              Entity gs = datastore.get(key);
+              String groupName = (String) gs.getProperty("name");
+              List<String> members = (List<String>) gs.getProperty("members");
+              if (members == null) {
+                members = new ArrayList<String>();
+              }
+              long id = gs.getKey().getId();
+              groupContent += ("<tr>");
+              groupContent += ("<td>" + groupName + "</td>");
+              groupContent += ("<td>" + members.size() + "</td>");
+              groupContent += ("<td><a href=\"/groups?groupID=" + id + "\">View/Edit</a></td>");
+              groupContent += ("</tr>");
+            } catch (Exception e) {
+              logger.atWarning().log("Problem while searching groups user owns: %s", e);
+              response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                  "Problem while searching groups user owns");
+              return;
+            }
+          }
+          groupContent += ("</table>");
         }
-        member = (List<Long>) userGroupEntity.getProperty("member");
+        groupContent += ("<h3>Groups you are a member of</h3>");
         if (member == null) {
-          member = new ArrayList<>();
-        }
-      }
-      out.println("<h3>Owned groups</h3>");
-      if (owner == null) {
-        out.println("<p>You do not own any groups.</p>");
-      } else {
-        out.println("<table><tr><th>Group name</th><th>Members</th></tr>");
-        for (Long ownerIndex : owner) {
-          try {
-            Key key = KeyFactory.createKey("Group", ownerIndex);
-            Entity gs = datastore.get(key);
-            String groupName = (String) gs.getProperty("name");
-            List<String> members = (List<String>) gs.getProperty("members");
-            if (members == null) {
-              members = new ArrayList<String>();
+          groupContent += ("<p>You are not a member of any group.</p>");
+        } else {
+          groupContent += ("<table><tr><th>Group name</th><th>Members</th></tr>");
+          for (Long memberIndex : member) {
+            try {
+              Key key = KeyFactory.createKey("Group", memberIndex);
+              Entity gs = datastore.get(key);
+              String groupName = (String) gs.getProperty("name");
+              List<String> members = (List<String>) gs.getProperty("members");
+              if (members == null) {
+                members = new ArrayList<>();
+              }
+              long id = gs.getKey().getId();
+              groupContent += ("<tr>");
+              groupContent += ("<td>" + groupName + "</td>");
+              groupContent += ("<td>" + members.size() + "</td>");
+              groupContent += ("<td><a href=\"/groups?groupID=" + id + "\">View</a></td>");
+              groupContent += ("</tr>");
+            } catch (Exception e) {
+              logger.atWarning().log("Problem while searching groups user is a member of: %s", e);
+              response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                  "Problem while searching groups user is a member of");
+              return;
             }
-            long id = gs.getKey().getId();
-            out.println("<tr>");
-            out.println("<td>" + groupName + "</td>");
-            out.println("<td>" + members.size() + "</td>");
-            out.println("<td><a href=\"/groups?groupID=" + id + "\">View/Edit</a></td>");
-            out.println("</tr>");
-          } catch (Exception e) {
-            logger.atWarning().log("Problem while searching groups user owns: %s", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Problem while searching groups user owns");
-            return;
           }
+          groupContent += ("</table>");
         }
-        out.println("</table>");
+      } catch (Exception e) {
+        logger.atWarning().log("Problem while adding group to users groups: %s", e);
+        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            "Problem while adding group to users groups");
       }
-      out.println("<h3>Groups you are a member of</h3>");
-      if (member == null) {
-        out.println("<p>You are not a member of any group.</p>");
-      } else {
-        out.println("<table><tr><th>Group name</th><th>Members</th></tr>");
-        for (Long memberIndex : member) {
-          try {
-            Key key = KeyFactory.createKey("Group", memberIndex);
-            Entity gs = datastore.get(key);
-            String groupName = (String) gs.getProperty("name");
-            List<String> members = (List<String>) gs.getProperty("members");
-            if (members == null) {
-              members = new ArrayList<>();
-            }
-            long id = gs.getKey().getId();
-            out.println("<tr>");
-            out.println("<td>" + groupName + "</td>");
-            out.println("<td>" + members.size() + "</td>");
-            out.println("<td><a href=\"/groups?groupID=" + id + "\">View</a></td>");
-            out.println("</tr>");
-          } catch (Exception e) {
-            logger.atWarning().log("Problem while searching groups user is a member of: %s", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Problem while searching groups user is a member of");
-            return;
-          }
-        }
-        out.println("</table>");
-      }
-    } catch (Exception e) {
-      logger.atWarning().log("Problem while adding group to users groups: %s", e);
+    }
+    data.put("groupContent", groupContent);
+    // run to freemarker template
+    try {
+      Template template = cfg.getTemplate("Groups.ftl");
+      PrintWriter out = response.getWriter();
+      template.process(data, out);
+      logger.atInfo().log("Groups page was displayed correctly for the User:"
+          + "%s", userService.getCurrentUser());
+    } catch (TemplateException e) {
+      logger.atWarning().log("There was a problem with processing the template %s", e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Problem while adding group to users groups");
+          "Internal Error occurred when trying to display the Groups Page");
     }
   }
 }
