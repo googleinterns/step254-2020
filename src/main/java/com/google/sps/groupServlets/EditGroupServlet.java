@@ -18,6 +18,7 @@ import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -147,7 +148,7 @@ public class EditGroupServlet extends HttpServlet {
       try {
         Key key = KeyFactory.createKey("Group", Long.parseLong(groupID));
         groupEntity = datastore.get(key);
-      } catch (Exception e) {
+      } catch (EntityNotFoundException e) {
         logger.atWarning().log("Group ID does not exist");
         response.sendError(HttpServletResponse.SC_BAD_REQUEST,
             "Group ID does not exist");

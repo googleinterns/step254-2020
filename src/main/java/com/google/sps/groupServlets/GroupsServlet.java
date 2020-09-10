@@ -17,6 +17,7 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -108,7 +109,7 @@ public class GroupsServlet extends HttpServlet {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key key = KeyFactory.createKey("Group", Long.parseLong(groupID));
         groupEntity = datastore.get(key);
-      } catch (Exception e) {
+      } catch (EntityNotFoundException e) {
         groupContent += ("<h3>Selected group is not available.</h3>");
         logger.atInfo().log("Group ID does not exist: %s", e);
       }
@@ -221,7 +222,7 @@ public class GroupsServlet extends HttpServlet {
               groupContent += ("<td>" + members.size() + "</td>");
               groupContent += ("<td><a href=\"/groups?groupID=" + id + "\">View/Edit</a></td>");
               groupContent += ("</tr>");
-            } catch (Exception e) {
+            } catch (EntityNotFoundException e) {
               logger.atWarning().log("Problem while searching groups user owns: %s", e);
               response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                   "Problem while searching groups user owns");
@@ -250,7 +251,7 @@ public class GroupsServlet extends HttpServlet {
               groupContent += ("<td>" + members.size() + "</td>");
               groupContent += ("<td><a href=\"/groups?groupID=" + id + "\">View</a></td>");
               groupContent += ("</tr>");
-            } catch (Exception e) {
+            } catch (EntityNotFoundException e) {
               logger.atWarning().log("Problem while searching groups user is a member of: %s", e);
               response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                   "Problem while searching groups user is a member of");

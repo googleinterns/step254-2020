@@ -17,6 +17,7 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -105,7 +106,7 @@ public class ExamServlet extends HttpServlet {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key key = KeyFactory.createKey("Exam", Long.parseLong(examID));
         examEntity = datastore.get(key);
-      } catch (Exception e) {
+      } catch (EntityNotFoundException e) {
         examContent += ("<h1>Selected exam is not available.</h1>");
         logger.atInfo().log("Exam ID does not exist: %s", e);
       }
@@ -156,7 +157,7 @@ public class ExamServlet extends HttpServlet {
                     + questionID + "\" onclick=\"startDictation(this.id)\" "
                     + "onchange=\"setDirty()\"><br><br>");
               }
-            } catch (Exception e) {
+            } catch (EntityNotFoundException e) {
               examContent += ("<p>Question was not found</p><br>");
               logger.atWarning().log("Question does not exist: %s", e);
             }
