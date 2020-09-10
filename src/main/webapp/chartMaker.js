@@ -44,7 +44,7 @@ function drawPersonalResults() {
 /** Draw the student result as  col chart */
 function drawStudentResults() {
   // Gets exam data
-   fetch('/charts').then((response) => response.json())
+  fetch('/charts').then((response) => response.json())
       .then((results) => {
         // Adds data from servlet to the chart
         const data = new google.visualization.DataTable();
@@ -84,9 +84,10 @@ function drawStudentResults() {
           legend: 'none',
         };
 
-        // creates chart instance and populates it with data and adds the styling
+        /*creates chart instance and populates it with data and 
+        adds the styling*/
         const chart = new google.visualization.ColumnChart(
           document.getElementById('chart-container'));
-          chart.draw(data, options);
-        });
+            chart.draw(data, options);
+          });
 }
