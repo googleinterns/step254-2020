@@ -14,30 +14,29 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
-import java.util.List;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet to update Student exam responses to include marks given by exam owner, overwrites current marks 
- * linked with users email and question on the datastore.
+ * Servlet to update Student exam responses to include marks given by exam owner, 
+ * overwrites current marks linked with users email and question on the datastore.
  *
  * @author Róisín O'Farrell
  */
@@ -55,7 +54,8 @@ public class UpdateExamResponseServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
+    if (!userService.isUserLoggedIn() 
+        || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
       "You are not authorised to view this page");
