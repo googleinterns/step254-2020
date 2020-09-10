@@ -95,10 +95,8 @@ public final class ShowExamServletTest extends ShowExamServlet {
     servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
-    System.out.println(result);
     Assert.assertTrue(result.contains("Trial"));
     Assert.assertTrue(result.contains("What day is it?"));
-    Assert.assertTrue(result.contains("chart-container"));
     Assert.assertFalse(result.contains("How many pets do you have?"));
   }
 
