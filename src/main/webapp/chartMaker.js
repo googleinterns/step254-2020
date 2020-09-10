@@ -84,10 +84,10 @@ function drawStudentResults() {
           legend: 'none',
         };
 
-        /*creates chart instance and populates it with data and 
+        /* creates chart instance and populates it with data and 
         adds the styling*/
         const chart = new google.visualization.ColumnChart(
-          document.getElementById('chart-container'));
-            chart.draw(data, options);
-          });
+            document.getElementById('chart-container'));
+        chart.draw(data, options);
+      });
 }
