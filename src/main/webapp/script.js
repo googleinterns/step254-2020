@@ -138,8 +138,8 @@ function getMcqChecked() {
   const mcqAnswer = document.getElementById('mcqAnswer');
   const mcqLine = document.getElementById('mcq');
   if (mcqCheck.checked) {
-    addFieldsButton.style.display = 'block';
-    removeFieldsButton.style.display = 'block';
+    addFieldsButton.style.display = 'inline-block';
+    removeFieldsButton.style.display = 'inline-block';
     fieldsList.style.display = 'block';
     mcqLine.style.display = 'block';
     mcqAnswer.style.display = 'block';
@@ -167,14 +167,14 @@ function moreFields() {
     field.type ='text';
     field.name = 'mcqField';
     field.id = 'mcqField'+counter;
-    field.onClick= startDictation(field.id);
+    field.onClick = startDictation(field.id);
     field.cols = '50';
     field.rows = '3';
     field.style.display = 'block';
     field.required = true;
     number.append(field);
     document.getElementById('fieldsList').append(number);
-    document.getElementById('removeFields').style.display = 'block';
+    document.getElementById('removeFields').style.display = 'inline-block';
     counter++;
   }
 };

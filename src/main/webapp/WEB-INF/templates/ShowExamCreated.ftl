@@ -23,37 +23,40 @@
       </div>
     </header>
     <main>
-        <div>
+      <div>
         <#if exam??>
           <#list exam as name, duration>
-          <h1 class="title"> Exam: ${name} , Duration: ${duration}</h3>
+            <h1 class="title"> Exam: ${name} , Duration: ${duration} minutes </h3>
           </#list>
           <#if question??>
+            <h2> Questions: </h2>
             <#list question as qs, mark>
-              <tr>
-              <td> ${qs} (${mark})</td>
-              <#if MCQ??>
-                <#list MCQ as key, answers>
-                   <#if key == qs>
-                     <#list answers as answer>
-                      <td> - ${answer}</td>
+              <div class="questionsForExam">
+                <tr>
+                  <td> ${qs?counter}: ${qs} (${mark})</td>
+                  <#if MCQ??>
+                    <div class="mcqForExam">
+                      <#list MCQ as key, answers>
+                        <#if key == qs>
+                          <#list answers as answer>
+                            <td> Option ${answer?counter}: ${answer} <#sep>, </#sep></td>
+                          </#list>
+                        </#if>
                       </#list>
-                    </#if>
-                </#list>
-              </#if> 
-              </tr>
-              <br>
+                    </div>
+                  </#if> 
+                </tr>
+              </div>
             </#list>
           <#else>
-          <h2> You did not create any questions for this exam <h3>
+            <h2> You did not create any questions for this exam </h2>
           </#if>
-        <div id="chart-container">
-        </div>
+          <div id="chart-container">
+          </div>
         <#else>
           <h2> Seems like this exam no longer exists </h2>
         </#if>
       </div>
-      
     </main>
     <footer>
     </footer>

@@ -80,13 +80,7 @@ public class ExamResponseServlet extends HttpServlet {
         String questionID = parameterNames.nextElement();
         System.out.println(questionID);
         if(questionID.equals("examID")){
-          if (parameterNames.hasMoreElements()){
-             System.out.println("continue");
-            continue;
-          } else{
-            System.out.println("break");
-            break;
-          }
+          continue;
         }
          System.out.println("good");
         String[] questionAnswer = request.getParameterValues(questionID);

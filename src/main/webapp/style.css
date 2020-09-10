@@ -7,7 +7,7 @@ html{
 body{
     color: #4D5061;
     margin: 0;
-    padding: 0;
+    padding: 20;
     font-family: 'Open Sans', sans-serif;
     font-size: 15px;
     line-height: 1.5;
@@ -48,6 +48,7 @@ h4{
 .title{
     text-align: center;
 }
+
 
 /* Header
 -------------------*/
@@ -145,4 +146,34 @@ h4{
 
 .answerValue, .questionValue{
   padding-left: 30px;
+}
+
+/* Dashboard */
+.done, .todo, .created {
+  margin: 20px;
+  border: 2px solid ;
+  border-radius: 5px;
+  padding-left: 20px;
+  padding-bottom: 10px;
+}
+
+/* Show Exam Created Page */
+.questionsForExam {
+  margin: 10px;
+  padding-left: 20px;
+}
+.mcqForExam {
+  padding-left: 30px;
+}
+/* Question Bank Page*/
+.questionsUserOwns {
+  padding-left: 20px;
+}
+
+/* Question Form Page*/
+#addFields, #removeFields {
+  display:inline-block;
+}
+.questionForm {
+  padding-left: 20px;
 }
