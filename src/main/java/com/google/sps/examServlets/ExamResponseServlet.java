@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Aidan Molloy
  * @author Róisín O'Farrell
+ * @author Klaudia Obieglo
  */
 @WebServlet("/examResponse")
 public class ExamResponseServlet extends HttpServlet {

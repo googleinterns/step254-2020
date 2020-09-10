@@ -165,7 +165,6 @@ public class ExamsTakenServlet extends HttpServlet {
           answerList.add(new AnswerClass(responseName, answer, givenMark, questionValue, possibleMark));
           data.put("responses", answerList);
           if(!"Not Marked Yet ".equals(givenMark)) {
-            // resultsData.put(Integer.parseInt(givenMark),Integer.parseInt(possibleMark));
             totalGivenMarks +=Integer.parseInt(givenMark);
             totalPossibleMArks +=Integer.parseInt(possibleMark);
           } else {
