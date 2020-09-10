@@ -132,24 +132,36 @@ public class ExamResponseServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryUser);
     Entity user = pq.asSingleEntity();
-    //add to examsTaken list
-    if (user.getProperty("taken") == null) {
+    if (user != null){
+      //add to examsTaken list
+      if (user.getProperty("taken") == null) {
         List<Long> examsTakenList = new ArrayList<>();
         examsTakenList.add(examID);
         user.setProperty("taken", examsTakenList);
       } else {
         List<Long> examsTakenList =
-            (List<Long>) user.getProperty("taken");
+        (List<Long>) user.getProperty("taken");
         examsTakenList.add(examID);
+        System.out.println("taken list has curr exam");
         user.setProperty("taken", examsTakenList);
       }
-    //remove examID from exams To Do list as exam has been taken
-    if(user.getProperty("available") != null) {
-      List<Long> availableExams =
-            (List<Long>) user.getProperty("available");
-      availableExams.remove(Long.valueOf(examID));
+      //remove examID from exams To Do list as exam has been taken
+      if(user.getProperty("available") != null) {
+        List<Long> availableExams =
+        (List<Long>) user.getProperty("available");
+        availableExams.remove(Long.valueOf(examID));
+      }
+      datastore.put(user);
+    } else {
+      Entity userExamEntity = new Entity("UserExams", email);
+      userExamEntity.setProperty("available", null);
+      userExamEntity.setProperty("created", new ArrayList<>());
+      userExamEntity.setProperty("email", email);
+      List<Long> examsTakenList = new ArrayList<>();
+      examsTakenList.add(examID);
+      userExamEntity.setProperty("taken", examsTakenList);
+      datastore.put(userExamEntity); 
     }
-    datastore.put(user);
   }
 }
 

@@ -5,7 +5,14 @@
     <title>Create Question</title>
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="script.js"></script>
+    <script src="chartMaker.js"></script>
+    <style>
+      main {
+        padding: 20px;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -44,6 +51,8 @@
           <#else>
             <h2> You did not create any questions for this exam </h2>
           </#if>
+          <div id="chart-container">
+          </div>
         <#else>
           <h2> Seems like this exam no longer exists </h2>
         </#if>

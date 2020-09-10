@@ -69,6 +69,11 @@ async function setPreference() {
   }
 }
 
+// On load
+window.onload = function() {
+  authenticate();
+};
+
 /* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
@@ -124,26 +129,6 @@ function isChecked(checkBoxList, submitButton) {
   }
   return areTheyChecked;
 };
-/* eslint-enable no-unused-vars */
-
-// On load
-window.onload = function() {
-  authenticate();
-};
-
-// Export modules for testing
-if (typeof exports !== 'undefined') {
-  module.exports = {
-    authenticate,
-    setPreference,
-    pageAccess,
-    userAuth,
-    userName,
-    newUser,
-    isChecked,
-  };
-};
-/* eslint-disable no-unused-vars */
 /** Checks if the MCQ checkbox is checked */
 function getMcqChecked() {
   const mcqCheck = document.getElementById('mcqCheckBox');
@@ -228,30 +213,20 @@ function startDictation(Id) {
     };
   }
 };
+/* eslint-enable no-unused-vars */
 
-/** Import google charts */
-google.charts.load('current', {'packages': ['corechart']});
-google.charts.setOnLoadCallback(drawResults);
-
-/** Draw the users result as  pie chart */
-function drawResults() {
-  fetch('/charts').then((response) => response.json())
-      .then((results) => {
-        const data = new google.visualization.DataTable();
-        data.addColumn('string', 'Given Marks');
-        data.addColumn('number', 'Possible Marks');
-        Object.keys(results).forEach((mark) => {
-          data.addRow([mark, results[mark]]);
-        });
-        const resultChart = {
-          'title': 'Your Results',
-          'width': 500,
-          'height': 400,
-          'colors': ['#d6add9', '#eda274'],
-        };
-        const chart = new google.visualization.PieChart(
-            document.getElementById('results-chart'));
-        chart.draw(data, resultChart);
-      });
+// Export modules for testing
+if (typeof exports !== 'undefined') {
+  module.exports = {
+    authenticate,
+    setPreference,
+    pageAccess,
+    userAuth,
+    userName,
+    newUser,
+    isChecked,
+  };
 };
+/* eslint-disable no-unused-vars */
+
 /* eslint-disable no-unused-vars */

@@ -58,7 +58,9 @@ import freemarker.cache.*;
 /**
  * Servlet that creates and stores exams in the datastore and assigns exams to users.
  *
- * @author Klaudia Obieglo & Aidan Molloy.
+ * @author Klaudia Obieglo
+ * @author Aidan Molloy
+ * @author Róisín O'Farrell
  */
 @WebServlet("/createExam")
 public class CreateExamServlet extends HttpServlet {
