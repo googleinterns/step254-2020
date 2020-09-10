@@ -162,20 +162,9 @@ main {
 /* Show Exam Created Page */
 .questionsForExam {
   margin: 10px;
-  /* padding-left: 20px; */
 }
-/* .mcqForExam {
-  padding-left: 30px;
-} */
-/* Question Bank Page*/
-/* .questionsUserOwns {
-  padding-left: 20px;
-} */
 
 /* Question Form Page*/
 #addFields, #removeFields {
   display:inline-block;
 }
-/* .questionForm {
-  padding-left: 20px;
-} */
