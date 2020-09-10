@@ -80,7 +80,6 @@ public class ExamResponseServlet extends HttpServlet {
         if(questionID.equals("examID")){
           continue;
         }
-         System.out.println("good");
         String[] questionAnswer = request.getParameterValues(questionID);
         // Correct mcq questions with pre-defined answers
         try{
