@@ -97,6 +97,7 @@ public class GroupsServlet extends HttpServlet {
     logger.atInfo().log("user=%s", userService.getCurrentUser());
     Map data = new HashMap();
     String groupID = UtilityClass.getParameter(request, "groupID", null);
+    logger.atInfo().log("groupID: %s", groupID);
     Entity groupEntity = null;
     String groupContent = "";
 

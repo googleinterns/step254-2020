@@ -96,6 +96,7 @@ public class ExamServlet extends HttpServlet {
 
     Map data = new HashMap();
     String examID = UtilityClass.getParameter(request, "examID", null);
+    logger.atInfo().log("examID: %s", examID);
     Entity examEntity = null;
     String examContent = "";
     if (examID != null) {

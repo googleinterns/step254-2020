@@ -63,6 +63,7 @@ public class EditGroupServlet extends HttpServlet {
     }
     logger.atInfo().log("user=%s", userService.getCurrentUser());
     String editType = UtilityClass.getParameter(request, "editType", "");
+    logger.atInfo().log("editType: %s", editType);
     // Remove all html tags and trim the spaces in the parameter.
     editType = UtilityClass.processExternalText(editType);
     logger.atInfo().log("edit type=%s", editType);
@@ -72,10 +73,10 @@ public class EditGroupServlet extends HttpServlet {
       // Create a group
       String name = UtilityClass.getParameter(request, "name", "");
       name = UtilityClass.processExternalText(name);
-      logger.atInfo().log("name=%s", name);
+      logger.atInfo().log("name: %s", name);
       String description = UtilityClass.getParameter(request, "description", "");
       description = UtilityClass.processExternalText(description);
-      logger.atInfo().log("description=%s", description);
+      logger.atInfo().log("description: %s", description);
       if (name.equals("")) {
         logger.atWarning().log("Name is null");
         response.sendError(HttpServletResponse.SC_BAD_REQUEST,

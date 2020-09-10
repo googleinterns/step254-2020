@@ -47,7 +47,7 @@ public class UpdateInfoServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn() 
+    if (!userService.isUserLoggedIn()
         || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -76,6 +76,8 @@ public class UpdateInfoServlet extends HttpServlet {
       textColor = request.getParameter("text_color");
       textColor = UtilityClass.processExternalText(textColor);
       email = userService.getCurrentUser().getEmail();
+      logger.atInfo().log("Name: %s, Font: %s, Font Size: %s, Background Colour: %s, " 
+          + "Text Colour: %s", name, font, fontSize, bgColor, textColor);
     } catch (Exception e) {
       logger.atSevere().log("One or more null parameters in try/catch");
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
