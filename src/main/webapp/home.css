@@ -48,9 +48,6 @@ h4{
 .title{
     text-align: center;
 }
-main {
-  padding:20px;
-}
 
 /* Header
 -------------------*/
@@ -125,57 +122,3 @@ main {
   overflow: hidden;
   transition: max-height 0.2s ease-out;
 }
-
-/* Forms
----------------*/
-.form{
-  padding: 20px;
-}
-.formElement, .reviewElement{
-  padding-bottom: 1.5em;
-}
-.form select{
-  font-size: 100%; 
-  width: 4em;
-  height: 2em;
-}
-
-/* Submitted Exam Display
---------------------------*/
-.answerOutput, .questionOutput{
-  font-weight: bold;
-}
-
-.answerValue, .questionValue{
-  padding-left: 30px;
-}
-
-/* Dashboard */
-.done, .todo, .created {
-  margin: 20px;
-  border: 2px solid ;
-  border-radius: 5px;
-  padding-left: 20px;
-  padding-bottom: 10px;
-}
-
-/* Show Exam Created Page */
-.questionsForExam {
-  margin: 10px;
-  /* padding-left: 20px; */
-}
-/* .mcqForExam {
-  padding-left: 30px;
-} */
-/* Question Bank Page*/
-/* .questionsUserOwns {
-  padding-left: 20px;
-} */
-
-/* Question Form Page*/
-#addFields, #removeFields {
-  display:inline-block;
-}
-/* .questionForm {
-  padding-left: 20px;
-} */

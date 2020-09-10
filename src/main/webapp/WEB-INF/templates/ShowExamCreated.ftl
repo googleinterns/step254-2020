@@ -8,10 +8,6 @@
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="script.js"></script>
     <script src="chartMaker.js"></script>
-    <style>
-      main {
-        padding: 20px;
-      }
     </style>
   </head>
   <body>
