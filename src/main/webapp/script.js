@@ -215,8 +215,6 @@ function startDictation(Id) {
 };
 /* eslint-enable no-unused-vars */
 
-
-
 // Export modules for testing
 if (typeof exports !== 'undefined') {
   module.exports = {
