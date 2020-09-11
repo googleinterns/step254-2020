@@ -6,11 +6,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
-    <style>
-      main {
-        padding: 20px;
-      }
-    </style>
   </head>
   <body>
     <header>
@@ -21,6 +16,7 @@
       </div>
     </header>
     <main>
+    <div class="questionsUserOwns">
     <#if questions??>
       <h1>Check the questions you would like to reuse</h1>
       <form action="/saveQuestionsFromBank" method="POST">
@@ -43,6 +39,7 @@
       <h1>You have not created any questions yet! </h1>
       <button onclick="location.href='/questionForm'" type="button"> Go Back </button>
     </#if>
+    </div>
     </main>
     <footer>
     </footer>

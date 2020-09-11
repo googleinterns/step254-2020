@@ -69,6 +69,11 @@ async function setPreference() {
   }
 }
 
+// On load
+window.onload = function() {
+  authenticate();
+};
+
 /* eslint-disable no-unused-vars */
 /**
  * Check if user has access to page
@@ -124,26 +129,6 @@ function isChecked(checkBoxList, submitButton) {
   }
   return areTheyChecked;
 };
-/* eslint-enable no-unused-vars */
-
-// On load
-window.onload = function() {
-  authenticate();
-};
-
-// Export modules for testing
-if (typeof exports !== 'undefined') {
-  module.exports = {
-    authenticate,
-    setPreference,
-    pageAccess,
-    userAuth,
-    userName,
-    newUser,
-    isChecked,
-  };
-};
-/* eslint-disable no-unused-vars */
 /** Checks if the MCQ checkbox is checked */
 function getMcqChecked() {
   const mcqCheck = document.getElementById('mcqCheckBox');
@@ -153,8 +138,8 @@ function getMcqChecked() {
   const mcqAnswer = document.getElementById('mcqAnswer');
   const mcqLine = document.getElementById('mcq');
   if (mcqCheck.checked) {
-    addFieldsButton.style.display = 'block';
-    removeFieldsButton.style.display = 'block';
+    addFieldsButton.style.display = 'inline-block';
+    removeFieldsButton.style.display = 'inline-block';
     fieldsList.style.display = 'block';
     mcqLine.style.display = 'block';
     mcqAnswer.style.display = 'block';
@@ -182,14 +167,14 @@ function moreFields() {
     field.type ='text';
     field.name = 'mcqField';
     field.id = 'mcqField'+counter;
-    field.onClick= startDictation(field.id);
+    field.onClick = startDictation(field.id);
     field.cols = '50';
     field.rows = '3';
     field.style.display = 'block';
     field.required = true;
     number.append(field);
     document.getElementById('fieldsList').append(number);
-    document.getElementById('removeFields').style.display = 'block';
+    document.getElementById('removeFields').style.display = 'inline-block';
     counter++;
   }
 };
@@ -228,4 +213,20 @@ function startDictation(Id) {
     };
   }
 };
+/* eslint-enable no-unused-vars */
+
+// Export modules for testing
+if (typeof exports !== 'undefined') {
+  module.exports = {
+    authenticate,
+    setPreference,
+    pageAccess,
+    userAuth,
+    userName,
+    newUser,
+    isChecked,
+  };
+};
+/* eslint-disable no-unused-vars */
+
 /* eslint-disable no-unused-vars */

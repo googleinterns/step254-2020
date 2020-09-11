@@ -144,7 +144,6 @@ public final class EditGroupServletTest extends EditGroupServlet {
     groupResponse.put("description", (String) entity.getProperty("description"));
     groupResponse.put("owner", (String) entity.getProperty("ownerID"));
     String result = UtilityClass.convertToJson(groupResponse);
-    System.out.println(result);
     Assert.assertTrue(result.contains("\"name\":\"Test Group\""));
     Assert.assertTrue(result.contains("\"description\":\"Test Description\""));
     Assert.assertTrue(result.contains("\"owner\":\"test@google.com\""));

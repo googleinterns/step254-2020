@@ -21,12 +21,17 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.File;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
@@ -42,13 +47,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 /**
- * Tests for Mark Exam Servlet. Test is marking form displayed correctly,
- * if a user is not logged in check for an unauthorised error.
+ * Tests for Show Exam Servlet. Test exam displayed as expected,
+ * if student results are gathered as expected.
  *
  * @author Róisín O'Farrell
  */
 @RunWith(JUnit4.class)
-public final class MarkExamServletTest extends MarkExamServlet {
+public final class ShowExamServletTest extends ShowExamServlet {
   private final LocalServiceTestHelper helper = 
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
@@ -60,10 +65,10 @@ public final class MarkExamServletTest extends MarkExamServlet {
   public void tearDown() {
     helper.tearDown();
   }
+
+   /*Tests the doGet function to see if the exam is retrieved correctly */
   @Test
-  public void testdoPostFunction() throws IOException, ServletException{
-    /*Tests the doGet function to see if the questions that the
-    * user owns get retrieved correctly */
+  public void testdoGetFunction() throws IOException, ServletException{
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     ServletConfig config = mock(ServletConfig.class);
@@ -71,8 +76,7 @@ public final class MarkExamServletTest extends MarkExamServlet {
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(request.getParameter("testName")).thenReturn("Trial");
-    when(request.getParameter("studentName")).thenReturn("student@google.com");
+    when(UtilityClass.getParameter(request, "examID", "")).thenReturn("7");
     setFakeTest();
     setFakeQuestions();
     setFakeResponeses();
@@ -86,17 +90,51 @@ public final class MarkExamServletTest extends MarkExamServlet {
     String path = filePath + endPath;
     when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
     
-    MarkExamServlet servlet= new MarkExamServlet();
+    
+    ShowExamServlet servlet= new ShowExamServlet();
     servlet.init(config);
-    servlet.doPost(request, response);
+    servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Trial"));
-    Assert.assertTrue(result.contains("student@google.com"));
     Assert.assertTrue(result.contains("What day is it?"));
-    Assert.assertTrue(result.contains("Tuesday"));
-    Assert.assertFalse(result.contains("person@example.com"));
     Assert.assertFalse(result.contains("How many pets do you have?"));
   }
+
+  /*Tests the doGet function to see if the exam is retrieved correctly */
+  @Test
+  public void testGetResponsesFunction() throws IOException, ServletException, EntityNotFoundException{
+    Map<String,Integer> testExamMarks = new LinkedHashMap<String, Integer>();
+    testExamMarks.put("10", 1);
+    setFakeTest();
+    setFakeQuestions();
+    setFakeResponeses();
+    
+    ShowExamServlet servlet= new ShowExamServlet();
+    servlet.getResponses("test@google.com", 7L);
+    Assert.assertTrue(testExamMarks.equals(servlet.examMarks)); 
+  }
+
+   /*Tests the doGet function to see if the exam is retrieved correctly */
+  @Test
+  public void testGetExamFunction() throws IOException, ServletException, EntityNotFoundException{
+    Map testData = new HashMap();
+    Map<String,String> testExamQuestions = new LinkedHashMap<String, String>();
+    Map<String,String> testExamMap = new LinkedHashMap<String, String>();
+   
+    testExamMap.put("Trial", "30");
+    testData.put("exam", testExamMap);
+    testExamQuestions.put("What day is it?", "5");
+    testExamQuestions.put("What year is it?", "10");
+    testData.put("question", testExamQuestions);
+    setFakeTest();
+    setFakeQuestions();
+    setFakeResponeses();
+    
+    ShowExamServlet servlet= new ShowExamServlet();
+    servlet.getExam("test@google.com", 7L);
+    Assert.assertTrue(testData.equals(servlet.data)); 
+  }
+
   @Test
   public void testNotLoggedInUser() throws IOException {
     // test to see if a not logged in user will be able to
@@ -106,8 +144,8 @@ public final class MarkExamServletTest extends MarkExamServlet {
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
-    MarkExamServlet servlet= new MarkExamServlet();
-    servlet.doPost(request, response);
+    ShowExamServlet servlet= new ShowExamServlet();
+    servlet.doGet(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
@@ -117,7 +155,7 @@ public final class MarkExamServletTest extends MarkExamServlet {
     List<Long> fakeQuestionList = new ArrayList<Long>();
     fakeQuestionList.add(1L);
     fakeQuestionList.add(2L);
-    Entity testEntity = new Entity("Exam");
+    Entity testEntity = new Entity("Exam", 7L);
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
     testEntity.setProperty("ownerID", "test@google.com");
@@ -128,14 +166,14 @@ public final class MarkExamServletTest extends MarkExamServlet {
   }
    private void setFakeResponeses () {
     /*Set up two fake response entities for testing purposes */
-    Entity responseEntity = new Entity("1", "student@google.com");
+    Entity responseEntity = new Entity("1", "test@google.com");
     responseEntity.setProperty("answer", "Tuesday");
     responseEntity.setProperty("marks", "5");
-    responseEntity.setProperty("email", "student@google.com");
-    Entity anotherResponseEntity = new Entity("2", "student@google.com");
+    responseEntity.setProperty("email", "test@google.com");
+    Entity anotherResponseEntity = new Entity("2", "test@google.com");
     anotherResponseEntity.setProperty("answer", "2011");
     anotherResponseEntity.setProperty("marks", "5");
-    anotherResponseEntity.setProperty("email", "student@google.com");
+    anotherResponseEntity.setProperty("email", "test@google.com");
     
     Entity responseToDifferentUser = new Entity("4", "person@example.com");
     responseToDifferentUser.setProperty("answer", "6");
@@ -153,16 +191,19 @@ public final class MarkExamServletTest extends MarkExamServlet {
     Entity questionEntity = new Entity("Question", 1L);
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
+    questionEntity.setProperty("type", "Normal");
     questionEntity.setProperty("date", date);
-    questionEntity.setProperty("ownerID", "test@example.com");
+    questionEntity.setProperty("ownerID", "test@google.com");
     Entity anotherQuestionEntity = new Entity("Question", 2L);
     anotherQuestionEntity.setProperty("question", "What year is it?");
+    anotherQuestionEntity.setProperty("type", "Normal");
     anotherQuestionEntity.setProperty("marks", "10");
     anotherQuestionEntity.setProperty("date", date);
-    anotherQuestionEntity.setProperty("ownerID", "test@example.com");
+    anotherQuestionEntity.setProperty("ownerID", "test@google.com");
     
     Entity questionByDifferentUser = new Entity("Question", 4L);
     questionByDifferentUser.setProperty("question", "How many pets do you have?");
+    questionByDifferentUser.setProperty("type", "Normal");
     questionByDifferentUser.setProperty("marks", "15");
     questionByDifferentUser.setProperty("date", date);
     questionByDifferentUser.setProperty("ownerID", "person@example.com");
@@ -173,7 +214,7 @@ public final class MarkExamServletTest extends MarkExamServlet {
     datastore.put(questionByDifferentUser);
   }
   private void helperLogin() {
-    /* Login user with email "test@example.com" */
+    /* Login user with email "test@google.com" */
     helper.setEnvAuthDomain("google.com");
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);

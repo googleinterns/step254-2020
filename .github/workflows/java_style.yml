@@ -28,6 +28,20 @@ jobs:
         reporter: 'github-pr-check'
         tool_name: 'testtool'
         workdir: 'src/main/java/com/google/sps/examServlets'
+    - name: Run check style on otherExamServlets
+      uses: nikitasavinov/checkstyle-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        reporter: 'github-pr-check'
+        tool_name: 'testtool'
+        workdir: 'src/main/java/com/google/sps/otherExamServlets'
+    - name: Run check style on groupServlets
+      uses: nikitasavinov/checkstyle-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        reporter: 'github-pr-check'
+        tool_name: 'testtool'
+        workdir: 'src/main/java/com/google/sps/groupServlets'
     - name: Run check style on data
       uses: nikitasavinov/checkstyle-action@master
       with:

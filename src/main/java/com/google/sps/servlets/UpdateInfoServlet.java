@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
+import com.google.sps.data.UtilityClass;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -46,7 +47,8 @@ public class UpdateInfoServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
+    if (!userService.isUserLoggedIn()
+        || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
@@ -64,21 +66,18 @@ public class UpdateInfoServlet extends HttpServlet {
     try {
       // Get all values and remove all html tags and trim the spaces in the parameters.
       name = request.getParameter("name");
-      name = name.replaceAll("\\<.*?\\>", "");
-      name = name.trim();
+      name = UtilityClass.processExternalText(name);
       font = request.getParameter("font");
-      font = font.replaceAll("\\<.*?\\>", "");
-      font = font.trim();
+      font = UtilityClass.processExternalText(font);
       fontSize = request.getParameter("font_size");
-      fontSize = fontSize.replaceAll("\\<.*?\\>", "");
-      fontSize = fontSize.trim();
+      fontSize = UtilityClass.processExternalText(fontSize);
       bgColor = request.getParameter("bg_color");
-      bgColor = bgColor.replaceAll("\\<.*?\\>", "");
-      bgColor = bgColor.trim();
+      bgColor = UtilityClass.processExternalText(bgColor);
       textColor = request.getParameter("text_color");
-      textColor = textColor.replaceAll("\\<.*?\\>", "");
-      textColor = textColor.trim();
+      textColor = UtilityClass.processExternalText(textColor);
       email = userService.getCurrentUser().getEmail();
+      logger.atInfo().log("Name: %s, Font: %s, Font Size: %s, Background Colour: %s, " 
+          + "Text Colour: %s", name, font, fontSize, bgColor, textColor);
     } catch (Exception e) {
       logger.atSevere().log("One or more null parameters in try/catch");
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);

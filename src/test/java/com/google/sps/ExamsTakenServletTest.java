@@ -11,13 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-/*
-package com.google.sps.servlets;
 
+package com.google.sps.servlets;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -44,14 +42,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
 /**
- * Tests for Get Exam Responses Servlet. Test are all exam created by the user retrieved,
- * are all student who took any of these exams retrieved,
+ * Tests for Exams Taken Servlet. Test are all exam taken by the user retrieved,
  * if a user is not logged in check for an unauthorised error.
  *
  * @author Róisín O'Farrell
- *//*
+ */
 @RunWith(JUnit4.class)
 public final class ExamsTakenServletTest extends ExamsTakenServlet {
   private final LocalServiceTestHelper helper = 
@@ -61,16 +57,14 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
   public void setUp() {
     helper.setUp();
   }
-
   @After
   public void tearDown() {
     helper.tearDown();
   }
-
   @Test
-  public void testdoPostFunction() throws IOException, ServletException{
-    /*Tests the doPost function to see if the exam that the
-    * user took get retrieved correctly *//*
+  public void testdoGetFunction() throws IOException, ServletException{
+    /*Tests the doGet function to see if the exam that the
+    * user took get retrieved correctly */
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
     ServletConfig config = mock(ServletConfig.class);
@@ -78,7 +72,7 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     helperLogin();
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(UtilityClass.getParameter(request, "examID", null)).thenReturn("Trial");
+    when(UtilityClass.getParameter(request, "examID", "")).thenReturn("7");
     setFakeTest();
     setFakeQuestions();
     setFakeResponeses();
@@ -86,7 +80,6 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
     when(config.getServletContext()).thenReturn(context);
-
     //Get the path to the target files were templates are stored for tests
     String filePath = new File(".").getCanonicalPath();
     String endPath = "/target/portfolio-1/WEB-INF/templates";
@@ -96,9 +89,9 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     
     ExamsTakenServlet servlet= new ExamsTakenServlet();
     servlet.init(config);
-    servlet.doPost(request, response);
+    servlet.doGet(request, response);
     String result = stringWriter.toString();
-    System.out.println(result);
+    
     Assert.assertTrue(result.contains("Trial"));
     Assert.assertTrue(result.contains("What day is it?"));
     Assert.assertTrue(result.contains("Tuesday"));
@@ -111,22 +104,21 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     // look at tests a user has created
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);
-
     UserService userService = mock(UserService.class);
     when(userService.isUserLoggedIn()).thenReturn(false);
     
     ExamsTakenServlet servlet= new ExamsTakenServlet();
-    servlet.doPost(request, response);
+    servlet.doGet(request, response);
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED,
         "You are not authorised to view this page");
   }
   private void setFakeTest() {
-    /*Set a fake test*//*
+    /*Set a fake test*/
     Long date = (new Date()).getTime(); 
     List<Long> fakeQuestionList = new ArrayList<Long>();
     fakeQuestionList.add(1L);
     fakeQuestionList.add(2L);
-    Entity testEntity = new Entity("Exam");
+    Entity testEntity = new Entity("Exam", 7L);
     testEntity.setProperty("name", "Trial");
     testEntity.setProperty("duration", "30");
     testEntity.setProperty("ownerID", "test@google.com");
@@ -135,14 +127,12 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(testEntity);
   }
-
    private void setFakeResponeses () {
-    /*Set up two fake response entities for testing purposes *//*
+    /*Set up two fake response entities for testing purposes */
     Entity responseEntity = new Entity("1", "test@google.com");
     responseEntity.setProperty("answer", "Tuesday");
     responseEntity.setProperty("marks", "5");
     responseEntity.setProperty("email", "test@google.com");
-
     Entity anotherResponseEntity = new Entity("2", "test@google.com");
     anotherResponseEntity.setProperty("answer", "2011");
     anotherResponseEntity.setProperty("marks", "5");
@@ -158,16 +148,14 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     datastore.put(anotherResponseEntity);
     datastore.put(responseToDifferentUser);
   }
-
    private void setFakeQuestions () {
-    /*Set up two fake question entities for testing purposes *//*
+    /*Set up two fake question entities for testing purposes */
     Long date = (new Date()).getTime(); 
     Entity questionEntity = new Entity("Question", 1L);
     questionEntity.setProperty("question", "What day is it?");
     questionEntity.setProperty("marks", "5");
     questionEntity.setProperty("date", date);
     questionEntity.setProperty("ownerID", "test@google.com");
-
     Entity anotherQuestionEntity = new Entity("Question", 2L);
     anotherQuestionEntity.setProperty("question", "What year is it?");
     anotherQuestionEntity.setProperty("marks", "10");
@@ -186,10 +174,9 @@ public final class ExamsTakenServletTest extends ExamsTakenServlet {
     datastore.put(questionByDifferentUser);
   }
   private void helperLogin() {
-    /* Login user with email "test@google.com" *//*
+    /* Login user with email "test@google.com" */
     helper.setEnvAuthDomain("google.com");
     helper.setEnvEmail("test@google.com");
     helper.setEnvIsLoggedIn(true);
   }
 }
-*/

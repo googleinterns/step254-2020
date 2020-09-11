@@ -58,7 +58,9 @@ import freemarker.cache.*;
 /**
  * Servlet that creates and stores exams in the datastore and assigns exams to users.
  *
- * @author Klaudia Obieglo & Aidan Molloy.
+ * @author Klaudia Obieglo
+ * @author Aidan Molloy
+ * @author Róisín O'Farrell
  */
 @WebServlet("/createExam")
 public class CreateExamServlet extends HttpServlet {
@@ -83,7 +85,7 @@ public class CreateExamServlet extends HttpServlet {
     cfg.setFallbackOnNullLoopVariable(false);
   
   }
-  @Override
+    @Override
   public void doPost(final HttpServletRequest request,
                      final HttpServletResponse response) throws IOException {
     /*Servlet Receives information from the client about an exam they
@@ -92,11 +94,9 @@ public class CreateExamServlet extends HttpServlet {
     Long date = (new Date()).getTime();
     String name = UtilityClass.getParameter(request, "name", "");
     // Remove all html tags and trim the spaces in the exam name.
-    name = name.replaceAll("\\<.*?\\>", "");
-    name = name.trim();
+    name = UtilityClass.processExternalText(name);
     String groupID = UtilityClass.getParameter(request, "groupID", "");
-    groupID = groupID.replaceAll("\\<.*?\\>", "");
-    groupID = groupID.trim();
+    groupID = UtilityClass.processExternalText(groupID);
     logger.atInfo().log("Group =%s is selected", groupID);
     String duration = UtilityClass.getParameter(request, "duration", "");
     if (name.equals("") || duration.equals("")) {
@@ -253,7 +253,7 @@ public class CreateExamServlet extends HttpServlet {
     
     // create Map with all the groups the user owns 
     Map data = new HashMap();
-    Map<String,Long> groupMap = new LinkedHashMap<String,Long>();
+    Map<Long,String> groupMap = new LinkedHashMap<Long,String>();
 
     //Look up each Group owned by the user and add to map
     try {
@@ -265,7 +265,7 @@ public class CreateExamServlet extends HttpServlet {
            
         long groupID = entity.getKey().getId();
         String name = (String) entity.getProperty("name");
-        groupMap.put(name, groupID);
+        groupMap.put(groupID, name);
         data.put("groups", groupMap);
         }  
     } catch (DatastoreFailureException e) {

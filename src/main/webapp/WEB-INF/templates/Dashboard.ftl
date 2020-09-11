@@ -6,11 +6,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
-    <style>
-      main {
-        padding: 20px;
-      }
-    </style>
   </head>
   <body>
     <header>
@@ -26,10 +21,10 @@
       </div>
     </header>
     <main>
-      <h1 class="title"> Welcome to your dashboard</h1>
+      <h1 class="title"><u> Welcome to your dashboard</u></h1>
       <div class="testdash">
         <div class="done">
-          <h2> Exam's Completed </h2>
+          <h2> <u> Exam's Completed </u> </h2>
           <#if examCompleted??>
             <#list examCompleted as name, id>
               <tr>
@@ -38,14 +33,12 @@
               </tr>
               <br>
             </#list>
-
           <#else>
             <h3>You have not completed any exams yet </h3><br>
           </#if>
-
         </div>
         <div class="todo">
-          <h2> Exam's To Do </h2>
+          <h2><u> Exam's To Do</u> </h2>
           <#if examToComplete??>
             <#list examToComplete as name, id>
               <tr>
@@ -59,7 +52,7 @@
           </#if>
         </div>
         <div class="created">
-          <h2> Exam's Created</h2>
+          <h2> <u> Exam's Created</u> </h2>
           <#if examOwned??>
             <#list examOwned as name, id >
               <tr>

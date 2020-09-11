@@ -21,17 +21,16 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.flogger.FluentLogger;
-import com.google.sps.data.UtilityClass;
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Aidan Molloy
  * @author Róisín O'Farrell
+ * @author Klaudia Obieglo
  */
 @WebServlet("/examResponse")
 public class ExamResponseServlet extends HttpServlet {
@@ -57,7 +57,8 @@ public class ExamResponseServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Only logged in users should access this page.
     UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn() || !userService.getCurrentUser().getEmail().contains("@google.com")) {
+    if (!userService.isUserLoggedIn() 
+        || !userService.getCurrentUser().getEmail().contains("@google.com")) {
       logger.atWarning().log("User is not logged in.");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
@@ -68,7 +69,6 @@ public class ExamResponseServlet extends HttpServlet {
     String examID = request.getParameter("examID");
 
     Enumeration<String> parameterNames = request.getParameterNames();
-    parameterNames.nextElement();
     String possibleMarks = null;
     String expected = "none";
     String type = null;
@@ -77,40 +77,41 @@ public class ExamResponseServlet extends HttpServlet {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       while (parameterNames.hasMoreElements()) {
         String questionID = parameterNames.nextElement();
+        if (questionID.equals("examID")) {
+          continue;
+        }
         String[] questionAnswer = request.getParameterValues(questionID);
         // Correct mcq questions with pre-defined answers
-        try{
-          Long questionIDL = Long.parseLong(questionID); 
+        try {
+          Long questionIDl = Long.parseLong(questionID); 
           // Get questionType, mcqAnswer and possibleMarks using Key as Question has a known ID/Name
-          Key questionKey = KeyFactory.createKey("Question", questionIDL); 
+          Key questionKey = KeyFactory.createKey("Question", questionIDl); 
           Entity qs = datastore.get(questionKey);
           type = (String) qs.getProperty("type");
-          if (type.equals("MCQ")){
+          if (type.equals("MCQ")) {
             String mcqAnswer = (String) qs.getProperty("mcqAnswer");
             int questionNum = Integer.parseInt(mcqAnswer);
             possibleMarks = (String) qs.getProperty("marks");
             List<String> answerList = (List<String>) qs.getProperty("mcqPossibleAnswers");
-            expected = (String) answerList.get(questionNum-1);
+            expected = (String) answerList.get(questionNum - 1);
           }
         } catch (Exception e) {
-          System.out.println("<h3>Cannot Find Question</h3>");
+          System.out.println("Cannot Find Question");
           logger.atInfo().log("Cannot find question: %s", e);
         }
         Entity examResponseEntity = new Entity(questionID, email);
         examResponseEntity.setProperty("email", email);
         examResponseEntity.setProperty("answer", questionAnswer[0]);
-        if(expected.equals(questionAnswer[0]) && type.equals("MCQ")){
+        if (expected.equals(questionAnswer[0]) && type.equals("MCQ")) {
           examResponseEntity.setProperty("marks", possibleMarks);
-        } else if(!expected.equals(questionAnswer[0]) && type.equals("MCQ")){
+        } else if (!expected.equals(questionAnswer[0]) && type.equals("MCQ")) {
           examResponseEntity.setProperty("marks", "0");
-        } else{
+        } else {
           examResponseEntity.setProperty("marks", null);
         }
-        datastore.put(examResponseEntity);
-        System.out.println("examID");
-        
+        datastore.put(examResponseEntity); 
       }
-      if(email != null && examID != null){
+      if (email != null && examID != null) {
         examTaken(email, Long.parseLong(examID));
       }
     } catch (Exception e) {
@@ -122,6 +123,11 @@ public class ExamResponseServlet extends HttpServlet {
     out.println("<a href=\"/dashboardServlet\">Return to dashboard</a>");
   }
 
+  /**
+   * Updates UserExams entity to reflect the user has taken the exam.
+   * @param email Users Email
+   * @param examID ID of the Exam the user has taken
+   */
   public void examTaken(String email, Long examID) {
     /*Marks what exam a user has taken by storing that exam id in their 
     * UserInfo.
@@ -131,24 +137,33 @@ public class ExamResponseServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(queryUser);
     Entity user = pq.asSingleEntity();
-    //add to examsTaken list
-    if (user.getProperty("taken") == null) {
+    if (user != null) {
+      //add to examsTaken list
+      if (user.getProperty("taken") == null) {
         List<Long> examsTakenList = new ArrayList<>();
         examsTakenList.add(examID);
         user.setProperty("taken", examsTakenList);
       } else {
-        List<Long> examsTakenList =
-            (List<Long>) user.getProperty("taken");
+        List<Long> examsTakenList = (List<Long>) user.getProperty("taken");
         examsTakenList.add(examID);
+        System.out.println("taken list has curr exam");
         user.setProperty("taken", examsTakenList);
       }
-    //remove examID from exams To Do list as exam has been taken
-    if(user.getProperty("available") != null) {
-      List<Long> availableExams =
-            (List<Long>) user.getProperty("available");
-      availableExams.remove(Long.valueOf(examID));
+      //remove examID from exams To Do list as exam has been taken
+      if (user.getProperty("available") != null) {
+        List<Long> availableExams = (List<Long>) user.getProperty("available");
+        availableExams.remove(Long.valueOf(examID));
+      }
+      datastore.put(user);
+    } else {
+      Entity userExamEntity = new Entity("UserExams", email);
+      userExamEntity.setProperty("available", null);
+      userExamEntity.setProperty("created", new ArrayList<>());
+      userExamEntity.setProperty("email", email);
+      List<Long> examsTakenList = new ArrayList<>();
+      examsTakenList.add(examID);
+      userExamEntity.setProperty("taken", examsTakenList);
+      datastore.put(userExamEntity); 
     }
-    datastore.put(user);
   }
 }
-

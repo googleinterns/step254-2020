@@ -50,8 +50,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for Get Exam Responses Servlet. Test are all exam created by the user retrieved,
- * are all student who took any of these exams retrieved,
+ * Tests for Update Exam Responses Servlet. Test is responses updated with expected marks,
  * if a user is not logged in check for an unauthorised error.
  *
  * @author Róisín O'Farrell

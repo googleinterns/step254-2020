@@ -17,7 +17,6 @@ package com.google.sps.servlets;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -25,10 +24,14 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -89,7 +92,7 @@ public final class GroupsServletTest extends GroupsServlet {
 
   /* When no groupID is provided. */
   @Test
-  public void doGetTestNoGroupID() throws IOException {
+  public void doGetTestNoGroupID() throws IOException, ServletException {
     helperLogin();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -98,7 +101,17 @@ public final class GroupsServletTest extends GroupsServlet {
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
+    when(config.getServletContext()).thenReturn(context);
 
+    //Get the path to the target files were templates are stored for tests
+    String filePath = new File(".").getCanonicalPath();
+    String endPath = "/target/portfolio-1/WEB-INF/templates";
+    String path = filePath + endPath;
+    when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
+
+    servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Create a Group"));
@@ -106,7 +119,7 @@ public final class GroupsServletTest extends GroupsServlet {
 
   /* When groupID that does not exist is provided */
   @Test
-  public void doGetTestInvalidGroupID() throws IOException {
+  public void doGetTestInvalidGroupID() throws IOException, ServletException {
     helperLogin();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -116,7 +129,17 @@ public final class GroupsServletTest extends GroupsServlet {
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
+    when(config.getServletContext()).thenReturn(context);
 
+    //Get the path to the target files were templates are stored for tests
+    String filePath = new File(".").getCanonicalPath();
+    String endPath = "/target/portfolio-1/WEB-INF/templates";
+    String path = filePath + endPath;
+    when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
+
+    servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Selected group is not available."));
@@ -139,7 +162,7 @@ public final class GroupsServletTest extends GroupsServlet {
    * When a real group is requested.
    */
   @Test
-  public void doGetTestGroup() throws IOException {
+  public void doGetTestGroup() throws IOException, ServletException {
     helperLogin();
     addGroup();
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -151,7 +174,17 @@ public final class GroupsServletTest extends GroupsServlet {
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+    ServletConfig config = mock(ServletConfig.class);
+    ServletContext context = mock(ServletContext.class);
+    when(config.getServletContext()).thenReturn(context);
 
+    //Get the path to the target files were templates are stored for tests
+    String filePath = new File(".").getCanonicalPath();
+    String endPath = "/target/portfolio-1/WEB-INF/templates";
+    String path = filePath + endPath;
+    when(context.getRealPath("/WEB-INF/templates/")).thenReturn(path);
+
+    servlet.init(config);
     servlet.doGet(request, response);
     String result = stringWriter.toString();
     Assert.assertTrue(result.contains("Group Name: Test Group"));

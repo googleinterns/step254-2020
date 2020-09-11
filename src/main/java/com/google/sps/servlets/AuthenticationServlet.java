@@ -58,7 +58,7 @@ public class AuthenticationServlet extends HttpServlet {
         // If logged in get email and create link to logout
         String userEmail = userService.getCurrentUser().getEmail();
         String logoutUrl = userService.createLogoutURL("/");
-        if(!userEmail.contains("@google.com")){
+        if (!userEmail.contains("@google.com")) {
           authResponse.put("logoutUrl", logoutUrl);
           authResponse.put("invalidLogin", "true");
           String json = UtilityClass.convertToJson(authResponse);

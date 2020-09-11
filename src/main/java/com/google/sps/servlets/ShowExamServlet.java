@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
+import com.google.gson.Gson;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -54,12 +55,14 @@ import javax.servlet.http.HttpServletResponse;
 
 /** Servlet that shows the exam a user has created
 * @author Klaudia Obieglo
+* @author Róisín O'Farrell
 */
 @WebServlet("/showExam")
 public class ShowExamServlet extends HttpServlet{
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   Configuration cfg;
-  Map examData = new HashMap();
+  Map data = new HashMap();
+  Map<String,Integer> examMarks = new LinkedHashMap<String, Integer>();
   //set up the configuration once
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -87,6 +90,7 @@ public class ShowExamServlet extends HttpServlet{
           "You are not authorised to view this page");
       return;
     }
+    examMarks.clear();
     String ownerID = userService.getCurrentUser().getEmail(); 
     String examID = UtilityClass.getParameter(request, "examID", "");
     //grab exams user owns
@@ -98,12 +102,25 @@ public class ShowExamServlet extends HttpServlet{
           "Internal Error occurred when trying to find your exam");
       return;
     }
+    //grab exam responses
+    try {
+      getResponses(ownerID, Long.parseLong(examID));
+    } catch (EntityNotFoundException e){
+      logger.atWarning().log("Exam responses were not found: %s",e);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          "Internal Error occurred when trying to find your responses");
+      return;
+    }
+    
+    if (examMarks != null){
+      ChartsServlet.charts(examMarks);
+    }
     // run to freemarker template
     try {
       Template template = cfg.getTemplate("ShowExamCreated.ftl");
       PrintWriter out = response.getWriter();
 
-      template.process(examData, out);
+      template.process(data, out);
       logger.atInfo().log("Dashboard was displayed correctly for the User:"
           + "%s", userService.getCurrentUser());
     } catch (TemplateException e) {
@@ -127,7 +144,7 @@ public class ShowExamServlet extends HttpServlet{
       String examName = (String) exam.getProperty("name");
       String duration = (String) exam.getProperty("duration");
       examMap.put(examName, duration);
-      examData.put("exam", examMap);
+      data.put("exam", examMap);
       Entity questionEntity = null;
       //Check if questionList is null , if so return
       List<Long> questionList = (List<Long>) exam.getProperty("questionsList");
@@ -150,12 +167,75 @@ public class ShowExamServlet extends HttpServlet{
             answers.add(answerList.get(j));
            }
            mcqAnswersMap.put(question, answers);
-           examData.put("MCQ", mcqAnswersMap);
+           data.put("MCQ", mcqAnswersMap);
         }
         examQuestions.put(question, marks);
-        examData.put("question", examQuestions);
+        data.put("question", examQuestions);
       }
       logger.atInfo().log("Questions were found and added to the examQuestions Map");
+    } catch (DatastoreFailureException e) {
+      logger.atSevere().log("Datastore error:%s" ,e);
+      return;
+    }
+  }
+
+   public synchronized void getResponses(String ownerID, Long examID) throws EntityNotFoundException{
+    //Gets the all the marks for an exam to display in a chart
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    int totalMark= 0;
+    int givenMark = 0;
+    List<String> studentList = new ArrayList();
+    try {
+      //Find the exam 
+      Key key = KeyFactory.createKey("Exam", examID);
+      Entity exam = datastore.get(key);
+      //Check if questionList is null , if so return
+      List<Long> questionList = (List<Long>) exam.getProperty("questionsList");
+      if(questionList == null) {
+        logger.atWarning().log("Question List was null for the exam: %s",examID);
+        return;
+      }
+      Long questionID = questionList.get(0);
+      String responseQuery = Long.toString(questionID);
+      /* Get all responses using query as the question response does not 
+      have a known ID/Name*/
+      Query queryResponses = new Query(responseQuery);
+      PreparedQuery questionResponses = datastore.prepare(queryResponses);
+      for (Entity responders : questionResponses.asIterable()) {
+        if(responders != null){
+          String email = (String) responders.getProperty("email");
+          studentList.add(email);
+        }  
+      }
+      // Go through the student List, find marks given for each question
+      for(String student : studentList) {
+          totalMark = 0;
+        for(Long question: questionList){
+            try{
+              String response = Long.toString(question);
+              key = KeyFactory.createKey(response, student);
+              Entity responseEntity = datastore.get(key);
+              String marks = (String) responseEntity.getProperty("marks");
+              if(marks == null){
+                givenMark = 0;  
+              } else {
+                givenMark = Integer.parseInt(marks);
+              } 
+              totalMark = totalMark + givenMark;
+            } catch (DatastoreFailureException e) {
+              totalMark = 0;
+              break;
+            }
+        }
+        String finalMark = Integer.toString(totalMark);
+        System.out.println(finalMark);
+        if (examMarks.containsKey(finalMark)) {
+          examMarks.put(finalMark, examMarks.get(finalMark) + 1);
+        } else {
+          examMarks.put(finalMark, 1);
+        }
+      }
+      logger.atInfo().log("Marks were found and added to the examMarks Map");
     } catch (DatastoreFailureException e) {
       logger.atSevere().log("Datastore error:%s" ,e);
       return;
